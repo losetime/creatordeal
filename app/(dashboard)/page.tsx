@@ -2,6 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 import { 
   Handshake, 
   DollarSign, 
@@ -10,8 +12,12 @@ import {
   Plus,
   ArrowRight,
   Download,
+  Calendar,
 } from "lucide-react"
 import Link from "next/link"
+import { RevenueChart } from "@/components/charts/revenue-chart"
+import { DealStatusChart } from "@/components/charts/deal-status-chart"
+import { PaymentTrendChart } from "@/components/charts/payment-trend-chart"
 
 const stats = [
   {
@@ -19,24 +25,28 @@ const stats = [
     value: "12",
     change: "+2 this week",
     icon: Handshake,
+    trend: "up",
   },
   {
     title: "Revenue MTD",
     value: "$15,200",
     change: "+18% vs last month",
     icon: DollarSign,
+    trend: "up",
   },
   {
     title: "Pending Payments",
     value: "$8,500",
     change: "3 overdue",
     icon: Clock,
+    trend: "warning",
   },
   {
     title: "Total Earned",
     value: "$45,200",
     change: "All time",
     icon: TrendingUp,
+    trend: "up",
   },
 ]
 
@@ -52,20 +62,18 @@ const recentActivity = [
   { id: "3", text: "New deal from Tesla - $6,000", type: "new" },
 ]
 
-const monthlyRevenue = [
-  { month: "Jan", amount: 12000 },
-  { month: "Feb", amount: 15000 },
-  { month: "Mar", amount: 18000 },
-  { month: "Apr", amount: 14000 },
-  { month: "May", amount: 22000 },
-  { month: "Jun", amount: 15200 },
-]
-
 export default function DashboardPage() {
   const exportRevenueCSV = () => {
+    const monthlyRevenue = [
+      { month: "Jan", amount: 12000 },
+      { month: "Feb", amount: 15000 },
+      { month: "Mar", amount: 18000 },
+      { month: "Apr", amount: 14000 },
+      { month: "May", amount: 22000 },
+      { month: "Jun", amount: 15200 },
+    ]
     const headers = ["Month", "Revenue"]
     const rows = monthlyRevenue.map((r) => [r.month, r.amount])
-    
     const csv = [headers, ...rows].map((row) => row.join(",")).join("\n")
     const blob = new Blob([csv], { type: "text/csv" })
     const url = URL.createObjectURL(blob)
@@ -80,7 +88,7 @@ export default function DashboardPage() {
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <Card key={stat.title}>
+          <Card key={stat.title} className="transition-all hover:shadow-md">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 {stat.title}
@@ -89,43 +97,25 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground">{stat.change}</p>
+              <p className={`text-xs ${
+                stat.trend === "warning" ? "text-amber-500" : "text-muted-foreground"
+              }`}>
+                {stat.change}
+              </p>
             </CardContent>
           </Card>
         ))}
       </div>
 
+      {/* Charts Row */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Revenue Chart */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Revenue (Last 6 Months)</CardTitle>
-            <Button variant="outline" size="sm" onClick={exportRevenueCSV}>
-              <Download className="mr-2 h-4 w-4" /> Export
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {monthlyRevenue.map((item) => (
-                <div key={item.month} className="flex items-center gap-4">
-                  <span className="w-8 text-sm text-muted-foreground">{item.month}</span>
-                  <div className="flex-1">
-                    <div className="h-6 bg-muted rounded overflow-hidden">
-                      <div
-                        className="h-full bg-primary rounded"
-                        style={{ width: `${(item.amount / 25000) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                  <span className="w-16 text-right text-sm font-medium">
-                    ${(item.amount / 1000).toFixed(1)}K
-                  </span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <RevenueChart />
+        <DealStatusChart />
+      </div>
 
+      <PaymentTrendChart />
+
+      <div className="grid gap-6 lg:grid-cols-2">
         {/* Upcoming Deadlines */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
@@ -141,31 +131,29 @@ export default function DashboardPage() {
               {upcomingDeadlines.map((deadline) => (
                 <div
                   key={deadline.id}
-                  className="flex items-center justify-between rounded-lg border p-4"
+                  className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-muted/50"
                 >
-                  <div>
-                    <p className="font-medium">{deadline.title}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {deadline.brand}
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <div className={`h-2 w-2 rounded-full ${
+                      deadline.urgent ? "bg-destructive" : "bg-primary"
+                    }`} />
+                    <div>
+                      <p className="font-medium">{deadline.title}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {deadline.brand}
+                      </p>
+                    </div>
                   </div>
-                  <span
-                    className={`text-sm font-medium ${
-                      deadline.urgent
-                        ? "text-destructive"
-                        : "text-muted-foreground"
-                    }`}
-                  >
+                  <Badge variant={deadline.urgent ? "destructive" : "secondary"}>
+                    <Calendar className="mr-1 h-3 w-3" />
                     {deadline.due}
-                  </span>
+                  </Badge>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
-      </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
         {/* Recent Activity */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
@@ -179,55 +167,60 @@ export default function DashboardPage() {
               {recentActivity.map((activity) => (
                 <div
                   key={activity.id}
-                  className="flex items-center gap-3 rounded-lg border p-4"
+                  className="flex items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/50"
                 >
-                  <div
-                    className={`h-2 w-2 rounded-full ${
-                      activity.type === "success"
-                        ? "bg-green-500"
-                        : activity.type === "new"
-                        ? "bg-blue-500"
-                        : "bg-muted-foreground"
-                    }`}
-                  />
+                  <Badge 
+                    variant={
+                      activity.type === "success" 
+                        ? "default" 
+                        : activity.type === "new" 
+                          ? "secondary" 
+                          : "outline"
+                    }
+                    className={
+                      activity.type === "success" 
+                        ? "bg-emerald-500 hover:bg-emerald-600" 
+                        : ""
+                    }
+                  >
+                    {activity.type === "success" ? "Paid" : activity.type === "new" ? "New" : "Sent"}
+                  </Badge>
                   <p className="text-sm">{activity.text}</p>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
-
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <Link href="/deals">
-                <Button className="w-full" variant="outline">
-                  <Plus className="mr-2 h-4 w-4" /> New Deal
-                </Button>
-              </Link>
-              <Link href="/invoices">
-                <Button className="w-full" variant="outline">
-                  <Plus className="mr-2 h-4 w-4" /> Create Invoice
-                </Button>
-              </Link>
-              <Link href="/brands">
-                <Button className="w-full" variant="outline">
-                  <Plus className="mr-2 h-4 w-4" /> Add Brand
-                </Button>
-              </Link>
-              <Link href="/payments">
-                <Button className="w-full" variant="outline">
-                  <DollarSign className="mr-2 h-4 w-4" /> View Payments
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
       </div>
+
+      {/* Quick Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <Link href="/deals">
+              <Button className="w-full" variant="outline">
+                <Plus className="mr-2 h-4 w-4" /> New Deal
+              </Button>
+            </Link>
+            <Link href="/invoices">
+              <Button className="w-full" variant="outline">
+                <Plus className="mr-2 h-4 w-4" /> Create Invoice
+              </Button>
+            </Link>
+            <Link href="/brands">
+              <Button className="w-full" variant="outline">
+                <Plus className="mr-2 h-4 w-4" /> Add Brand
+              </Button>
+            </Link>
+            <Button className="w-full" variant="outline" onClick={exportRevenueCSV}>
+              <Download className="mr-2 h-4 w-4" /> Export CSV
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

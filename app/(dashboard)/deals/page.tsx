@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
@@ -14,9 +15,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { toast } from "sonner"
 import { 
   Plus, GripVertical, DollarSign, Calendar, 
-  LayoutGrid, List, CalendarDays, Search, X, Trash2, Pencil 
+  LayoutGrid, List, CalendarDays, Search, X, Trash2, Pencil,
+  Handshake
 } from "lucide-react"
 
 const stages = [
@@ -179,10 +182,17 @@ export default function DealsPage() {
     setDeals([deal, ...deals])
     setNewDeal({ title: "", brand: "", amount: "", deadline: "" })
     setIsDialogOpen(false)
+    toast.success("Deal created successfully", {
+      description: `${deal.title} has been added to your pipeline.`,
+    })
   }
 
   const handleDeleteDeal = (dealId: string) => {
+    const deal = deals.find((d) => d.id === dealId)
     setDeals(deals.filter((d) => d.id !== dealId))
+    toast.success("Deal deleted", {
+      description: deal ? `${deal.title} has been removed.` : "Deal has been removed.",
+    })
   }
 
   const handleEditDeal = (deal: typeof mockDeals[0]) => {
@@ -214,6 +224,9 @@ export default function DealsPage() {
     )
     setIsEditDialogOpen(false)
     setEditingDeal(null)
+    toast.success("Deal updated successfully", {
+      description: `${editDeal.title} has been updated.`,
+    })
   }
 
   // Calendar view helper
@@ -439,85 +452,108 @@ export default function DealsPage() {
 
       {/* Kanban View */}
       {viewMode === "kanban" && (
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {stages.map((stage) => (
-            <div
-              key={stage.id}
-              className="min-w-[280px] flex-shrink-0"
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, stage.id)}
-            >
-              <Card className="h-full">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-2">
-                    <div className={`h-3 w-3 rounded-full ${stage.color}`} />
-                    <CardTitle className="text-sm font-medium">
-                      {stage.name}
-                    </CardTitle>
-                    <span className="ml-auto text-sm text-muted-foreground">
-                      {filteredDeals.filter((d) => d.stage === stage.id).length}
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {filteredDeals
-                    .filter((deal) => deal.stage === stage.id)
-                    .map((deal) => (
-                      <div
-                        key={deal.id}
-                        draggable
-                        onDragStart={(e) => handleDragStart(e, deal.id)}
-                        className="group cursor-grab rounded-lg border bg-card p-4 shadow-sm transition-shadow hover:shadow-md"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="space-y-1">
-                            <p className="font-medium">{deal.title}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {deal.brand?.name}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleEditDeal(deal)
-                              }}
-                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-primary/10 rounded"
-                            >
-                              <Pencil className="h-4 w-4 text-primary" />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleDeleteDeal(deal.id)
-                              }}
-                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded"
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </button>
-                            <GripVertical className="h-4 w-4 text-muted-foreground" />
-                          </div>
-                        </div>
-                        <div className="mt-3 flex items-center justify-between text-sm">
-                          <div className="flex items-center text-muted-foreground">
-                            <DollarSign className="mr-1 h-4 w-4" />
-                            {deal.amount.toLocaleString()}
-                          </div>
-                          <div className="flex items-center text-muted-foreground">
-                            <Calendar className="mr-1 h-4 w-4" />
-                            {new Date(deal.content_deadline).toLocaleDateString(
-                              "en-US",
-                              { month: "short", day: "numeric" }
-                            )}
-                          </div>
-                        </div>
+        <>
+          {filteredDeals.length === 0 ? (
+            <Card className="py-12">
+              <CardContent className="flex flex-col items-center justify-center text-center">
+                <div className="rounded-full bg-muted p-4 mb-4">
+                  <Handshake className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold">No deals found</h3>
+                <p className="text-muted-foreground mt-1 mb-4">
+                  {hasFilters 
+                    ? "Try adjusting your filters to see more deals."
+                    : "Create your first deal to get started with your sponsorship pipeline."}
+                </p>
+                {!hasFilters && (
+                  <Button onClick={() => setIsDialogOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" /> Create Deal
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="flex gap-4 overflow-x-auto pb-4">
+              {stages.map((stage) => (
+                <div
+                  key={stage.id}
+                  className="min-w-[280px] flex-shrink-0"
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, stage.id)}
+                >
+                  <Card className="h-full">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center gap-2">
+                        <div className={`h-3 w-3 rounded-full ${stage.color}`} />
+                        <CardTitle className="text-sm font-medium">
+                          {stage.name}
+                        </CardTitle>
+                        <Badge variant="secondary" className="ml-auto">
+                          {filteredDeals.filter((d) => d.stage === stage.id).length}
+                        </Badge>
                       </div>
-                    ))}
-                </CardContent>
-              </Card>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {filteredDeals
+                        .filter((deal) => deal.stage === stage.id)
+                        .map((deal) => (
+                          <div
+                            key={deal.id}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, deal.id)}
+                            className="group cursor-grab rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md hover:border-primary/20"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="space-y-1">
+                                <p className="font-medium">{deal.title}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {deal.brand?.name}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleEditDeal(deal)
+                                  }}
+                                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-primary/10 rounded"
+                                >
+                                  <Pencil className="h-4 w-4 text-primary" />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleDeleteDeal(deal.id)
+                                  }}
+                                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded"
+                                >
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </button>
+                                <GripVertical className="h-4 w-4 text-muted-foreground" />
+                              </div>
+                            </div>
+                            <div className="mt-3 flex items-center justify-between text-sm">
+                              <div className="flex items-center text-muted-foreground">
+                                <DollarSign className="mr-1 h-4 w-4" />
+                                {deal.amount.toLocaleString()}
+                              </div>
+                              <div className="flex items-center text-muted-foreground">
+                                <Calendar className="mr-1 h-4 w-4" />
+                                {new Date(deal.content_deadline).toLocaleDateString(
+                                  "en-US",
+                                  { month: "short", day: "numeric" }
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
 
       {/* List View */}
