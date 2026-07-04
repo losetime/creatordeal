@@ -5,7 +5,9 @@ import { renderToBuffer } from "@react-pdf/renderer"
 import React from "react"
 import { InvoicePDF } from "@/components/invoice-pdf"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY)
+}
 
 function escapeHtml(str: string): string {
   return str
@@ -193,7 +195,7 @@ export async function POST(request: Request) {
     `
 
     // Send email with PDF attachment
-    const { error: emailError } = await resend.emails.send({
+    const { error: emailError } = await getResend().emails.send({
       from: process.env.RESEND_FROM_EMAIL || "CreatorDeal <noreply@yourdomain.com>",
       to: [brand.contact_email],
       subject: `Invoice ${invoice.invoice_number} from ${profile?.full_name || "Creator"}`,

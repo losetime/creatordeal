@@ -2,7 +2,9 @@ import { NextResponse } from "next/server"
 import { Resend } from "resend"
 import { createClient } from "@/lib/supabase/server"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY)
+}
 
 function escapeHtml(str: string): string {
   return str
@@ -116,7 +118,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid email type" }, { status: 400 })
     }
 
-    const { data: emailData, error } = await resend.emails.send({
+    const { data: emailData, error } = await getResend().emails.send({
       from: process.env.RESEND_FROM_EMAIL || "CreatorDeal <noreply@yourdomain.com>",
       to: [to],
       subject,
