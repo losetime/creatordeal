@@ -1,75 +1,60 @@
 "use client"
 
 import { useState } from "react"
+import { trpc } from "@/lib/trpc/client"
+import { formatDate } from "@/lib/utils"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Bell, Clock, DollarSign, CheckCircle, Filter } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Bell, Clock, DollarSign, Handshake, Info, CheckCircle } from "lucide-react"
+import { toast } from "sonner"
 
-const initialNotifications = [
-  {
-    id: "1",
-    type: "deadline",
-    title: "Content Deadline Tomorrow",
-    message: "Nike Summer Campaign content is due tomorrow",
-    read: false,
-    created_at: "2026-06-30T10:00:00Z",
-  },
-  {
-    id: "2",
-    type: "payment",
-    title: "Payment Overdue",
-    message: "Samsung Galaxy Launch invoice is 10 days overdue",
-    read: false,
-    created_at: "2026-06-29T14:30:00Z",
-  },
-  {
-    id: "3",
-    type: "deadline",
-    title: "Content Deadline in 3 Days",
-    message: "Apple Product Review content is due in 3 days",
-    read: false,
-    created_at: "2026-06-29T09:00:00Z",
-  },
-  {
-    id: "4",
-    type: "deal_update",
-    title: "Deal Stage Updated",
-    message: "Apple Product Review moved to Negotiate stage",
-    read: true,
-    created_at: "2026-06-28T09:15:00Z",
-  },
-  {
-    id: "5",
-    type: "payment",
-    title: "Payment Received",
-    message: "Netflix Series Promo payment of $4,000 received",
-    read: true,
-    created_at: "2026-06-27T16:45:00Z",
-  },
-  {
-    id: "6",
-    type: "system",
-    title: "Welcome to CreatorDeal",
-    message: "Get started by adding your first deal",
-    read: true,
-    created_at: "2026-06-27T08:00:00Z",
-  },
-]
-
-const iconMap = {
+const iconMap: Record<string, React.ElementType> = {
   deadline: Clock,
   payment: DollarSign,
-  deal_update: Bell,
-  system: CheckCircle,
+  deal_update: Handshake,
+  system: Info,
 }
 
-type FilterType = "all" | "unread" | "deadline" | "payment"
+type FilterType = "all" | "unread" | "deadline" | "payment" | "deal_update" | "system"
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState(initialNotifications)
   const [filter, setFilter] = useState<FilterType>("all")
+  const utils = trpc.useUtils()
+
+  const { data: notifications = [], isLoading } = trpc.notifications.list.useQuery()
 
   const unreadCount = notifications.filter((n) => !n.read).length
+
+  const markAsReadMutation = trpc.notifications.markAsRead.useMutation({
+    onSuccess: () => {
+      utils.notifications.list.invalidate()
+      toast.success("Marked as read")
+    },
+    onError: (error) => {
+      toast.error("Failed to mark as read", { description: error.message })
+    },
+  })
+
+  const markAllAsReadMutation = trpc.notifications.markAllAsRead.useMutation({
+    onSuccess: () => {
+      utils.notifications.list.invalidate()
+      toast.success("All notifications marked as read")
+    },
+    onError: (error) => {
+      toast.error("Failed to mark all as read", { description: error.message })
+    },
+  })
+
+  const dismissMutation = trpc.notifications.dismiss.useMutation({
+    onSuccess: () => {
+      utils.notifications.list.invalidate()
+      toast.success("Notification dismissed")
+    },
+    onError: (error) => {
+      toast.error("Failed to dismiss notification", { description: error.message })
+    },
+  })
 
   const filteredNotifications = notifications.filter((n) => {
     if (filter === "all") return true
@@ -77,49 +62,98 @@ export default function NotificationsPage() {
     return n.type === filter
   })
 
-  const markAsRead = (id: string) => {
-    setNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, read: true } : n))
+  if (isLoading) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 p-5 text-white shadow-elevated">
+          <div className="absolute inset-0 dot-pattern opacity-15" />
+          <div className="relative flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="rounded-lg bg-white/15 p-1.5">
+                <Bell className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold">Notifications</h2>
+                <Skeleton className="h-3 w-16 mt-1 bg-white/20" />
+              </div>
+            </div>
+            <Skeleton className="h-8 w-32 bg-white/15" />
+          </div>
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className="h-7 w-16" />
+          ))}
+        </div>
+        <Card>
+          <CardContent className="p-0">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-start gap-4 p-4 border-b border-border last:border-0">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+                <div className="flex gap-2">
+                  <Skeleton className="h-8 w-20" />
+                  <Skeleton className="h-8 w-16" />
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
     )
   }
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })))
-  }
-
-  const dismiss = (id: string) => {
-    setNotifications(notifications.filter((n) => n.id !== id))
-  }
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Notifications</h2>
-          <p className="text-muted-foreground">
-            {unreadCount} unread notification{unreadCount !== 1 ? "s" : ""}
-          </p>
+    <div className="space-y-6 animate-fade-in">
+      {/* Header */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 p-5 text-white shadow-elevated">
+        <div className="absolute inset-0 dot-pattern opacity-15" />
+        <div className="relative flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="rounded-lg bg-white/15 p-1.5">
+              <Bell className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">Notifications</h2>
+              <p className="text-xs text-teal-100">{unreadCount} unread</p>
+            </div>
+          </div>
+          <Button
+            variant="secondary"
+            onClick={() => markAllAsReadMutation.mutate()}
+            disabled={unreadCount === 0 || markAllAsReadMutation.isPending}
+            className="bg-white/15 hover:bg-white/25 text-white border-0 h-8"
+            size="sm"
+          >
+            <CheckCircle className="mr-1.5 h-3.5 w-3.5" /> Mark All Read
+          </Button>
         </div>
-        <Button variant="outline" onClick={markAllAsRead} disabled={unreadCount === 0}>
-          <CheckCircle className="mr-2 h-4 w-4" /> Mark All as Read
-        </Button>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex gap-2">
-        {(["all", "unread", "deadline", "payment"] as FilterType[]).map((f) => (
-          <Button
-            key={f}
-            variant={filter === f ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFilter(f)}
-          >
-            {f === "all" && "All"}
-            {f === "unread" && `Unread (${unreadCount})`}
-            {f === "deadline" && "Deadlines"}
-            {f === "payment" && "Payments"}
-          </Button>
-        ))}
+      <div className="flex gap-2 flex-wrap">
+        {(["all", "unread", "deadline", "payment", "deal_update", "system"] as FilterType[]).map(
+          (f) => (
+            <Button
+              key={f}
+              variant={filter === f ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFilter(f)}
+              className="h-7 text-xs"
+            >
+              {f === "all" && "All"}
+              {f === "unread" && `Unread (${unreadCount})`}
+              {f === "deadline" && "Deadlines"}
+              {f === "payment" && "Payments"}
+              {f === "deal_update" && "Deals"}
+              {f === "system" && "System"}
+            </Button>
+          )
+        )}
       </div>
 
       <Card>
@@ -133,7 +167,7 @@ export default function NotificationsPage() {
           ) : (
             <div className="divide-y">
               {filteredNotifications.map((notification) => {
-                const Icon = iconMap[notification.type as keyof typeof iconMap]
+                const Icon = iconMap[notification.type] || Bell
                 return (
                   <div
                     key={notification.id}
@@ -158,7 +192,9 @@ export default function NotificationsPage() {
                       <div className="flex items-center gap-2">
                         <p
                           className={`font-medium ${
-                            !notification.read ? "text-foreground" : "text-muted-foreground"
+                            !notification.read
+                              ? "text-foreground"
+                              : "text-muted-foreground"
                           }`}
                         >
                           {notification.title}
@@ -171,15 +207,7 @@ export default function NotificationsPage() {
                         {notification.message}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {new Date(notification.created_at).toLocaleDateString(
-                          "en-US",
-                          {
-                            month: "short",
-                            day: "numeric",
-                            hour: "numeric",
-                            minute: "2-digit",
-                          }
-                        )}
+                        {formatDate(notification.created_at)}
                       </p>
                     </div>
                     <div className="flex gap-2">
@@ -187,7 +215,10 @@ export default function NotificationsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => markAsRead(notification.id)}
+                          onClick={() =>
+                            markAsReadMutation.mutate({ id: notification.id })
+                          }
+                          disabled={markAsReadMutation.isPending}
                         >
                           Mark Read
                         </Button>
@@ -195,7 +226,10 @@ export default function NotificationsPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => dismiss(notification.id)}
+                        onClick={() =>
+                          dismissMutation.mutate({ id: notification.id })
+                        }
+                        disabled={dismissMutation.isPending}
                       >
                         Dismiss
                       </Button>

@@ -1,6 +1,17 @@
 import { z } from "zod"
 import { router, protectedProcedure } from "../server"
 
+const VALID_STAGE_TRANSITIONS: Record<string, string[]> = {
+  inquiry: ["negotiate", "closed"],
+  negotiate: ["signed", "closed"],
+  signed: ["creating"],
+  creating: ["review"],
+  review: ["published", "creating"],
+  published: ["paid", "closed"],
+  paid: ["closed"],
+  closed: [],
+}
+
 export const dealsRouter = router({
   list: protectedProcedure.query(async ({ ctx }) => {
     const { data, error } = await ctx.supabase
@@ -30,9 +41,9 @@ export const dealsRouter = router({
   create: protectedProcedure
     .input(
       z.object({
-        title: z.string(),
+        title: z.string().min(1).max(200),
         brand_id: z.string().optional(),
-        amount: z.number().optional(),
+        amount: z.number().positive().optional(),
         currency: z.string().default("USD"),
         content_type: z.string().optional(),
         content_deadline: z.string().optional(),
@@ -53,6 +64,15 @@ export const dealsRouter = router({
         .single()
 
       if (error) throw error
+
+      await ctx.supabase.from("notifications").insert({
+        user_id: ctx.user.id,
+        type: "deal_update",
+        title: "New deal created",
+        message: `"${input.title}" has been added to your pipeline`,
+        deal_id: data.id,
+      })
+
       return data
     }),
 
@@ -60,9 +80,9 @@ export const dealsRouter = router({
     .input(
       z.object({
         id: z.string(),
-        title: z.string().optional(),
+        title: z.string().min(1).max(200).optional(),
         brand_id: z.string().nullable().optional(),
-        amount: z.number().nullable().optional(),
+        amount: z.number().positive().nullable().optional(),
         currency: z.string().optional(),
         content_type: z.string().nullable().optional(),
         content_deadline: z.string().nullable().optional(),
@@ -90,18 +110,28 @@ export const dealsRouter = router({
       z.object({
         id: z.string(),
         stage: z.enum([
-          "inquiry",
-          "negotiate",
-          "signed",
-          "creating",
-          "review",
-          "published",
-          "paid",
-          "closed",
+          "inquiry", "negotiate", "signed", "creating",
+          "review", "published", "paid", "closed",
         ]),
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const { data: currentDeal, error: fetchError } = await ctx.supabase
+        .from("deals")
+        .select("stage, title")
+        .eq("id", input.id)
+        .eq("user_id", ctx.user.id)
+        .single()
+
+      if (fetchError || !currentDeal) {
+        throw new Error("Deal not found")
+      }
+
+      const allowed = VALID_STAGE_TRANSITIONS[currentDeal.stage] || []
+      if (!allowed.includes(input.stage)) {
+        throw new Error(`Cannot move from "${currentDeal.stage}" to "${input.stage}"`)
+      }
+
       const { data, error } = await ctx.supabase
         .from("deals")
         .update({
@@ -114,6 +144,24 @@ export const dealsRouter = router({
         .single()
 
       if (error) throw error
+
+      const stageLabels: Record<string, string> = {
+        signed: "Deal signed!",
+        published: "Content published",
+        paid: "Payment received",
+        closed: "Deal closed",
+      }
+
+      if (stageLabels[input.stage]) {
+        await ctx.supabase.from("notifications").insert({
+          user_id: ctx.user.id,
+          type: "deal_update",
+          title: stageLabels[input.stage],
+          message: `"${currentDeal.title}" moved to ${input.stage}`,
+          deal_id: input.id,
+        })
+      }
+
       return data
     }),
 

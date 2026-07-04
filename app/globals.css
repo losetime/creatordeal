@@ -19,8 +19,8 @@
   --color-accent-foreground: #0f172a;
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
-  --color-border: #e2e8f0;
-  --color-input: #e2e8f0;
+  --color-border: #f5f7fa;
+  --color-input: #f5f7fa;
   --color-ring: #0d9488;
   --radius: 0.75rem;
   --font-sans: var(--font-geist-sans);
@@ -36,7 +36,7 @@
   --color-sidebar-primary-foreground: #ffffff;
   --color-sidebar-accent: #f0fdfa;
   --color-sidebar-accent-foreground: #0d9488;
-  --color-sidebar-border: #e2e8f0;
+  --color-sidebar-border: #f5f7fa;
   --color-sidebar-ring: #0d9488;
 }
 
@@ -57,8 +57,8 @@
   --color-accent-foreground: #e2e8f0;
   --color-destructive: #dc2626;
   --color-destructive-foreground: #ffffff;
-  --color-border: #334155;
-  --color-input: #334155;
+  --color-border: #2d3f55;
+  --color-input: #2d3f55;
   --color-ring: #14b8a6;
   --color-chart-1: #14b8a6;
   --color-chart-2: #f59e0b;
@@ -71,7 +71,7 @@
   --color-sidebar-primary-foreground: #0f172a;
   --color-sidebar-accent: #134e4a;
   --color-sidebar-accent-foreground: #14b8a6;
-  --color-sidebar-border: #334155;
+  --color-sidebar-border: #2d3f55;
   --color-sidebar-ring: #14b8a6;
 }
 
@@ -85,4 +85,118 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  .glass {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+  .dark .glass {
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .gradient-primary {
+    background: linear-gradient(135deg, #0d9488 0%, #14b8a6 50%, #2dd4bf 100%);
+  }
+  .gradient-primary-subtle {
+    background: linear-gradient(135deg, rgba(13, 148, 136, 0.06) 0%, rgba(20, 184, 166, 0.02) 100%);
+  }
+  .gradient-card-hover {
+    background: linear-gradient(135deg, rgba(13, 148, 136, 0.04) 0%, rgba(45, 212, 191, 0.01) 100%);
+  }
+  .shadow-card {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02), 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+  .shadow-card-hover {
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+  }
+  .shadow-elevated {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.03);
+  }
+  .shadow-drag {
+    box-shadow: 0 12px 32px rgba(13, 148, 136, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  .accent-border-left {
+    border-left: 2px solid #0d9488;
+  }
+  .accent-border-top {
+    border-top: 2px solid #0d9488;
+  }
+  .dot-pattern {
+    background-image: radial-gradient(circle, rgba(13, 148, 136, 0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .badge-pill {
+    border-radius: 9999px;
+    padding: 0.25rem 0.75rem;
+  }
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+  .table-row-hover:hover {
+    background: linear-gradient(90deg, rgba(13, 148, 136, 0.04) 0%, transparent 100%);
+  }
+  .input-focus:focus {
+    border-color: #0d9488;
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.2); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.25s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.35s ease-out forwards;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(13, 148, 136, 0.06), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2s ease-in-out infinite;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out forwards;
 }

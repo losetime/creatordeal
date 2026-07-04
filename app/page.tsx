@@ -119,22 +119,10 @@ const pricingPlans = [
 
 const testimonials = [
   {
-    name: "Sarah Chen",
-    role: "Tech Creator · 250K followers",
-    content: "CreatorDeal helped me close $40K in brand deals last month. The AI contract scanner saved me from a bad deal.",
-    avatar: "SC",
-  },
-  {
-    name: "Marcus Johnson",
-    role: "Lifestyle Creator · 180K followers",
-    content: "I used to spend hours on invoicing. Now it takes 2 minutes. The payment tracking alone is worth the price.",
-    avatar: "MJ",
-  },
-  {
-    name: "Elena Rodriguez",
-    role: "Fitness Creator · 320K followers",
-    content: "The rate benchmarking feature is game-changing. I increased my rates by 40% after seeing market data.",
-    avatar: "ER",
+    name: "CreatorDeal User",
+    role: "Early Adopter",
+    content: "Finally a tool built specifically for sponsorship management. The deal pipeline alone saves hours every week.",
+    avatar: "CD",
   },
 ]
 
@@ -149,20 +137,20 @@ const faqs = [
   },
   {
     question: "Can I import existing deals?",
-    answer: "Yes! You can manually add existing deals or import them from a CSV file. We also support email forwarding for automatic deal capture.",
+    answer: "Yes! You can manually add existing deals and track them through the full pipeline from inquiry to payment.",
   },
   {
     question: "What payment methods do you support?",
-    answer: "We integrate with Stripe for payments. You can accept bank transfers, credit cards, and ACH payments.",
+    answer: "You can track payments from any source — bank transfers, PayPal, Venmo, or any other method. Manual payment recording is built in.",
   },
   {
     question: "Is my data secure?",
-    answer: "Absolutely. We use bank-level encryption and are SOC 2 compliant. Your data is always private and secure.",
+    answer: "We use industry-standard encryption and Supabase's security infrastructure. Your data is always private and protected.",
   },
 ]
 
 const logos = [
-  "Nike", "Apple", "Samsung", "Netflix", "Tesla", "Spotify", "Adobe", "Shopify"
+  "YouTube", "Instagram", "TikTok", "Twitch", "Twitter"
 ]
 
 export default function HomePage() {
@@ -206,9 +194,9 @@ export default function HomePage() {
         <section className="relative overflow-hidden border-b border-border/50">
           <div className="container mx-auto px-4 py-24 lg:py-32">
             <div className="mx-auto max-w-3xl text-center">
-              <Badge variant="secondary" className="mb-6">
+                <Badge variant="secondary" className="mb-6">
                 <Sparkles className="mr-1 h-3 w-3 text-primary" />
-                Trusted by 2,000+ creators
+                Built for Content Creators
               </Badge>
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl text-balance">
                 Manage Your Sponsorship Deals
@@ -221,11 +209,6 @@ export default function HomePage() {
                 <Link href="/signup">
                   <Button size="lg" className="px-8">
                     Start Free <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-                <Link href="/deals">
-                  <Button variant="outline" size="lg" className="px-8">
-                    View Demo
                   </Button>
                 </Link>
               </div>
@@ -468,7 +451,7 @@ export default function HomePage() {
               Ready to Transform Your Creator Business?
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-              Join 2,000+ creators who are already using CreatorDeal to close more deals and get paid faster.
+              Join creators who are using CreatorDeal to close more deals and get paid faster.
             </p>
             <div className="mt-8">
               <Link href="/signup">
@@ -515,9 +498,9 @@ export default function HomePage() {
             <div>
               <h4 className="font-semibold text-foreground mb-4">Legal</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Privacy</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Terms</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Security</a></li>
+                <li><Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link></li>
+                <li><Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Notice</Link></li>
+                <li><Link href="/refund" className="hover:text-foreground transition-colors">Refund Policy</Link></li>
               </ul>
             </div>
           </div>

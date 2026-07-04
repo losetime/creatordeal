@@ -2,6 +2,8 @@ import type { Metadata } from "next"
 import { ThemeProvider } from "next-themes"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
+import { TRPCProvider } from "@/lib/trpc/provider"
+import { AuthProvider } from "@/lib/auth/context"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -23,10 +25,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <TooltipProvider>
-            {children}
-            <Toaster />
-          </TooltipProvider>
+          <TRPCProvider>
+            <AuthProvider>
+              <TooltipProvider>
+                {children}
+                <Toaster />
+              </TooltipProvider>
+            </AuthProvider>
+          </TRPCProvider>
         </ThemeProvider>
       </body>
     </html>

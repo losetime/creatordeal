@@ -1,9 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Zap, Moon, Sun } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { Zap, Moon, Sun, LogOut } from "lucide-react"
 import { useTheme } from "next-themes"
+import { useAuth } from "@/lib/auth/context"
+import { trpc } from "@/lib/trpc/client"
 import {
   Sidebar,
   SidebarContent,
@@ -34,12 +36,11 @@ import {
   Shield,
   DollarSign,
   TrendingUp,
-  LogOut,
   User,
 } from "lucide-react"
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Dashboard", href: "/home", icon: LayoutDashboard },
   { name: "Deals", href: "/deals", icon: Handshake },
   { name: "Brands", href: "/brands", icon: Building2 },
   { name: "Invoices", href: "/invoices", icon: FileText },
@@ -55,10 +56,24 @@ const secondaryNav = [
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const { theme, setTheme } = useTheme()
+  const { user, signOut } = useAuth()
+
+  const { data: unreadCount } = trpc.notifications.getUnreadCount.useQuery()
+  const { data: profile } = trpc.profiles.get.useQuery()
 
   const isActive = (href: string) =>
     pathname === href || (href !== "/" && pathname.startsWith(href))
+
+  const initials = profile?.full_name
+    ? profile.full_name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
+    : user?.email?.slice(0, 2).toUpperCase() || "U"
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.push("/login")
+  }
 
   return (
     <Sidebar collapsible="icon">
@@ -66,7 +81,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg">
-              <Link href="/" className="flex items-center gap-2">
+              <Link href="/home" className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary">
                   <Zap className="h-5 w-5 text-white" />
                 </div>
@@ -108,9 +123,9 @@ export function AppSidebar() {
                     <Link href={item.href}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.name}</span>
-                      {item.name === "Notifications" && (
-                        <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs text-destruct-foreground">
-                          3
+                      {item.name === "Notifications" && unreadCount != null && unreadCount > 0 && (
+                        <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-xs font-medium text-white">
+                          {unreadCount > 99 ? "99+" : unreadCount}
                         </span>
                       )}
                     </Link>
@@ -130,13 +145,15 @@ export function AppSidebar() {
                 <SidebarMenuButton size="lg">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="gradient-primary text-white">
-                      JD
+                      {initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                    <span className="truncate font-semibold">John Doe</span>
+                    <span className="truncate font-semibold">
+                      {profile?.full_name || user?.email || "User"}
+                    </span>
                     <span className="truncate text-xs text-muted-foreground">
-                      john@creator.com
+                      {user?.email || ""}
                     </span>
                   </div>
                 </SidebarMenuButton>
@@ -147,7 +164,7 @@ export function AppSidebar() {
                 align="end"
                 sideOffset={4}
               >
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/settings")}>
                   <User className="mr-2 h-4 w-4" />
                   Profile
                 </DropdownMenuItem>
@@ -160,7 +177,7 @@ export function AppSidebar() {
                   {theme === "dark" ? "Light Mode" : "Dark Mode"}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Log out
                 </DropdownMenuItem>

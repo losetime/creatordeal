@@ -6,7 +6,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { usePathname } from "next/navigation"
 
 const pageNames: Record<string, string> = {
-  "/": "Dashboard",
+  "/home": "Dashboard",
   "/deals": "Deals",
   "/brands": "Brands",
   "/invoices": "Invoices",
@@ -28,14 +28,14 @@ export default function DashboardLayout({
     <SidebarProvider>
       <AppSidebar />
       <main className="flex-1 overflow-auto">
-        <header className="flex h-16 items-center border-b px-4 gap-4">
+        <header className="flex h-16 items-center border-b border-border px-4 gap-4">
           <SidebarTrigger />
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                <span className="text-sm font-medium">Dashboard</span>
               </BreadcrumbItem>
-              {pathname !== "/" && (
+              {pathname !== "/home" && (
                 <BreadcrumbItem>
                   <BreadcrumbPage>
                     {pageNames[pathname] || pathname.split("/").pop()}

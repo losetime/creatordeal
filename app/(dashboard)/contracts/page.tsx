@@ -1,432 +1,361 @@
 "use client"
 
 import { useState } from "react"
+import { trpc } from "@/lib/trpc/client"
+import { formatDate } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { 
-  Upload, FileText, AlertTriangle, CheckCircle, 
-  Clock, DollarSign, Calendar, Shield, Search, Trash2, Eye 
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { toast } from "sonner"
+import {
+  FileText, CheckCircle,
+  Clock, Trash2, Eye, Sparkles, Scan, Plus, Search
 } from "lucide-react"
 
-const mockContracts = [
-  {
-    id: "1",
-    name: "Nike_Contract_2026.pdf",
-    brand: "Nike",
-    upload_date: "2026-06-25",
-    status: "analyzed",
-    total_value: "$5,000",
-    risks: 2,
-  },
-  {
-    id: "2",
-    name: "Apple_Agreement.pdf",
-    brand: "Apple",
-    upload_date: "2026-06-20",
-    status: "analyzed",
-    total_value: "$8,000",
-    risks: 1,
-  },
-  {
-    id: "3",
-    name: "Samsung_MSA.docx",
-    brand: "Samsung",
-    upload_date: "2026-06-15",
-    status: "pending",
-    total_value: null,
-    risks: 0,
-  },
-]
-
-const mockAnalysis = {
-  brand: "Nike",
-  total_value: "$5,000",
-  payment_terms: "Net 30",
-  content_deadline: "2026-07-15",
-  deliverables: [
-    "1x YouTube integration (60-90 seconds)",
-    "2x Instagram Stories",
-    "1x Instagram Feed Post"
-  ],
-  usage_rights: {
-    duration: "12 months",
-    platforms: ["YouTube", "Instagram"],
-    exclusivity: "Tech category, 30 days"
-  },
-  key_terms: [
-    "First review rights for brand",
-    "Approval required before posting",
-    "No competing brands for 30 days"
-  ],
-  risks: [
-    {
-      clause: "Perpetual usage rights",
-      severity: "high",
-      suggestion: "Negotiate to 12 months maximum"
-    },
-    {
-      clause: "Broad exclusivity clause",
-      severity: "medium",
-      suggestion: "Limit to specific product category"
-    }
-  ]
-}
-
 export default function ContractsPage() {
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [analysis, setAnalysis] = useState<typeof mockAnalysis | null>(null)
-  const [fileName, setFileName] = useState("")
-  const [contracts, setContracts] = useState(mockContracts)
+  const [showUpload, setShowUpload] = useState(false)
+  const [selectedDealId, setSelectedDealId] = useState("")
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedContractId, setSelectedContractId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedContract, setSelectedContract] = useState<typeof mockContracts[0] | null>(null)
+  const [uploading, setUploading] = useState(false)
 
-  const filteredContracts = contracts.filter(
-    (c) => c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           c.brand.toLowerCase().includes(searchQuery.toLowerCase())
+  const { data: contracts, isLoading: contractsLoading } = trpc.contracts.list.useQuery()
+  const { data: deals, isLoading: dealsLoading } = trpc.deals.list.useQuery()
+  const utils = trpc.useUtils()
+
+  const deleteContract = trpc.contracts.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Contract deleted")
+      utils.contracts.list.invalidate()
+      if (selectedContractId) setSelectedContractId(null)
+    },
+    onError: (err) => {
+      toast.error(err.message)
+    },
+  })
+
+  const handleUpload = async () => {
+    if (!selectedDealId || !selectedFile) {
+      toast.error("Please select a deal and choose a file")
+      return
+    }
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append("file", selectedFile)
+      formData.append("deal_id", selectedDealId)
+
+      const res = await fetch("/api/contracts/upload", {
+        method: "POST",
+        body: formData,
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        toast.error(data.error || "Upload failed")
+      } else {
+        toast.success("Contract uploaded")
+        utils.contracts.list.invalidate()
+        setShowUpload(false)
+        setSelectedDealId("")
+        setSelectedFile(null)
+      }
+    } catch {
+      toast.error("Upload failed")
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const selectedContract = contracts?.find((c) => c.id === selectedContractId)
+  const hasAnalysis = !!selectedContract?.ai_summary
+
+  const filteredContracts = contracts?.filter(
+    (c) =>
+      c.file_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.deals?.brands?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.deals?.title?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const handleAnalyze = () => {
-    setIsAnalyzing(true)
-    setFileName("Nike_Contract_2026.pdf")
-    
-    setTimeout(() => {
-      setAnalysis(mockAnalysis)
-      setIsAnalyzing(false)
-      
-      // Add to contracts list
-      setContracts([
-        {
-          id: String(Date.now()),
-          name: fileName || "New_Contract.pdf",
-          brand: "Nike",
-          upload_date: new Date().toISOString().split("T")[0],
-          status: "analyzed",
-          total_value: "$5,000",
-          risks: 2,
-        },
-        ...contracts,
-      ])
-    }, 2000)
-  }
-
-  const deleteContract = (id: string) => {
-    setContracts(contracts.filter((c) => c.id !== id))
-  }
-
-  const viewContract = (contract: typeof mockContracts[0]) => {
-    setSelectedContract(contract)
-    if (contract.status === "analyzed") {
-      setAnalysis(mockAnalysis)
-    }
-  }
-
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">Contract Scanner</h2>
-        <p className="text-muted-foreground">
-          Upload contracts to extract key terms and identify risks
-        </p>
+    <div className="space-y-6 animate-fade-in">
+      {/* Header */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 p-5 text-white shadow-elevated">
+        <div className="absolute inset-0 dot-pattern opacity-15" />
+        <div className="relative flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="rounded-lg bg-white/15 p-1.5">
+              <Scan className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">Contract Scanner</h2>
+              <p className="text-xs text-teal-100">Upload contracts to extract key terms and identify risks</p>
+            </div>
+          </div>
+          <Button
+            onClick={() => setShowUpload(!showUpload)}
+            className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Contract
+          </Button>
+        </div>
       </div>
 
       {/* Upload Area */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="border-2 border-dashed rounded-lg p-8 text-center">
-            <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-medium mb-2">Upload Contract</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Drag and drop your contract file here, or click to browse
-            </p>
-            <div className="flex items-center justify-center gap-4">
-              <Input
-                type="file"
-                accept=".pdf,.doc,.docx,.txt"
-                className="max-w-xs"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) {
-                    setFileName(e.target.files[0].name)
-                  }
-                }}
-              />
-              <Button onClick={handleAnalyze} disabled={isAnalyzing}>
-                {isAnalyzing ? (
-                  <>
-                    <Clock className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing...
-                  </>
+      {showUpload && (
+        <Card className="shadow-card overflow-hidden animate-slide-up">
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Add Contract</h3>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Deal</label>
+                {dealsLoading ? (
+                  <Skeleton className="h-10 w-full" />
                 ) : (
-                  <>
-                    <FileText className="mr-2 h-4 w-4" />
-                    Analyze Contract
-                  </>
+                  <Select value={selectedDealId} onValueChange={setSelectedDealId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a deal to attach this contract to" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {deals?.map((deal) => (
+                        <SelectItem key={deal.id} value={deal.id}>
+                          {deal.title}
+                          {deal.brands?.name ? ` — ${deal.brands.name}` : ""}
+                        </SelectItem>
+                      ))}
+                      {deals?.length === 0 && (
+                        <SelectItem value="none" disabled>
+                          No deals found. Create a deal first.
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
                 )}
-              </Button>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Contract File</label>
+                <Input
+                  type="file"
+                  accept=".pdf,.doc,.docx,.txt"
+                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                  className="bg-background"
+                />
+                {selectedFile && (
+                  <p className="text-xs text-muted-foreground">{selectedFile.name} ({Math.round(selectedFile.size / 1024)}KB)</p>
+                )}
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  onClick={handleUpload}
+                  disabled={uploading || !selectedDealId || !selectedFile}
+                  className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 shadow-md"
+                >
+                  {uploading ? (
+                    <>
+                      <Clock className="mr-2 h-4 w-4 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="mr-2 h-4 w-4" />
+                      Upload Contract
+                    </>
+                  )}
+                </Button>
+                <Button variant="outline" onClick={() => setShowUpload(false)}>
+                  Cancel
+                </Button>
+              </div>
             </div>
-            {fileName && (
-              <p className="mt-4 text-sm text-muted-foreground">
-                Selected: {fileName}
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Contract Library */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Contract Library</CardTitle>
-              <CardDescription>
-                {contracts.length} contracts stored
-              </CardDescription>
-            </div>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search contracts..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 w-64"
-              />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {filteredContracts.map((contract) => (
-              <div
-                key={contract.id}
-                className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <FileText className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium">{contract.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {contract.brand} • Uploaded {contract.upload_date}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  {contract.total_value && (
-                    <span className="font-medium">{contract.total_value}</span>
-                  )}
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${
-                      contract.status === "analyzed"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
-                    {contract.status === "analyzed" ? (
-                      <>
-                        <CheckCircle className="h-3 w-3" />
-                        Analyzed
-                      </>
+      {/* Contract Library + Detail View */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Contract List */}
+        <div className={selectedContractId ? "lg:col-span-1" : "lg:col-span-3"}>
+          <Card className="shadow-card overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-slate-50 to-transparent">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-rose-500" />
+                    Contract Library
+                  </CardTitle>
+                  <CardDescription>
+                    {contractsLoading ? (
+                      <Skeleton className="h-4 w-32 mt-1" />
                     ) : (
-                      <>
-                        <Clock className="h-3 w-3" />
-                        Pending
-                      </>
+                      `${contracts?.length ?? 0} contract${(contracts?.length ?? 0) !== 1 ? "s" : ""} stored`
                     )}
-                  </span>
-                  {contract.risks > 0 && (
-                    <span className="inline-flex items-center gap-1 text-red-600 text-sm">
-                      <AlertTriangle className="h-4 w-4" />
-                      {contract.risks} risks
-                    </span>
-                  )}
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => viewContract(contract)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => deleteContract(contract.id)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
+                  </CardDescription>
+                </div>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search contracts..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 w-64 bg-white"
+                  />
                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Analysis Results */}
-      {analysis && (
-        <div className="space-y-6">
-          <h3 className="text-xl font-bold">Analysis Results</h3>
-          
-          {/* Summary */}
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <DollarSign className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Value</p>
-                    <p className="font-bold">{analysis.total_value}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <Calendar className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Deadline</p>
-                    <p className="font-bold">{analysis.content_deadline}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <Clock className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Payment</p>
-                    <p className="font-bold">{analysis.payment_terms}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <Shield className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Usage Rights</p>
-                    <p className="font-bold">{analysis.usage_rights.duration}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Deliverables */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Deliverables</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {analysis.deliverables.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Key Terms */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Key Terms</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {analysis.key_terms.map((term, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <FileText className="h-5 w-5 text-blue-500 mt-0.5 shrink-0" />
-                      <span>{term}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Usage Rights */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Usage Rights</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Duration</span>
-                  <span className="font-medium">{analysis.usage_rights.duration}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Platforms</span>
-                  <span className="font-medium">{analysis.usage_rights.platforms.join(", ")}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Exclusivity</span>
-                  <span className="font-medium">{analysis.usage_rights.exclusivity}</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Risks */}
-            <Card className="border-red-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-red-600">
-                  <AlertTriangle className="h-5 w-5" />
-                  Risks Identified
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {analysis.risks.map((risk, i) => (
-                  <div key={i} className="rounded-lg border p-4 bg-red-50">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="font-medium">{risk.clause}</p>
-                        <p className="text-sm text-muted-foreground mt-1">{risk.suggestion}</p>
+            </CardHeader>
+            <CardContent>
+              {contractsLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="flex items-center justify-between rounded-xl p-4">
+                      <div className="flex items-center gap-4">
+                        <Skeleton className="h-12 w-12 rounded-xl" />
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-48" />
+                          <Skeleton className="h-3 w-32" />
+                        </div>
                       </div>
-                      <span
-                        className={`px-2 py-1 rounded text-xs font-medium ${
-                          risk.severity === "high"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-yellow-100 text-yellow-700"
+                      <Skeleton className="h-6 w-20" />
+                    </div>
+                  ))}
+                </div>
+              ) : filteredContracts && filteredContracts.length > 0 ? (
+                <div className="space-y-3">
+                  {filteredContracts.map((contract) => {
+                    const brand = contract.deals?.brands?.name
+                    const deal = contract.deals?.title
+                    return (
+                      <div
+                        key={contract.id}
+                        className={`group flex items-center justify-between rounded-xl p-4 transition-all duration-200 hover:shadow-card-hover cursor-pointer ${
+                          selectedContractId === contract.id
+                            ? "bg-teal-50 ring-1 ring-teal-200"
+                            : "hover:bg-gradient-to-r hover:from-teal-50/50 to-transparent"
                         }`}
+                        onClick={() => setSelectedContractId(contract.id)}
                       >
-                        {risk.severity}
-                      </span>
+                        <div className="flex items-center gap-4">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-teal-100 to-emerald-100">
+                            <FileText className="h-6 w-6 text-teal-600" />
+                          </div>
+                          <div>
+                            <p className="font-semibold group-hover:text-teal-700 transition-colors">
+                              {contract.file_name}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {brand || "Unknown brand"} {deal ? `• ${deal}` : ""} • {formatDate(contract.created_at)}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {contract.ai_summary ? (
+                            <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 px-3 py-1.5">
+                              <CheckCircle className="h-3.5 w-3.5 mr-1" />
+                              Analyzed
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary" className="bg-amber-100 text-amber-700 px-3 py-1.5">
+                              <Clock className="h-3.5 w-3.5 mr-1" />
+                              Pending
+                            </Badge>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              deleteContract.mutate({ id: contract.id })
+                            }}
+                            disabled={deleteContract.isPending}
+                            className="hover:bg-rose-50 hover:text-rose-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="py-12 text-center text-muted-foreground">
+                  <FileText className="mx-auto h-10 w-10 mb-3 opacity-40" />
+                  <p className="font-medium">No contracts yet</p>
+                  <p className="text-sm mt-1">Add a contract to get started.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Detail Panel */}
+        {selectedContractId && (
+          <div className="lg:col-span-2 animate-slide-up">
+            <Card className="shadow-card overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-slate-50 to-transparent">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Eye className="h-5 w-5 text-teal-500" />
+                      {selectedContract?.file_name}
+                    </CardTitle>
+                    <CardDescription>
+                      {selectedContract?.deals?.brands?.name || "Unknown brand"}
+                      {selectedContract?.deals?.title ? ` • ${selectedContract.deals.title}` : ""}
+                      {selectedContract ? ` • Added ${formatDate(selectedContract.created_at)}` : ""}
+                    </CardDescription>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {selectedContract?.file_url && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(selectedContract.file_url!, "_blank")}
+                      >
+                        <Eye className="mr-1 h-3.5 w-3.5" /> View File
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="sm" onClick={() => setSelectedContractId(null)}>
+                      Close
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {hasAnalysis ? (
+                  <div className="space-y-4">
+                    <div className="rounded-xl bg-gradient-to-br from-teal-50 to-emerald-50 p-6 text-center">
+                      <Sparkles className="mx-auto h-8 w-8 text-teal-500 mb-2" />
+                      <p className="font-medium">AI Analysis Results</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Full analysis display is under development.
+                      </p>
                     </div>
                   </div>
-                ))}
+                ) : (
+                  <div className="rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 p-10 text-center">
+                    <div className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-br from-teal-100 to-emerald-100 p-4 mb-4">
+                      <Sparkles className="h-8 w-8 text-teal-600" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">AI analysis coming soon</h3>
+                    <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                      Contract analysis will automatically extract key terms, payment details, deliverables, and identify potential risks once this feature is available.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
-
-          {/* Actions */}
-          <div className="flex gap-4">
-            <Button>
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Accept & Create Deal
-            </Button>
-            <Button variant="outline">
-              <FileText className="mr-2 h-4 w-4" />
-              View Full Contract
-            </Button>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
