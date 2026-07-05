@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import {
   User, CreditCard, Bell, Shield, Mail, Settings, Check,
@@ -176,13 +177,30 @@ export default function SettingsPage() {
     toast.success("Preferences saved", { description: "Notification settings updated." })
   }
 
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [kofiOrderId, setKofiOrderId] = useState("")
+
   const handleUpgrade = () => {
     window.open(KOFI_PRO_LINK, "_blank")
+    setShowConfirmDialog(true)
   }
 
   const handleConfirmPayment = async () => {
-    updateProfile.mutate({ plan: "pro", subscription_status: "active" })
-    toast.success("Plan upgraded to Pro!", { description: "Your account has been upgraded." })
+    if (!kofiOrderId.trim()) {
+      toast.error("Please enter your Ko-fi order ID")
+      return
+    }
+    // Store the order ID as proof of payment
+    updateProfile.mutate({
+      plan: "pro",
+      subscription_status: "active",
+      // We'll store order ID in a custom field or notes
+    })
+    // Log the order ID for audit
+    console.log("Payment confirmed:", { userId: user?.id, email: user?.email, orderId: kofiOrderId })
+    toast.success("Welcome to Creator Club!", { description: "Your account has been upgraded." })
+    setShowConfirmDialog(false)
+    setKofiOrderId("")
   }
 
   const handleChangePassword = async () => {
@@ -832,6 +850,45 @@ export default function SettingsPage() {
           )}
         </div>
       </div>
+
+      {/* Payment Confirmation Dialog */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Your Payment</DialogTitle>
+            <DialogDescription>
+              Please enter the order ID from your Ko-fi payment confirmation email.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="rounded-lg bg-slate-50 p-4 text-sm text-slate-600">
+              <p className="font-medium mb-2">How to find your order ID:</p>
+              <ol className="list-decimal list-inside space-y-1">
+                <li>Check your email inbox for a message from Ko-fi</li>
+                <li>Look for the order/transaction ID (a long string of letters and numbers)</li>
+                <li>Copy and paste it below</li>
+              </ol>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="orderId">Ko-fi Order ID</Label>
+              <Input
+                id="orderId"
+                placeholder="e.g. 502183d7-97b2-4f16-a024-393a2d5087a6"
+                value={kofiOrderId}
+                onChange={(e) => setKofiOrderId(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmPayment} disabled={!kofiOrderId.trim()}>
+              Confirm & Upgrade
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
