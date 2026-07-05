@@ -4,18 +4,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb"
 import { usePathname } from "next/navigation"
-
-const pageNames: Record<string, string> = {
-  "/home": "Dashboard",
-  "/deals": "Deals",
-  "/brands": "Brands",
-  "/invoices": "Invoices",
-  "/payments": "Payments",
-  "/rates": "Rates",
-  "/contracts": "Contracts",
-  "/notifications": "Notifications",
-  "/settings": "Settings",
-}
+import { useLocale } from "@/hooks/use-locale"
 
 export default function DashboardLayout({
   children,
@@ -23,6 +12,23 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const { t } = useLocale()
+
+  const getPageName = (path: string): string => {
+    const map: Record<string, string> = {
+      "/home": t("nav.dashboard"),
+      "/deals": t("nav.deals"),
+      "/brands": t("nav.brands"),
+      "/invoices": t("nav.invoices"),
+      "/payments": t("nav.payments"),
+      "/rates": t("nav.rates"),
+      "/contracts": t("nav.contracts"),
+      "/notifications": t("nav.notifications"),
+      "/settings": t("nav.settings"),
+      "/admin/payments": t("nav.admin"),
+    }
+    return map[path] || "Page"
+  }
 
   return (
     <SidebarProvider>
@@ -33,12 +39,12 @@ export default function DashboardLayout({
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <span className="text-sm font-medium">Dashboard</span>
+                <span className="text-sm font-medium">{t("nav.dashboard")}</span>
               </BreadcrumbItem>
               {pathname !== "/home" && (
                 <BreadcrumbItem>
                   <BreadcrumbPage>
-                    {pageNames[pathname] || pathname.split("/").pop()}
+                    {getPageName(pathname)}
                   </BreadcrumbPage>
                 </BreadcrumbItem>
               )}

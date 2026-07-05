@@ -6,6 +6,7 @@ import { Zap, Moon, Sun, LogOut } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useAuth } from "@/lib/auth/context"
 import { trpc } from "@/lib/trpc/client"
+import { useLocale } from "@/hooks/use-locale"
 import {
   Sidebar,
   SidebarContent,
@@ -39,30 +40,34 @@ import {
   User,
 } from "lucide-react"
 
-const navigation = [
-  { name: "Dashboard", href: "/home", icon: LayoutDashboard },
-  { name: "Deals", href: "/deals", icon: Handshake },
-  { name: "Brands", href: "/brands", icon: Building2 },
-  { name: "Invoices", href: "/invoices", icon: FileText },
-  { name: "Payments", href: "/payments", icon: DollarSign },
-  { name: "Rates", href: "/rates", icon: TrendingUp },
-  { name: "Contracts", href: "/contracts", icon: Shield },
-]
-
-const secondaryNav = [
-  { name: "Notifications", href: "/notifications", icon: Bell },
-  { name: "Settings", href: "/settings", icon: Settings },
-  { name: "Admin", href: "/admin/payments", icon: Shield },
-]
-
 export function AppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { theme, setTheme } = useTheme()
   const { user, signOut } = useAuth()
+  const { t, locale, setLocale } = useLocale()
 
   const { data: unreadCount } = trpc.notifications.getUnreadCount.useQuery()
   const { data: profile } = trpc.profiles.get.useQuery()
+
+  const navigation = [
+    { name: t("nav.dashboard"), href: "/home", icon: LayoutDashboard },
+    { name: t("nav.deals"), href: "/deals", icon: Handshake },
+    { name: t("nav.brands"), href: "/brands", icon: Building2 },
+    { name: t("nav.invoices"), href: "/invoices", icon: FileText },
+    { name: t("nav.payments"), href: "/payments", icon: DollarSign },
+    { name: t("nav.rates"), href: "/rates", icon: TrendingUp },
+    { name: t("nav.contracts"), href: "/contracts", icon: Shield },
+  ]
+
+  const secondaryNav = [
+    { name: t("nav.notifications"), href: "/notifications", icon: Bell },
+    { name: t("nav.settings"), href: "/settings", icon: Settings },
+  ]
+
+  const adminNav = [
+    { name: t("nav.admin"), href: "/admin/payments", icon: Shield },
+  ]
 
   const isActive = (href: string) =>
     pathname === href || (href !== "/" && pathname.startsWith(href))
@@ -118,7 +123,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Account</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {secondaryNav.map((item) => (
+              {[...secondaryNav, ...(profile?.role === "admin" ? adminNav : [])].map((item) => (
                 <SidebarMenuItem key={item.name}>
                   <SidebarMenuButton asChild isActive={isActive(item.href)}>
                     <Link href={item.href}>
@@ -167,7 +172,7 @@ export function AppSidebar() {
               >
                 <DropdownMenuItem onClick={() => router.push("/settings")}>
                   <User className="mr-2 h-4 w-4" />
-                  Profile
+                  {t("nav.settings")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
                   {theme === "dark" ? (
@@ -177,10 +182,13 @@ export function AppSidebar() {
                   )}
                   {theme === "dark" ? "Light Mode" : "Dark Mode"}
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setLocale(locale === "en" ? "zh" : "en")}>
+                  {locale === "en" ? "中文" : "English"}
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
-                  Log out
+                  {t("nav.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

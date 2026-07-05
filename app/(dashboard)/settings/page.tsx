@@ -323,7 +323,8 @@ export default function SettingsPage() {
                             if (!file) return
                             const { createClient } = await import("@/lib/supabase/client")
                             const supabase = createClient()
-                            const fileName = `avatars/${user?.id}/${Date.now()}-${file.name}`
+                            const ext = file.name.split(".").pop() || "jpg"
+                            const fileName = `avatars/${user?.id}/${Date.now()}.${ext}`
                             const { error } = await supabase.storage.from("avatars").upload(fileName, file, {
                               contentType: file.type,
                               upsert: true,
@@ -337,14 +338,11 @@ export default function SettingsPage() {
                             toast.success("Avatar updated")
                           }} />
                         </label>
-                        <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-emerald-500 flex items-center justify-center shadow-md">
-                          <Check className="h-3 w-3 text-white" />
-                        </div>
                       </div>
                       <div>
                         <p className="font-medium">{profile?.full_name || "User"}</p>
                         <p className="text-sm text-muted-foreground">{user?.email}</p>
-                        <Badge variant="secondary" className="mt-1 bg-teal-100 text-teal-700 text-xs">{planLabel} Plan</Badge>
+                        <Badge variant="secondary" className="mt-1 bg-teal-100 text-teal-700 text-xs">{planLabel}</Badge>
                       </div>
                     </div>
                     <div className="grid gap-4 md:grid-cols-2">
@@ -453,7 +451,71 @@ export default function SettingsPage() {
 
           {/* Billing */}
           {activeNav === "billing" && (
+            <Card className="shadow-card overflow-hidden border-0">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <DollarSign className="h-4 w-4 text-emerald-500" />
+                  Billing History
+                </CardTitle>
+                <CardDescription>
+                  View and download your past invoices
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                {invoicesLoading ? (
+                  <BillingSkeleton />
+                ) : (invoices ?? []).length === 0 ? (
+                  <div className="p-8 text-center text-muted-foreground text-sm">
+                    No invoices yet. They&apos;ll appear here once you&apos;re billed.
+                  </div>
+                ) : (
+                  <div className="divide-y">
+                    {(invoices ?? []).map((invoice) => (
+                      <div key={invoice.id} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-full bg-emerald-100 flex items-center justify-center">
+                            <DollarSign className="h-4 w-4 text-emerald-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">
+                              {invoice.deals?.brands?.name ? `${invoice.deals.brands.name} - ` : ""}
+                              {invoice.deals?.title ?? "Invoice"}
+                            </p>
+                            <p className="text-xs text-muted-foreground">{formatDate(invoice.due_date)}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Badge
+                            variant="secondary"
+                            className={`text-xs ${
+                              invoice.status === "paid"
+                                ? "bg-emerald-100 text-emerald-700"
+                                : invoice.status === "overdue"
+                                ? "bg-rose-100 text-rose-700"
+                                : invoice.status === "sent"
+                                ? "bg-blue-100 text-blue-700"
+                                : "bg-slate-100 text-slate-600"
+                            }`}
+                          >
+                            {invoice.status}
+                          </Badge>
+                          <span className="text-sm font-medium">{formatCurrency(invoice.amount)}</span>
+                          <Button variant="ghost" size="sm" onClick={() => toast.success("Invoice downloaded", { description: `${invoice.invoice_number}.pdf` })}>
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Subscription */}
+          {activeNav === "subscription" && (
             <>
+              {/* Subscription Status Card - same style as old Billing subscription card */}
               <Card className="shadow-card overflow-hidden border-0">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
@@ -462,25 +524,34 @@ export default function SettingsPage() {
                   </CardTitle>
                   <CardDescription>
                     You&apos;re currently on the{" "}
-                    <Badge variant="secondary" className="bg-teal-100 text-teal-700">{planLabel}</Badge>{" "}
-                    plan.
+                    <Badge variant="secondary" className="bg-teal-100 text-teal-700">{planLabel}</Badge>
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="rounded-lg p-4 bg-slate-50">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-semibold">{planLabel} Plan</p>
+                        <p className="font-semibold">{planLabel} Plan — $9.90/mo</p>
                         <p className="text-sm text-muted-foreground mt-1">
                           {profile?.plan === "pro" || profile?.plan === "team"
                             ? "Unlimited deals, invoicing, AI contract scanner, rate benchmarks, priority support"
                             : "3 active deals, basic features"}
                         </p>
+                        {profile?.payment_pending && (
+                          <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                            <Clock className="h-3 w-3" /> Payment pending verification
+                          </p>
+                        )}
+                        {profile?.plan === "pro" && !profile?.payment_pending && (
+                          <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                            <CheckCircle className="h-3 w-3" /> Active
+                          </p>
+                        )}
                       </div>
                       <div className="flex gap-2">
                         {profile?.plan !== "pro" && (
                           <>
-                            <Button onClick={handleUpgrade}>Subscribe - $9.90/mo</Button>
+                            <Button onClick={handleUpgrade}>Subscribe — $9.90/mo</Button>
                             <Button variant="outline" onClick={handleShowConfirmDialog}>
                               I&apos;ve Paid
                             </Button>
@@ -491,7 +562,7 @@ export default function SettingsPage() {
                   </div>
                   {profile?.plan !== "pro" && (
                     <div className="rounded-lg p-4 bg-teal-50">
-                      <p className="font-medium text-sm text-slate-700 mb-3">Pro includes:</p>
+                      <p className="font-medium text-sm text-slate-700 mb-3">Creator Club includes:</p>
                       <div className="grid grid-cols-2 gap-2">
                         {[
                           "Unlimited deals",
@@ -513,190 +584,90 @@ export default function SettingsPage() {
                 </CardContent>
               </Card>
 
-              {/* Billing History */}
+              {/* Subscription History - same list style as Billing History */}
               <Card className="shadow-card overflow-hidden border-0">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <DollarSign className="h-4 w-4 text-emerald-500" />
-                    Billing History
+                    <DollarSign className="h-4 w-4 text-violet-500" />
+                    Subscription History
                   </CardTitle>
                   <CardDescription>
-                    View and download your past invoices
+                    Your CreatorDeal subscription records
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">
-                  {invoicesLoading ? (
-                    <BillingSkeleton />
-                  ) : (invoices ?? []).length === 0 ? (
+                  {!profile?.payment_order_id ? (
                     <div className="p-8 text-center text-muted-foreground text-sm">
-                      No invoices yet. They&apos;ll appear here once you&apos;re billed.
+                      No subscription history yet.
                     </div>
                   ) : (
                     <div className="divide-y">
-                      {(invoices ?? []).map((invoice) => (
-                        <div key={invoice.id} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors">
-                          <div className="flex items-center gap-3">
-                            <div className="h-9 w-9 rounded-full bg-emerald-100 flex items-center justify-center">
-                              <DollarSign className="h-4 w-4 text-emerald-600" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">
-                                {invoice.deals?.brands?.name ? `${invoice.deals.brands.name} - ` : ""}
-                                {invoice.deals?.title ?? "Invoice"}
-                              </p>
-                              <p className="text-xs text-muted-foreground">{formatDate(invoice.due_date)}</p>
-                            </div>
+                      <div className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-full bg-violet-100 flex items-center justify-center">
+                            <CreditCard className="h-4 w-4 text-violet-600" />
                           </div>
-                          <div className="flex items-center gap-3">
-                            <Badge
-                              variant="secondary"
-                              className={`text-xs ${
-                                invoice.status === "paid"
-                                  ? "bg-emerald-100 text-emerald-700"
-                                  : invoice.status === "overdue"
-                                  ? "bg-rose-100 text-rose-700"
-                                  : invoice.status === "sent"
-                                  ? "bg-blue-100 text-blue-700"
-                                  : "bg-slate-100 text-slate-600"
-                              }`}
-                            >
-                              {invoice.status}
-                            </Badge>
-                            <span className="text-sm font-medium">{formatCurrency(invoice.amount)}</span>
-                            <Button variant="ghost" size="sm" onClick={() => toast.success("Invoice downloaded", { description: `${invoice.invoice_number}.pdf` })}>
-                              <Download className="h-4 w-4" />
-                            </Button>
+                          <div>
+                            <p className="text-sm font-medium">Creator Club — Monthly</p>
+                            <p className="text-xs text-muted-foreground">
+                              {profile.payment_submitted_at ? formatDate(profile.payment_submitted_at) : "—"}
+                            </p>
                           </div>
                         </div>
-                      ))}
+                        <div className="flex items-center gap-3">
+                          <Badge
+                            variant="secondary"
+                            className={`text-xs ${
+                              profile.payment_pending
+                                ? "bg-amber-100 text-amber-700"
+                                : profile.plan === "pro"
+                                ? "bg-emerald-100 text-emerald-700"
+                                : "bg-slate-100 text-slate-600"
+                            }`}
+                          >
+                            {profile.payment_pending ? "Pending" : profile.plan === "pro" ? "Active" : "Expired"}
+                          </Badge>
+                          <span className="text-sm font-medium">$9.90/mo</span>
+                          {profile.plan === "pro" && !profile.payment_pending && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={async () => {
+                                const { pdf } = await import("@react-pdf/renderer")
+                                const { ReceiptPDF: ReceiptPDFComponent } = await import("@/components/receipt-pdf")
+                                const receiptNumber = `RCP-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 99999)).padStart(5, "0")}`
+                                const doc = pdf(
+                                  <ReceiptPDFComponent
+                                    receiptNumber={receiptNumber}
+                                    date={profile.payment_confirmed_at ? formatDate(profile.payment_confirmed_at) : formatDate(new Date().toISOString())}
+                                    userName={profile.full_name || user?.email || "User"}
+                                    userEmail={user?.email || ""}
+                                    amount={9.90}
+                                    currency="USD"
+                                    planName="Creator Club"
+                                    paymentMethod="PayPal (via Ko-fi)"
+                                    orderId={profile.payment_order_id || ""}
+                                  />
+                                )
+                                const blob = await doc.toBlob()
+                                const url = URL.createObjectURL(blob)
+                                const a = document.createElement("a")
+                                a.href = url
+                                a.download = `${receiptNumber}.pdf`
+                                a.click()
+                                URL.revokeObjectURL(url)
+                              }}
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   )}
                 </CardContent>
               </Card>
             </>
-          )}
-
-          {/* Subscription */}
-          {activeNav === "subscription" && (
-            <Card className="shadow-card overflow-hidden border-0">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <DollarSign className="h-4 w-4 text-violet-500" />
-                  Creator Club Subscription
-                </CardTitle>
-                <CardDescription>
-                  Manage your CreatorDeal subscription
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Current Status */}
-                <div className="rounded-lg p-4 bg-slate-50">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold">{planLabel} Plan — $9.90/mo</p>
-                      {profile?.payment_pending && (
-                        <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
-                          <Clock className="h-3 w-3" /> Payment pending verification
-                        </p>
-                      )}
-                      {profile?.plan === "pro" && !profile?.payment_pending && (
-                        <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
-                          <CheckCircle className="h-3 w-3" /> Active since {profile.payment_confirmed_at ? formatDate(profile.payment_confirmed_at) : "unknown"}
-                        </p>
-                      )}
-                      {profile?.plan === "free" && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Subscribe to unlock all features
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      {profile?.plan !== "pro" && (
-                        <>
-                          <Button onClick={handleUpgrade}>Subscribe — $9.90/mo</Button>
-                          <Button variant="outline" onClick={handleShowConfirmDialog}>
-                            I&apos;ve Paid
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Subscription Details */}
-                {profile?.plan === "pro" && (
-                  <div className="rounded-lg p-4 bg-violet-50">
-                    <p className="font-medium text-sm text-violet-700 mb-3">Creator Club includes:</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {[
-                        "Unlimited deals",
-                        "Smart invoicing",
-                        "AI contract scanner",
-                        "Rate benchmarking",
-                        "Priority support",
-                      ].map((feature) => (
-                        <div key={feature} className="flex items-center gap-2 text-sm">
-                          <div className="h-5 w-5 rounded-full bg-violet-100 flex items-center justify-center">
-                            <Check className="h-3 w-3 text-violet-600" />
-                          </div>
-                          <span className="text-slate-600">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Payment Info */}
-                {profile?.payment_order_id && (
-                  <div className="rounded-lg p-4 border">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm font-medium">Payment Details</p>
-                      {profile.plan === "pro" && !profile.payment_pending && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={async () => {
-                            const { ReceiptPDF } = await import("@/components/receipt-pdf")
-                            const { renderToBuffer } = await import("@react-pdf/renderer")
-                            const React = await import("react")
-                            const receiptNumber = `RCP-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 99999)).padStart(5, "0")}`
-                            const element = React.createElement(ReceiptPDF, {
-                              receiptNumber,
-                              date: profile.payment_confirmed_at ? formatDate(profile.payment_confirmed_at) : formatDate(new Date().toISOString()),
-                              userName: profile.full_name || user?.email || "User",
-                              userEmail: user?.email || "",
-                              amount: 9.90,
-                              currency: "USD",
-                              planName: "Creator Club",
-                              paymentMethod: "PayPal (via Ko-fi)",
-                              orderId: profile.payment_order_id,
-                            })
-                            const buffer = await renderToBuffer(element as any)
-                            const blob = new Blob([buffer as any], { type: "application/pdf" })
-                            const url = URL.createObjectURL(blob)
-                            const a = document.createElement("a")
-                            a.href = url
-                            a.download = `${receiptNumber}.pdf`
-                            a.click()
-                            URL.revokeObjectURL(url)
-                          }}
-                        >
-                          <Download className="h-4 w-4 mr-1" />
-                          Download Receipt
-                        </Button>
-                      )}
-                    </div>
-                    <div className="space-y-1 text-sm text-muted-foreground">
-                      <p>Order ID: <span className="font-mono">{profile.payment_order_id}</span></p>
-                      <p>Submitted: {profile.payment_submitted_at ? formatDate(profile.payment_submitted_at) : "—"}</p>
-                      {profile.payment_confirmed_at && (
-                        <p>Confirmed: {formatDate(profile.payment_confirmed_at)}</p>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           )}
 
           {/* Notification Preferences */}

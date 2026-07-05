@@ -22,11 +22,13 @@ import {
 import Link from "next/link"
 import { trpc } from "@/lib/trpc/client"
 import { formatCurrency, formatDate, formatRelativeTime } from "@/lib/utils"
+import { useLocale } from "@/hooks/use-locale"
 import { RevenueChart } from "@/components/charts/revenue-chart"
 import { DealStatusChart } from "@/components/charts/deal-status-chart"
 import { PaymentTrendChart } from "@/components/charts/payment-trend-chart"
 
 export default function DashboardPage() {
+  const { t } = useLocale()
   const { data: stats, isLoading: statsLoading } = trpc.deals.getStats.useQuery()
   const { data: deals, isLoading: dealsLoading } = trpc.deals.list.useQuery()
   const { data: notifications, isLoading: notificationsLoading } = trpc.notifications.list.useQuery()
@@ -188,10 +190,10 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      title: "Active Deals",
+      title: t("home.activeDeals"),
       value: stats?.activeDeals ?? 0,
       change: activeDealsChange,
-      changeLabel: "this week",
+      changeLabel: t("home.thisWeek"),
       trend: "up" as const,
       trendValue: dealsThisWeek.thisWeek,
       icon: Handshake,
@@ -200,10 +202,10 @@ export default function DashboardPage() {
       iconColor: "text-teal-600",
     },
     {
-      title: "Revenue MTD",
+      title: t("home.revenueMtd"),
       value: stats?.totalRevenue ?? 0,
       change: revenueChange,
-      changeLabel: "vs last month",
+      changeLabel: t("home.vsLastMonth"),
       trend: "up" as const,
       trendValue: revenueThisMonth.thisMonth,
       icon: DollarSign,
@@ -212,10 +214,10 @@ export default function DashboardPage() {
       iconColor: "text-amber-600",
     },
     {
-      title: "Pending Payments",
+      title: t("home.pendingPayments"),
       value: stats?.pendingAmount ?? 0,
       change: String(overdueInvoiceCount),
-      changeLabel: "overdue",
+      changeLabel: t("home.overdue"),
       trend: "warning" as const,
       trendValue: overdueInvoiceCount,
       icon: Clock,
@@ -224,10 +226,10 @@ export default function DashboardPage() {
       iconColor: "text-rose-600",
     },
     {
-      title: "Total Deals",
+      title: t("home.totalDeals"),
       value: stats?.totalDeals ?? 0,
-      change: "YTD",
-      changeLabel: "all time",
+      change: t("home.ytd"),
+      changeLabel: t("home.allTime"),
       trend: "up" as const,
       trendValue: 0,
       icon: TrendingUp,
@@ -268,12 +270,12 @@ export default function DashboardPage() {
         <div className="absolute inset-0 dot-pattern opacity-20" />
         <div className="relative flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold">Welcome back, {displayName}!</h1>
-            <p className="mt-0.5 text-sm text-teal-100">Here&apos;s what&apos;s happening with your deals today.</p>
+            <h1 className="text-xl font-bold">{t("home.welcome", { name: displayName })}</h1>
+            <p className="mt-0.5 text-sm text-teal-100">{t("home.subtitle")}</p>
           </div>
-          <Button variant="secondary" size="sm" className="bg-white/15 hover:bg-white/25 text-white border-0 h-8" onClick={() => toast.info("Quick setup coming soon")}>
+          <Button variant="secondary" size="sm" className="bg-white/15 hover:bg-white/25 text-white border-0 h-8" onClick={() => toast.info(t("home.quickSetup"))}>
             <Zap className="mr-1.5 h-3.5 w-3.5" />
-            Quick Setup
+            {t("home.quickSetup")}
           </Button>
         </div>
       </div>
@@ -334,18 +336,18 @@ export default function DashboardPage() {
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <Activity className="h-4 w-4 text-teal-600" />
-              Upcoming Deadlines
+              {t("home.upcomingDeadlines")}
             </CardTitle>
             <Link href="/deals">
               <Button variant="ghost" size="sm" className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 h-8">
-                View All <ArrowRight className="ml-1 h-3 w-3" />
+                {t("home.viewAll")} <ArrowRight className="ml-1 h-3 w-3" />
               </Button>
             </Link>
           </CardHeader>
           <CardContent className="pt-0">
             <div className="space-y-2">
               {upcomingDeadlines.length === 0 && (
-                <p className="text-sm text-muted-foreground py-4 text-center">No upcoming deadlines</p>
+                <p className="text-sm text-muted-foreground py-4 text-center">{t("home.noUpcomingDeadlines")}</p>
               )}
               {upcomingDeadlines.map((deadline) => (
                 <div
@@ -386,18 +388,18 @@ export default function DashboardPage() {
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <Zap className="h-4 w-4 text-amber-500" />
-              Recent Activity
+              {t("home.recentActivity")}
             </CardTitle>
             <Link href="/notifications">
               <Button variant="ghost" size="sm" className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 h-8">
-                View All <ArrowRight className="ml-1 h-3 w-3" />
+                {t("home.viewAll")} <ArrowRight className="ml-1 h-3 w-3" />
               </Button>
             </Link>
           </CardHeader>
           <CardContent className="pt-0">
             <div className="space-y-2">
               {recentActivity.length === 0 && (
-                <p className="text-sm text-muted-foreground py-4 text-center">No recent activity</p>
+                <p className="text-sm text-muted-foreground py-4 text-center">{t("home.noRecentActivity")}</p>
               )}
               {recentActivity.map((activity) => (
                 <div
@@ -434,28 +436,28 @@ export default function DashboardPage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Zap className="h-4 w-4 text-violet-500" />
-            Quick Actions
+            {t("home.quickActions")}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
             <Link href="/deals">
               <Button className="w-full h-9 bg-teal-600 hover:bg-teal-700 shadow-sm transition-all" variant="default">
-                <Plus className="mr-1.5 h-3.5 w-3.5" /> New Deal
+                <Plus className="mr-1.5 h-3.5 w-3.5" /> {t("home.newDeal")}
               </Button>
             </Link>
             <Link href="/invoices">
               <Button className="w-full h-9 bg-amber-600 hover:bg-amber-700 shadow-sm transition-all text-white" variant="default">
-                <Plus className="mr-1.5 h-3.5 w-3.5" /> Create Invoice
+                <Plus className="mr-1.5 h-3.5 w-3.5" /> {t("home.createInvoice")}
               </Button>
             </Link>
             <Link href="/brands">
               <Button className="w-full h-9 bg-violet-600 hover:bg-violet-700 shadow-sm transition-all text-white" variant="default">
-                <Plus className="mr-1.5 h-3.5 w-3.5" /> Add Brand
+                <Plus className="mr-1.5 h-3.5 w-3.5" /> {t("home.addBrand")}
               </Button>
             </Link>
             <Button className="w-full h-9 bg-slate-600 hover:bg-slate-700 shadow-sm transition-all text-white" variant="default" onClick={exportRevenueCSV}>
-              <Download className="mr-1.5 h-3.5 w-3.5" /> Export CSV
+              <Download className="mr-1.5 h-3.5 w-3.5" /> {t("home.exportCsv")}
             </Button>
           </div>
         </CardContent>
