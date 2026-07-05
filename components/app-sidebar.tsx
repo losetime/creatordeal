@@ -182,9 +182,6 @@ export function AppSidebar() {
                   )}
                   {theme === "dark" ? "Light Mode" : "Dark Mode"}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLocale(locale === "en" ? "zh" : "en")}>
-                  {locale === "en" ? "中文" : "English"}
-                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />

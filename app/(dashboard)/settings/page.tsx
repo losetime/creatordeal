@@ -16,6 +16,7 @@ import {
 import { trpc } from "@/lib/trpc/client"
 import { useAuth } from "@/lib/auth/context"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { useLocale } from "@/hooks/use-locale"
 
 const KOFI_PRO_LINK = "https://ko-fi.com/summary/502183d7-97b2-4f16-a024-393a2d5087a6"
 
@@ -99,6 +100,7 @@ function BillingSkeleton() {
 
 export default function SettingsPage() {
   const { user, signOut } = useAuth()
+  const { t, locale, setLocale } = useLocale()
   const [activeNav, setActiveNav] = useState<NavSection>("profile")
   const [isEditingName, setIsEditingName] = useState(false)
   const [editedName, setEditedName] = useState("")
@@ -408,7 +410,10 @@ export default function SettingsPage() {
                         <select
                           id="language"
                           value={language}
-                          onChange={(e) => setLanguage(e.target.value)}
+                          onChange={(e) => {
+                            setLanguage(e.target.value)
+                            setLocale(e.target.value as "en" | "zh")
+                          }}
                           className="flex h-9 w-full rounded-md border border-input bg-slate-50 px-3 py-1 text-sm shadow-sm transition-colors focus:bg-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                         >
                           {languages.map((lang) => (
