@@ -15,7 +15,8 @@ import {
 import { trpc } from "@/lib/trpc/client"
 import { useAuth } from "@/lib/auth/context"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { getPaddle, PADDLE_PRICES } from "@/lib/paddle"
+
+const KOFI_PRO_LINK = "https://ko-fi.com/summary/502183d7-97b2-4f16-a024-393a2d5087a6"
 
 type NavSection = "profile" | "billing" | "notifications" | "security"
 
@@ -175,20 +176,13 @@ export default function SettingsPage() {
     toast.success("Preferences saved", { description: "Notification settings updated." })
   }
 
-  const handleUpgrade = async () => {
-    const paddle = await getPaddle()
-    const priceId = PADDLE_PRICES.pro
-    if (!paddle || !priceId) {
-      toast.error("Payment system not available")
-      return
-    }
-    paddle.Checkout.open({
-      items: [{ priceId, quantity: 1 }],
-      customData: {
-        user_email: user?.email || "",
-        user_id: user?.id || "",
-      },
-    })
+  const handleUpgrade = () => {
+    window.open(KOFI_PRO_LINK, "_blank")
+  }
+
+  const handleConfirmPayment = async () => {
+    updateProfile.mutate({ plan: "pro", subscription_status: "active" })
+    toast.success("Plan upgraded to Pro!", { description: "Your account has been upgraded." })
   }
 
   const handleChangePassword = async () => {
@@ -457,9 +451,16 @@ export default function SettingsPage() {
                             : "3 active deals, basic features"}
                         </p>
                       </div>
-                      {profile?.plan !== "pro" && (
-                        <Button onClick={handleUpgrade}>Upgrade to Pro - $19/mo</Button>
-                      )}
+                      <div className="flex gap-2">
+                        {profile?.plan !== "pro" && (
+                          <>
+                            <Button onClick={handleUpgrade}>Subscribe - $9.90/mo</Button>
+                            <Button variant="outline" onClick={handleConfirmPayment}>
+                              I&apos;ve Paid
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                   {profile?.plan !== "pro" && (

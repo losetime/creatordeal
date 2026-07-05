@@ -21,6 +21,8 @@ export const profilesRouter = router({
         timezone: z.string().max(50).optional(),
         language: z.string().max(10).optional(),
         currency: z.string().max(3).optional(),
+        plan: z.enum(["free", "pro", "team"]).optional(),
+        subscription_status: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
