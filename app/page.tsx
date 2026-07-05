@@ -361,12 +361,14 @@ export default function HomePage() {
                       </li>
                     ))}
                   </ul>
-                  <Button
-                    className={`w-full mt-8 ${plan.popular ? "" : "variant-outline"}`}
-                    variant={plan.popular ? "default" : "outline"}
-                  >
-                    {plan.cta}
-                  </Button>
+                  <Link href={plan.name === "Free" ? "/signup" : "/signup"}>
+                    <Button
+                      className={`w-full mt-8 ${plan.popular ? "" : "variant-outline"}`}
+                      variant={plan.popular ? "default" : "outline"}
+                    >
+                      {plan.cta}
+                    </Button>
+                  </Link>
                 </div>
               ))}
             </div>

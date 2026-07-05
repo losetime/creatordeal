@@ -15,6 +15,7 @@ import {
 import { trpc } from "@/lib/trpc/client"
 import { useAuth } from "@/lib/auth/context"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { getPaddle, PADDLE_PRICES } from "@/lib/paddle"
 
 type NavSection = "profile" | "billing" | "notifications" | "security"
 
@@ -174,8 +175,16 @@ export default function SettingsPage() {
     toast.success("Preferences saved", { description: "Notification settings updated." })
   }
 
-  const handleUpgrade = () => {
-    toast.info("Redirecting to checkout...", { description: "Stripe integration will process your payment." })
+  const handleUpgrade = async () => {
+    const paddle = await getPaddle()
+    const priceId = PADDLE_PRICES.pro
+    if (!paddle || !priceId) {
+      toast.error("Payment system not available")
+      return
+    }
+    paddle.Checkout.open({
+      items: [{ priceId, quantity: 1 }],
+    })
   }
 
   const handleChangePassword = async () => {
