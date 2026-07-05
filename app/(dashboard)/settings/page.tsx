@@ -184,6 +184,10 @@ export default function SettingsPage() {
     }
     paddle.Checkout.open({
       items: [{ priceId, quantity: 1 }],
+      customData: {
+        user_email: user?.email || "",
+        user_id: user?.id || "",
+      },
     })
   }
 

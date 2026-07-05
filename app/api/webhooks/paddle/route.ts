@@ -28,7 +28,6 @@ export async function POST(request: Request) {
       case "subscription.created":
       case "subscription.updated": {
         const subscription = event.data
-        const customerId = subscription.customer_id
         const planId = subscription.items?.[0]?.price?.id
 
         // Determine plan based on price ID
@@ -39,15 +38,29 @@ export async function POST(request: Request) {
           plan = "team"
         }
 
-        // Update profile
-        await supabase
-          .from("profiles")
-          .update({
-            plan,
-            subscription_status: subscription.status || "active",
-            stripe_subscription_id: subscription.id,
-          })
-          .eq("email", subscription.custom_data?.user_email || "")
+        // Try to find user by custom_data first, then by subscription ID
+        const userEmail = subscription.custom_data?.user_email
+        const userId = subscription.custom_data?.user_id
+
+        if (userId) {
+          await supabase
+            .from("profiles")
+            .update({
+              plan,
+              subscription_status: subscription.status || "active",
+              stripe_subscription_id: subscription.id,
+            })
+            .eq("id", userId)
+        } else if (userEmail) {
+          await supabase
+            .from("profiles")
+            .update({
+              plan,
+              subscription_status: subscription.status || "active",
+              stripe_subscription_id: subscription.id,
+            })
+            .eq("email", userEmail)
+        }
 
         break
       }
