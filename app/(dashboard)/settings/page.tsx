@@ -156,6 +156,7 @@ export default function SettingsPage() {
   }, [profile])
 
   const handleSaveSettings = () => {
+    setLocale(language as "en" | "zh")
     updateProfile.mutate({ timezone, language, currency })
   }
 
@@ -294,10 +295,10 @@ export default function SettingsPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <User className="h-4 w-4 text-teal-600" />
-                  Profile
+                  {t("settings.profile")}
                 </CardTitle>
                 <CardDescription>
-                  Manage your account settings and preferences.
+                  {t("settings.profileDesc")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -349,7 +350,7 @@ export default function SettingsPage() {
                     </div>
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="full_name" className="text-sm font-medium">Full Name</Label>
+                        <Label htmlFor="full_name" className="text-sm font-medium">{t("settings.fullName")}</Label>
                         {isEditingName ? (
                           <div className="flex gap-2">
                             <Input
@@ -379,7 +380,7 @@ export default function SettingsPage() {
                         )}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+                        <Label htmlFor="email" className="text-sm font-medium">{t("settings.email")}</Label>
                         <Input
                           id="email"
                           type="email"
@@ -390,7 +391,7 @@ export default function SettingsPage() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="timezone" className="text-sm font-medium flex items-center gap-1">
-                          <Clock className="h-3 w-3" /> Timezone
+                          <Clock className="h-3 w-3" /> {t("settings.timezone")}
                         </Label>
                         <select
                           id="timezone"
@@ -405,7 +406,7 @@ export default function SettingsPage() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="language" className="text-sm font-medium flex items-center gap-1">
-                          <Globe className="h-3 w-3" /> Language
+                          <Globe className="h-3 w-3" /> {t("settings.language")}
                         </Label>
                         <select
                           id="language"
@@ -423,7 +424,7 @@ export default function SettingsPage() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="currency" className="text-sm font-medium flex items-center gap-1">
-                          <DollarSign className="h-3 w-3" /> Currency
+                          <DollarSign className="h-3 w-3" /> {t("settings.currency")}
                         </Label>
                         <select
                           id="currency"
@@ -438,7 +439,7 @@ export default function SettingsPage() {
                       </div>
                       {profile?.created_at && (
                         <div className="space-y-2">
-                          <Label className="text-sm font-medium">Member Since</Label>
+                          <Label className="text-sm font-medium">{t("settings.memberSince")}</Label>
                           <div className="flex h-9 w-full items-center rounded-md border border-input bg-slate-50 px-3 py-1 text-sm text-muted-foreground">
                             {formatDate(profile.created_at)}
                           </div>
@@ -446,7 +447,7 @@ export default function SettingsPage() {
                       )}
                     </div>
                     <Button onClick={handleSaveSettings} disabled={updateProfile.isPending}>
-                      {updateProfile.isPending ? "Saving..." : "Save Settings"}
+                      {updateProfile.isPending ? `${t("common.loading")}` : t("settings.saveSettings")}
                     </Button>
                   </>
                 )}
@@ -681,10 +682,10 @@ export default function SettingsPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Bell className="h-4 w-4 text-amber-500" />
-                  Notification Preferences
+                  {t("settings.notificationPrefs")}
                 </CardTitle>
                 <CardDescription>
-                  Configure how and when you receive notifications.
+                  {t("settings.notificationPrefsDesc")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -699,8 +700,8 @@ export default function SettingsPage() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium">Content Deadline Reminders</p>
-                        <p className="text-xs text-muted-foreground">Get notified before content is due</p>
+                        <p className="text-sm font-medium">{t("settings.contentDeadlineReminders")}</p>
+                        <p className="text-xs text-muted-foreground">{t("settings.contentDeadlineDesc")}</p>
                       </div>
                       <div className="flex gap-2">
                         {[
@@ -731,8 +732,8 @@ export default function SettingsPage() {
 
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium">Payment Reminders</p>
-                        <p className="text-xs text-muted-foreground">Get notified about payments</p>
+                        <p className="text-sm font-medium">{t("settings.paymentReminders")}</p>
+                        <p className="text-xs text-muted-foreground">{t("settings.paymentDesc")}</p>
                       </div>
                       <div className="flex gap-2">
                         {[
@@ -762,8 +763,8 @@ export default function SettingsPage() {
 
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium">Deal Updates</p>
-                        <p className="text-xs text-muted-foreground">Get notified when deals change</p>
+                        <p className="text-sm font-medium">{t("settings.dealUpdates")}</p>
+                        <p className="text-xs text-muted-foreground">{t("settings.dealUpdatesDesc")}</p>
                       </div>
                       <label
                         className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full cursor-pointer transition-all ${
@@ -795,8 +796,8 @@ export default function SettingsPage() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium">Enable Push Notifications</p>
-                        <p className="text-xs text-muted-foreground">Receive notifications in your browser</p>
+                        <p className="text-sm font-medium">{t("settings.pushNotifications")}</p>
+                        <p className="text-xs text-muted-foreground">{t("settings.pushDesc")}</p>
                       </div>
                       <label
                         className={`relative inline-flex items-center cursor-pointer ${
@@ -816,8 +817,8 @@ export default function SettingsPage() {
                     <div className={`space-y-3 ${!notifications.pushEnabled ? "opacity-50 pointer-events-none" : ""}`}>
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium">Deadline Alerts</p>
-                          <p className="text-xs text-muted-foreground">Get instant deadline reminders</p>
+                          <p className="text-sm font-medium">{t("settings.deadlineAlerts")}</p>
+                          <p className="text-xs text-muted-foreground">{t("settings.deadlineAlertsDesc")}</p>
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
@@ -832,8 +833,8 @@ export default function SettingsPage() {
 
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium">Payment Alerts</p>
-                          <p className="text-xs text-muted-foreground">Get instant payment reminders</p>
+                          <p className="text-sm font-medium">{t("settings.paymentAlerts")}</p>
+                          <p className="text-xs text-muted-foreground">{t("settings.paymentAlertsDesc")}</p>
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
@@ -848,8 +849,8 @@ export default function SettingsPage() {
 
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium">Deal Updates</p>
-                          <p className="text-xs text-muted-foreground">Get instant deal notifications</p>
+                          <p className="text-sm font-medium">{t("settings.pushDealUpdates")}</p>
+                          <p className="text-xs text-muted-foreground">{t("settings.pushDealUpdatesDesc")}</p>
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
@@ -867,9 +868,9 @@ export default function SettingsPage() {
 
                 {/* Deadline Reminder Days */}
                 <div className="rounded-lg p-4 bg-slate-50">
-                  <h4 className="font-semibold mb-2 text-sm">Default Reminder Days</h4>
+                  <h4 className="font-semibold mb-2 text-sm">{t("settings.defaultReminderDays")}</h4>
                   <p className="text-xs text-muted-foreground mb-4">
-                    Choose which days before a deadline to send reminders
+                    {t("settings.defaultReminderDesc")}
                   </p>
                   <div className="flex gap-2">
                     {[
@@ -898,7 +899,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <Button onClick={handleSavePreferences}>Save Preferences</Button>
+                <Button onClick={handleSavePreferences}>{t("settings.savePreferences")}</Button>
               </CardContent>
             </Card>
           )}
@@ -911,21 +912,21 @@ export default function SettingsPage() {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Key className="h-4 w-4 text-rose-500" />
-                    Password
+                    {t("settings.password")}
                   </CardTitle>
                   <CardDescription>
-                    Change your account password
+                    {t("settings.passwordDesc")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between p-4 rounded-lg bg-slate-50">
                     <div>
-                      <p className="font-medium">Password</p>
+                      <p className="font-medium">{t("settings.password")}</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Manage your account password
+                        {t("settings.passwordDesc")}
                       </p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={handleChangePassword}>Change Password</Button>
+                    <Button variant="outline" size="sm" onClick={handleChangePassword}>{t("settings.changePassword")}</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -935,21 +936,21 @@ export default function SettingsPage() {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Smartphone className="h-4 w-4 text-violet-500" />
-                    Two-Factor Authentication
+                    {t("settings.twoFactor")}
                   </CardTitle>
                   <CardDescription>
-                    Add an extra layer of security to your account
+                    {t("settings.twoFactorDesc")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between p-4 rounded-lg bg-slate-50">
                     <div>
-                      <p className="font-medium">Two-Factor Authentication</p>
+                      <p className="font-medium">{t("settings.twoFactor")}</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Protect your account with 2FA
+                        {t("settings.twoFactorDesc")}
                       </p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={handleEnable2FA}>Enable 2FA</Button>
+                    <Button variant="outline" size="sm" onClick={handleEnable2FA}>{t("settings.enable2fa")}</Button>
                   </div>
                 </CardContent>
               </Card>
