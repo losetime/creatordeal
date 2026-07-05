@@ -84,19 +84,19 @@ const pricingPlans = [
     popular: false,
   },
   {
-    name: "Pro",
-    price: "$19",
+    name: "Creator Club",
+    price: "$9.90",
     period: "/month",
     description: "For serious creators",
     features: [
       "Unlimited deals",
-      "Advanced invoicing",
+      "Smart invoicing",
       "AI contract scanner",
       "Rate benchmarking",
       "Priority support",
       "Custom branding",
     ],
-    cta: "Get Pro",
+    cta: "Join Club",
     popular: true,
   },
   {

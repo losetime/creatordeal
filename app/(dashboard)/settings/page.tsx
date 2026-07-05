@@ -217,7 +217,7 @@ export default function SettingsPage() {
     ? profile.full_name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
     : user?.email?.slice(0, 2).toUpperCase() ?? "U"
 
-  const planLabel = profile?.plan === "pro" ? "Pro" : profile?.plan === "team" ? "Team" : "Free"
+  const planLabel = profile?.plan === "pro" ? "Creator Club" : profile?.plan === "team" ? "Team" : "Free"
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -447,7 +447,7 @@ export default function SettingsPage() {
                         <p className="font-semibold">{planLabel} Plan</p>
                         <p className="text-sm text-muted-foreground mt-1">
                           {profile?.plan === "pro" || profile?.plan === "team"
-                            ? "Unlimited active deals, AI contract scanning, rate benchmarking, priority support"
+                            ? "Unlimited deals, invoicing, AI contract scanner, rate benchmarks, priority support"
                             : "3 active deals, basic features"}
                         </p>
                       </div>
@@ -468,8 +468,9 @@ export default function SettingsPage() {
                       <p className="font-medium text-sm text-slate-700 mb-3">Pro includes:</p>
                       <div className="grid grid-cols-2 gap-2">
                         {[
-                          "Unlimited active deals",
-                          "AI contract scanning",
+                          "Unlimited deals",
+                          "Smart invoicing",
+                          "AI contract scanner",
                           "Rate benchmarking",
                           "Priority support"
                         ].map((feature) => (
