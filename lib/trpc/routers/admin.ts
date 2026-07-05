@@ -13,6 +13,16 @@ export const adminRouter = router({
     return data
   }),
 
+  getAllMembers: protectedProcedure.query(async ({ ctx }) => {
+    const { data, error } = await ctx.supabase
+      .from("profiles")
+      .select("id, full_name, email, plan, subscription_status, payment_pending, payment_order_id, payment_submitted_at, payment_confirmed_at")
+      .order("created_at", { ascending: false })
+
+    if (error) throw error
+    return data
+  }),
+
   confirmPayment: protectedProcedure
     .input(z.object({ userId: z.string() }))
     .mutation(async ({ ctx, input }) => {
