@@ -316,5 +316,47 @@
     "reject": "Reject",
     "noPending": "No pending payments to review.",
     "noMembers": "No members yet."
+  },
+  "payments": {
+    "title": "Payment Tracking",
+    "subtitle": "Track and manage all your payments",
+    "exportCsv": "Export CSV",
+    "totalPending": "Total Pending",
+    "totalPaid": "Total Paid",
+    "overdue": "Overdue",
+    "totalRevenue": "Total Revenue",
+    "search": "Search payments...",
+    "followUp": "Follow Up",
+    "markPaid": "Mark Paid",
+    "confirmMarkPaid": "Confirm Mark as Paid",
+    "confirmMarkPaidDesc": "Are you sure you want to mark this invoice as paid?",
+    "noPayments": "No payments found."
+  },
+  "rates": {
+    "title": "Rate Benchmarking",
+    "subtitle": "See how your rates compare to market standards",
+    "platform": "Platform",
+    "followers": "Followers",
+    "yourRate": "Your Rate",
+    "saveAndCompare": "Save & Compare",
+    "marketMedian": "Market Median",
+    "rateHistory": "Rate History",
+    "factorsAffecting": "Factors Affecting Your Rate"
+  },
+  "contracts": {
+    "title": "Contract Scanner",
+    "subtitle": "Upload contracts to extract key terms and identify risks",
+    "addContract": "Add Contract",
+    "search": "Search contracts...",
+    "noContracts": "No contracts yet",
+    "addFirst": "Add a contract to get started.",
+    "uploadFile": "Upload File",
+    "aiAnalysis": "AI analysis coming soon"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Stay updated on your deals and payments",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications yet"
   }
 }

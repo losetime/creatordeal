@@ -316,5 +316,47 @@
     "reject": "驳回",
     "noPending": "暂无待审核的付款。",
     "noMembers": "暂无成员。"
+  },
+  "payments": {
+    "title": "付款追踪",
+    "subtitle": "追踪和管理所有付款",
+    "exportCsv": "导出 CSV",
+    "totalPending": "待处理总额",
+    "totalPaid": "已付总额",
+    "overdue": "逾期",
+    "totalRevenue": "总收入",
+    "search": "搜索付款...",
+    "followUp": "跟进",
+    "markPaid": "标记已付",
+    "confirmMarkPaid": "确认标记已付",
+    "confirmMarkPaidDesc": "确定要将此发票标记为已付款吗？",
+    "noPayments": "暂无付款记录。"
+  },
+  "rates": {
+    "title": "费率基准",
+    "subtitle": "了解您的费率与市场标准的对比",
+    "platform": "平台",
+    "followers": "粉丝数",
+    "yourRate": "您的费率",
+    "saveAndCompare": "保存并对比",
+    "marketMedian": "市场中位数",
+    "rateHistory": "费率历史",
+    "factorsAffecting": "影响您费率的因素"
+  },
+  "contracts": {
+    "title": "合同扫描",
+    "subtitle": "上传合同以提取关键条款并识别风险",
+    "addContract": "添加合同",
+    "search": "搜索合同...",
+    "noContracts": "暂无合同",
+    "addFirst": "添加合同以开始使用。",
+    "uploadFile": "上传文件",
+    "aiAnalysis": "AI 分析即将上线"
+  },
+  "notifications": {
+    "title": "通知",
+    "subtitle": "了解您的交易和付款动态",
+    "markAllRead": "全部标为已读",
+    "noNotifications": "暂无通知"
   }
 }

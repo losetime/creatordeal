@@ -26,6 +26,7 @@ import { toast } from "sonner"
 import { Plus, FileText, Send, CheckCircle, Clock, AlertCircle, Download, Eye, Receipt, Sparkles, Trash2, Loader2 } from "lucide-react"
 import { trpc } from "@/lib/trpc/client"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { useLocale } from "@/hooks/use-locale"
 
 const statusConfig = {
   draft: { label: "Draft", color: "bg-slate-100 text-slate-600", icon: FileText, gradient: "from-slate-400 to-slate-500" },
@@ -145,6 +146,7 @@ function InvoicePreview({ invoice, profile }: { invoice: Invoice; profile?: { fu
 }
 
 export default function InvoicesPage() {
+  const { t } = useLocale()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null)
   const [selectedDealId, setSelectedDealId] = useState<string>("")
@@ -255,19 +257,19 @@ export default function InvoicesPage() {
               <Receipt className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">Invoices</h2>
-              <p className="text-xs text-teal-100">{invoiceList.length} invoices total</p>
+              <h2 className="text-xl font-bold">{t("invoices.title")}</h2>
+              <p className="text-xs text-teal-100">{invoiceList.length} {t("invoices.title").toLowerCase()}</p>
             </div>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-white text-teal-600 hover:bg-teal-50 shadow-sm h-8" size="sm">
-                <Plus className="mr-1.5 h-3.5 w-3.5" /> Create Invoice
+                <Plus className="mr-1.5 h-3.5 w-3.5" /> {t("invoices.createInvoice")}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Create New Invoice</DialogTitle>
+                <DialogTitle>{t("invoices.createInvoice")}</DialogTitle>
                 <DialogDescription>
                   Generate an invoice for a completed deal.
                 </DialogDescription>

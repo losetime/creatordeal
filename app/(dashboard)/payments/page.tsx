@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react"
 import { trpc } from "@/lib/trpc/client"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { useLocale } from "@/hooks/use-locale"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -70,6 +71,7 @@ function StatsSkeleton() {
 }
 
 export default function PaymentsPage() {
+  const { t } = useLocale()
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false)
@@ -232,8 +234,8 @@ export default function PaymentsPage() {
               <Wallet className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">Payment Tracking</h2>
-              <p className="text-xs text-emerald-100">Track and manage all your payments</p>
+              <h2 className="text-xl font-bold">{t("payments.title")}</h2>
+              <p className="text-xs text-emerald-100">{t("payments.subtitle")}</p>
             </div>
           </div>
           <Button variant="secondary" onClick={exportCSV} className="bg-white/15 hover:bg-white/25 text-white border-0 h-8" size="sm">
