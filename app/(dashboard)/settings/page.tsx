@@ -190,15 +190,16 @@ export default function SettingsPage() {
       toast.error("Please enter your Ko-fi order ID")
       return
     }
-    // Store the order ID as proof of payment
     updateProfile.mutate({
       plan: "pro",
       subscription_status: "active",
-      // We'll store order ID in a custom field or notes
+      payment_pending: true,
+      payment_order_id: kofiOrderId.trim(),
+      payment_submitted_at: new Date().toISOString(),
     })
-    // Log the order ID for audit
-    console.log("Payment confirmed:", { userId: user?.id, email: user?.email, orderId: kofiOrderId })
-    toast.success("Welcome to Creator Club!", { description: "Your account has been upgraded." })
+    toast.success("Payment submitted for review", {
+      description: "Your account has been upgraded. An admin will verify your payment shortly.",
+    })
     setShowConfirmDialog(false)
     setKofiOrderId("")
   }

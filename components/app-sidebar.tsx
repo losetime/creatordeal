@@ -52,6 +52,7 @@ const navigation = [
 const secondaryNav = [
   { name: "Notifications", href: "/notifications", icon: Bell },
   { name: "Settings", href: "/settings", icon: Settings },
+  { name: "Admin", href: "/admin/payments", icon: Shield },
 ]
 
 export function AppSidebar() {
