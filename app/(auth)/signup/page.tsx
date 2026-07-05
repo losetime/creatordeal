@@ -28,7 +28,21 @@ export default function SignupPage() {
       return
     }
     setLoading(true)
-    const { error } = await supabase.auth.signUp({
+
+    // Check if email already exists in profiles table
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("email", email)
+      .single()
+
+    if (existingProfile) {
+      toast.error("An account with this email already exists. Please sign in instead.")
+      setLoading(false)
+      return
+    }
+
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -42,6 +56,14 @@ export default function SignupPage() {
       setLoading(false)
       return
     }
+
+    // If signUp returns no user, it means email already exists but unconfirmed
+    if (!data.user) {
+      toast.info("An account may already exist with this email. Please check your inbox or try signing in.")
+      setLoading(false)
+      return
+    }
+
     toast.success("Account created! Please verify your email.")
     router.push(`/verify-email?email=${encodeURIComponent(email)}`)
   }
