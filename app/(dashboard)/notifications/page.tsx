@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { trpc } from "@/lib/trpc/client"
 import { formatDate } from "@/lib/utils"
+import { useLocale } from "@/hooks/use-locale"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -19,6 +20,7 @@ const iconMap: Record<string, React.ElementType> = {
 type FilterType = "all" | "unread" | "deadline" | "payment" | "deal_update" | "system"
 
 export default function NotificationsPage() {
+  const { t } = useLocale()
   const [filter, setFilter] = useState<FilterType>("all")
   const utils = trpc.useUtils()
 
@@ -118,7 +120,7 @@ export default function NotificationsPage() {
               <Bell className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">Notifications</h2>
+              <h2 className="text-xl font-bold">{t("notifications.title")}</h2>
               <p className="text-xs text-teal-100">{unreadCount} unread</p>
             </div>
           </div>

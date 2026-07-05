@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { trpc } from "@/lib/trpc/client"
 import { formatDate } from "@/lib/utils"
+import { useLocale } from "@/hooks/use-locale"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,6 +23,7 @@ import {
 } from "lucide-react"
 
 export default function ContractsPage() {
+  const { t } = useLocale()
   const [showUpload, setShowUpload] = useState(false)
   const [selectedDealId, setSelectedDealId] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -97,8 +99,8 @@ export default function ContractsPage() {
               <Scan className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">Contract Scanner</h2>
-              <p className="text-xs text-teal-100">Upload contracts to extract key terms and identify risks</p>
+              <h2 className="text-xl font-bold">{t("contracts.title")}</h2>
+              <p className="text-xs text-teal-100">{t("contracts.subtitle")}</p>
             </div>
           </div>
           <Button

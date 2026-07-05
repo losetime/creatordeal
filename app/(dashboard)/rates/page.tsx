@@ -19,6 +19,7 @@ import {
 } from "lucide-react"
 import { trpc } from "@/lib/trpc/client"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { useLocale } from "@/hooks/use-locale"
 
 const platforms = [
   { value: "youtube", label: "YouTube" },
@@ -80,6 +81,7 @@ function LoadingSkeleton() {
 }
 
 export default function RatesPage() {
+  const { t } = useLocale()
   const [followerCount, setFollowerCount] = useState("50000")
   const [platform, setPlatform] = useState("youtube")
   const [deliverableType, setDeliverableType] = useState("video")
@@ -175,8 +177,8 @@ export default function RatesPage() {
             <BarChart3 className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-xl font-bold">Rate Benchmarking</h2>
-            <p className="text-xs text-teal-100">See how your rates compare to market standards</p>
+            <h2 className="text-xl font-bold">{t("rates.title")}</h2>
+            <p className="text-xs text-teal-100">{t("rates.subtitle")}</p>
           </div>
         </div>
       </div>
@@ -210,8 +212,8 @@ export default function RatesPage() {
                 onChange={(e) => setDeliverableType(e.target.value)}
                 className="rounded border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm h-9"
               >
-                {deliverableTypes.map((t) => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
+                {deliverableTypes.map((dt) => (
+                  <option key={dt.value} value={dt.value}>{dt.label}</option>
                 ))}
               </select>
             </div>
