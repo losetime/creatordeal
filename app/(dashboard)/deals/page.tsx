@@ -31,6 +31,7 @@ import {
 } from "lucide-react"
 import { trpc } from "@/lib/trpc/client"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { useLocale } from "@/hooks/use-locale"
 
 const stages = [
   { id: "inquiry", name: "Inquiry", color: "bg-blue-500", gradient: "from-blue-500 to-blue-600", lightBg: "bg-blue-50" },
@@ -78,6 +79,7 @@ type DealType = {
 }
 
 export default function DealsPage() {
+  const { t } = useLocale()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>("kanban")
@@ -353,8 +355,8 @@ export default function DealsPage() {
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">Deal Pipeline</h2>
-              <p className="text-xs text-teal-100">{deals.length} deals in your pipeline</p>
+              <h2 className="text-xl font-bold">{t("deals.title")}</h2>
+              <p className="text-xs text-teal-100">{deals.length} {t("deals.title").toLowerCase()}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -386,11 +388,12 @@ export default function DealsPage() {
             </div>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-white text-teal-600 hover:bg-teal-50 shadow-sm h-8" size="sm">
-                  <Plus className="mr-1.5 h-3.5 w-3.5" /> New Deal
-                </Button>
-              </DialogTrigger>
+            <DialogTrigger asChild>
+              <Button className="bg-white/20 hover:bg-white/30 text-white border-white/30 h-8" size="sm">
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                {t("deals.createDeal")}
+              </Button>
+            </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Create New Deal</DialogTitle>
