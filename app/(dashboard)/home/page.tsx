@@ -197,7 +197,7 @@ export default function DashboardPage() {
       trend: "up" as const,
       trendValue: dealsThisWeek.thisWeek,
       icon: Handshake,
-      color: "from-teal-500 to-emerald-500",
+      color: "#0d9488",
       bgColor: "bg-teal-50",
       iconColor: "text-teal-600",
     },
@@ -209,9 +209,9 @@ export default function DashboardPage() {
       trend: "up" as const,
       trendValue: revenueThisMonth.thisMonth,
       icon: DollarSign,
-      color: "from-amber-500 to-orange-500",
-      bgColor: "bg-amber-50",
-      iconColor: "text-amber-600",
+      color: "#0d9488",
+      bgColor: "bg-teal-50",
+      iconColor: "text-teal-600",
     },
     {
       title: t("home.pendingPayments"),
@@ -221,9 +221,9 @@ export default function DashboardPage() {
       trend: "warning" as const,
       trendValue: overdueInvoiceCount,
       icon: Clock,
-      color: "from-rose-500 to-pink-500",
-      bgColor: "bg-rose-50",
-      iconColor: "text-rose-600",
+      color: "#0d9488",
+      bgColor: "bg-teal-50",
+      iconColor: "text-teal-600",
     },
     {
       title: t("home.totalDeals"),
@@ -233,9 +233,9 @@ export default function DashboardPage() {
       trend: "up" as const,
       trendValue: 0,
       icon: TrendingUp,
-      color: "from-violet-500 to-purple-500",
-      bgColor: "bg-violet-50",
-      iconColor: "text-violet-600",
+      color: "#0d9488",
+      bgColor: "bg-teal-50",
+      iconColor: "text-teal-600",
     },
   ]
 
@@ -266,14 +266,14 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Welcome Banner */}
-      <div className="relative overflow-hidden rounded-xl gradient-primary p-5 text-white shadow-elevated">
+      <div className="relative overflow-hidden bg-foreground p-5 text-background shadow-elevated">
         <div className="absolute inset-0 dot-pattern opacity-20" />
         <div className="relative flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold">{t("home.welcome", { name: displayName })}</h1>
-            <p className="mt-0.5 text-sm text-teal-100">{t("home.subtitle")}</p>
+            <p className="mt-0.5 text-sm opacity-70">{t("home.subtitle")}</p>
           </div>
-          <Button variant="secondary" size="sm" className="bg-white/15 hover:bg-white/25 text-white border-0 h-8" onClick={() => toast.info(t("home.quickSetup"))}>
+          <Button variant="secondary" size="sm" className="bg-background text-foreground hover:bg-background/90 h-8" onClick={() => toast.info(t("home.quickSetup"))}>
             <Zap className="mr-1.5 h-3.5 w-3.5" />
             {t("home.quickSetup")}
           </Button>
@@ -285,10 +285,10 @@ export default function DashboardPage() {
         {statCards.map((stat, index) => (
           <Card
             key={stat.title}
-            className="relative overflow-hidden shadow-card border-0 hover:shadow-card-hover transition-all duration-200 hover-lift animate-slide-up"
+            className="relative overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-200 hover-lift animate-slide-up"
             style={{ animationDelay: `${index * 40}ms` }}
           >
-            <div className={`absolute top-0 left-0 h-full w-1 bg-gradient-to-b ${stat.color}`} />
+            <div className="absolute top-0 left-0 h-full w-1" style={{ backgroundColor: stat.color }} />
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 {stat.title}

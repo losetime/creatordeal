@@ -5,13 +5,13 @@
 @theme inline {
   --color-background: #FFFDF2;
   --color-foreground: #000000;
-  --color-card: #ffffff;
+  --color-card: #FFFDF2;
   --color-card-foreground: #000000;
-  --color-popover: #ffffff;
+  --color-popover: #FFFDF2;
   --color-popover-foreground: #000000;
   --color-primary: #000000;
   --color-primary-foreground: #ffffff;
-  --color-secondary: #f5f5f5;
+  --color-secondary: #FFFDF2;
   --color-secondary-foreground: #000000;
   --color-muted: #f5f5f5;
   --color-muted-foreground: #666666;
@@ -34,10 +34,11 @@
   --color-sidebar-foreground: #000000;
   --color-sidebar-primary: #000000;
   --color-sidebar-primary-foreground: #ffffff;
-  --color-sidebar-accent: #f5f0e0;
+  --color-sidebar-accent: #FFFDF2;
   --color-sidebar-accent-foreground: #000000;
   --color-sidebar-border: #000000;
   --color-sidebar-ring: #000000;
+  --color-teal-600: #0d9488;
 }
 
 .dark {
@@ -125,10 +126,10 @@ body {
     border: 1px solid #000000;
   }
   .accent-border-left {
-    border-left: 3px solid #000000;
+    border-left: 3px solid #0d9488;
   }
   .accent-border-top {
-    border-top: 3px solid #000000;
+    border-top: 3px solid #0d9488;
   }
   .dot-pattern {
     background-image: radial-gradient(circle, rgba(0, 0, 0, 0.08) 1px, transparent 1px);
