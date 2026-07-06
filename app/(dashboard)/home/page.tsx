@@ -273,7 +273,7 @@ export default function DashboardPage() {
             <h1 className="text-xl font-bold">{t("home.welcome", { name: displayName })}</h1>
             <p className="mt-0.5 text-sm opacity-80">{t("home.subtitle")}</p>
           </div>
-          <Button variant="secondary" size="sm" className="bg-white/20 hover:bg-white/30 text-white h-8" onClick={() => toast.info(t("home.quickSetup"))}>
+          <Button variant="secondary" size="sm" className="bg-background hover:bg-background/90 text-foreground h-8" onClick={() => toast.info(t("home.quickSetup"))}>
             <Zap className="mr-1.5 h-3.5 w-3.5" />
             {t("home.quickSetup")}
           </Button>

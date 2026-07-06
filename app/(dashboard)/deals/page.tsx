@@ -217,7 +217,7 @@ export default function DealsPage() {
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-white/20 hover:bg-white/30 text-white h-8" size="sm">
+              <Button className="bg-background hover:bg-background/90 text-foreground h-8" size="sm">
                 <Plus className="mr-1.5 h-3.5 w-3.5" />
                 {t("deals.createDeal")}
               </Button>

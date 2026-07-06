@@ -111,7 +111,7 @@ export default function ContractsPage() {
                 setShowSmartCreate(true)
                 setShowUpload(false)
               }}
-              className="bg-white/20 hover:bg-white/30 text-white border-white/20"
+              className="bg-background hover:bg-background/90 text-foreground border-background"
             >
               <Wand2 className="mr-2 h-4 w-4" />
               Smart Create
@@ -121,7 +121,7 @@ export default function ContractsPage() {
                 setShowUpload(!showUpload)
                 setShowSmartCreate(false)
               }}
-              className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+              className="bg-background hover:bg-background/90 text-foreground border-background"
             >
               <Plus className="mr-2 h-4 w-4" />
               Manual Upload
