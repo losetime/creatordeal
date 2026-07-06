@@ -238,7 +238,7 @@ export default function PaymentsPage() {
               <p className="text-xs text-emerald-100">{t("payments.subtitle")}</p>
             </div>
           </div>
-          <Button variant="secondary" onClick={exportCSV} className="bg-white/15 hover:bg-white/25 text-white border-0 h-8" size="sm">
+          <Button onClick={exportCSV} className="bg-black hover:bg-black/80 text-white h-8" size="sm">
             <Download className="mr-1.5 h-3.5 w-3.5" /> Export CSV
           </Button>
         </div>
