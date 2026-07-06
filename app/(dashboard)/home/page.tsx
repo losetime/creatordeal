@@ -266,14 +266,14 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Welcome Banner */}
-      <div className="relative overflow-hidden bg-foreground p-5 text-background shadow-elevated">
+      <div className="relative overflow-hidden p-5 text-white shadow-elevated" style={{ backgroundColor: "#0d9488" }}>
         <div className="absolute inset-0 dot-pattern opacity-20" />
         <div className="relative flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold">{t("home.welcome", { name: displayName })}</h1>
-            <p className="mt-0.5 text-sm opacity-70">{t("home.subtitle")}</p>
+            <p className="mt-0.5 text-sm opacity-80">{t("home.subtitle")}</p>
           </div>
-          <Button variant="secondary" size="sm" className="bg-background text-foreground hover:bg-background/90 h-8" onClick={() => toast.info(t("home.quickSetup"))}>
+          <Button variant="secondary" size="sm" className="bg-white/20 hover:bg-white/30 text-white h-8" onClick={() => toast.info(t("home.quickSetup"))}>
             <Zap className="mr-1.5 h-3.5 w-3.5" />
             {t("home.quickSetup")}
           </Button>

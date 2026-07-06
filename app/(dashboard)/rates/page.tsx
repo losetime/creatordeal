@@ -45,7 +45,7 @@ const getFollowerTier = (count: number) => {
 function LoadingSkeleton() {
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 p-5 text-white shadow-elevated">
+      <div className="relative overflow-hidden p-5 text-white shadow-elevated" style={{ backgroundColor: "#0d9488" }}">
         <div className="absolute inset-0 dot-pattern opacity-15" />
         <div className="relative flex items-center gap-2">
           <div className="rounded-lg bg-white/15 p-1.5">
@@ -170,7 +170,7 @@ export default function RatesPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 p-5 text-white shadow-elevated">
+      <div className="relative overflow-hidden p-5 text-white shadow-elevated" style={{ backgroundColor: "#0d9488" }}">
         <div className="absolute inset-0 dot-pattern opacity-15" />
         <div className="relative flex items-center gap-2">
           <div className="rounded-lg bg-white/15 p-1.5">
@@ -259,7 +259,7 @@ export default function RatesPage() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-base">
-                {platforms.find((p) => p.value === platform)?.label} â€” {tier.label} Tier ({tier.range})
+                {platforms.find((p) => p.value === platform)?.label} â€?{tier.label} Tier ({tier.range})
               </CardTitle>
               <CardDescription className="text-xs">
                 {getDataSourceLabel()}
@@ -317,7 +317,7 @@ export default function RatesPage() {
                   <span className="w-12 text-xs text-muted-foreground">Range</span>
                   <div className="flex-1 flex items-center gap-2 text-xs text-muted-foreground">
                     <span>{formatCurrency(marketP25)}</span>
-                    <span className="text-slate-300">â€”</span>
+                    <span className="text-slate-300">â€?/span>
                     <span>{formatCurrency(marketP75)}</span>
                     <Badge variant="secondary" className="text-[10px] ml-1">
                       25th-75th percentile
@@ -368,7 +368,7 @@ export default function RatesPage() {
                     <span className="text-xs text-muted-foreground capitalize">{entry.deliverable_type}</span>
                     {entry.deals && (
                       <span className="text-xs text-muted-foreground">
-                        â€” {entry.deals.title}
+                        â€?{entry.deals.title}
                         {entry.deals.brands?.name && ` Â· ${entry.deals.brands.name}`}
                       </span>
                     )}

@@ -93,7 +93,7 @@ export default function ContractsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 p-5 text-white shadow-elevated">
+      <div className="relative overflow-hidden p-5 text-white shadow-elevated" style={{ backgroundColor: "#0d9488" }}">
         <div className="absolute inset-0 dot-pattern opacity-15" />
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -160,7 +160,7 @@ export default function ContractsPage() {
                       {deals?.map((deal) => (
                         <SelectItem key={deal.id} value={deal.id}>
                           {deal.title}
-                          {deal.brands?.name ? ` â€” ${deal.brands.name}` : ""}
+                          {deal.brands?.name ? ` â€?${deal.brands.name}` : ""}
                         </SelectItem>
                       ))}
                       {deals?.length === 0 && (
@@ -188,7 +188,7 @@ export default function ContractsPage() {
                 <Button
                   onClick={handleUpload}
                   disabled={uploading || !selectedDealId || !selectedFile}
-                  className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 shadow-md"
+                  className="hover:opacity-90" style={{ backgroundColor: "#0d9488" }} shadow-md"
                 >
                   {uploading ? (
                     <>
@@ -282,7 +282,7 @@ export default function ContractsPage() {
                               {contract.file_name}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              {brand || "Unknown brand"} {deal ? `â€¢ ${deal}` : ""} â€¢ {formatDate(contract.created_at)}
+                              {brand || "Unknown brand"} {deal ? `â€?${deal}` : ""} â€?{formatDate(contract.created_at)}
                             </p>
                           </div>
                         </div>
@@ -339,8 +339,8 @@ export default function ContractsPage() {
                     </CardTitle>
                     <CardDescription>
                       {selectedContract?.deals?.brands?.name || "Unknown brand"}
-                      {selectedContract?.deals?.title ? ` â€¢ ${selectedContract.deals.title}` : ""}
-                      {selectedContract ? ` â€¢ Added ${formatDate(selectedContract.created_at)}` : ""}
+                      {selectedContract?.deals?.title ? ` â€?${selectedContract.deals.title}` : ""}
+                      {selectedContract ? ` â€?Added ${formatDate(selectedContract.created_at)}` : ""}
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
