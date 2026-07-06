@@ -187,21 +187,21 @@ export default function BrandsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="relative overflow-hidden p-5 text-white shadow-elevated" style={{ backgroundColor: "#0d9488" }}>
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 p-5 text-white shadow-elevated">
         <div className="absolute inset-0 dot-pattern opacity-15" />
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="bg-white/15 p-1.5">
+            <div className="rounded-lg bg-white/15 p-1.5">
               <Building2 className="h-5 w-5" />
             </div>
             <div>
               <h2 className="text-xl font-bold">Brands</h2>
-              <p className="text-xs opacity-80">{brands?.length ?? 0} brands in your network</p>
+              <p className="text-xs text-teal-100">{brands?.length ?? 0} brands in your network</p>
             </div>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-black hover:bg-black/80 text-white h-8" size="sm">
+              <Button className="bg-white text-teal-600 hover:bg-teal-50 shadow-sm h-8" size="sm">
                 <Plus className="mr-1.5 h-3.5 w-3.5" /> Add Brand
               </Button>
             </DialogTrigger>
@@ -266,7 +266,7 @@ export default function BrandsPage() {
                   Cancel
                 </Button>
                 <Button
-                  className="bg-black hover:bg-black/80 text-white"
+                  className="bg-teal-600 hover:bg-teal-700"
                   onClick={handleAddBrand}
                   disabled={createBrand.isPending}
                 >
@@ -341,7 +341,7 @@ export default function BrandsPage() {
               Cancel
             </Button>
             <Button
-              className="bg-black hover:bg-black/80 text-white"
+              className="bg-teal-600 hover:bg-teal-700"
               onClick={handleSaveEdit}
               disabled={updateBrand.isPending}
             >
@@ -493,7 +493,7 @@ export default function BrandsPage() {
             <p className="text-muted-foreground mt-2 mb-6 max-w-md">
               Add your first brand to start tracking your partnerships.
             </p>
-            <Button onClick={() => setIsDialogOpen(true)} className="bg-black hover:bg-black/80 text-white">
+            <Button onClick={() => setIsDialogOpen(true)} className="bg-teal-600 hover:bg-teal-700">
               <Plus className="mr-2 h-4 w-4" /> Add Brand
             </Button>
           </CardContent>

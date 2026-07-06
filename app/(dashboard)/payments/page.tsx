@@ -238,7 +238,7 @@ export default function PaymentsPage() {
               <p className="text-xs text-emerald-100">{t("payments.subtitle")}</p>
             </div>
           </div>
-          <Button onClick={exportCSV} className="bg-black hover:bg-black/80 text-white h-8" size="sm">
+          <Button variant="secondary" onClick={exportCSV} className="bg-white/15 hover:bg-white/25 text-white border-0 h-8" size="sm">
             <Download className="mr-1.5 h-3.5 w-3.5" /> Export CSV
           </Button>
         </div>
@@ -411,7 +411,7 @@ export default function PaymentsPage() {
                       <div className="min-w-0">
                         <p className="font-semibold text-sm truncate group-hover:text-emerald-700 transition-colors">{invoice.invoice_number}</p>
                         <p className="text-xs text-muted-foreground truncate">
-                          {dealTitle} â€?{brandName}
+                          {dealTitle} â€¢ {brandName}
                         </p>
                       </div>
                     </div>
@@ -419,10 +419,10 @@ export default function PaymentsPage() {
                       <div className="text-right min-w-[100px]">
                         <p className="font-bold text-sm">{formatCurrency(invoice.amount ?? 0)}</p>
                         <p className="text-xs text-muted-foreground">
-                          Due {invoice.due_date ? formatDate(invoice.due_date) : "â€?}
+                          Due {invoice.due_date ? formatDate(invoice.due_date) : "â€”"}
                           {invoice.paid_at && (
                             <span className="text-emerald-600 font-medium">
-                              {" "}â€?Paid {formatDate(invoice.paid_at)}
+                              {" "}â€¢ Paid {formatDate(invoice.paid_at)}
                             </span>
                           )}
                         </p>
