@@ -34,7 +34,7 @@ export default function DashboardLayout({
     <SidebarProvider>
       <AppSidebar />
       <main className="flex-1 overflow-auto">
-        <header className="flex h-16 items-center border-b border-border px-4 gap-4">
+        <header className="flex h-16 items-center border-b-2 border-foreground px-4 gap-4">
           <SidebarTrigger />
           <Breadcrumb>
             <BreadcrumbList>

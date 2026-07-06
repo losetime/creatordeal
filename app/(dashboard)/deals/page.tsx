@@ -203,21 +203,21 @@ export default function DealsPage() {
   return (
     <div className="space-y-4 animate-fade-in">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 p-5 text-white shadow-elevated">
+      <div className="relative overflow-hidden bg-foreground p-5 text-background shadow-elevated">
         <div className="absolute inset-0 dot-pattern opacity-15" />
         <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
-            <div className="rounded-lg bg-white/15 p-1.5">
+            <div className="bg-background/15 p-1.5">
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
               <h2 className="text-xl font-bold">{t("deals.title")}</h2>
-              <p className="text-xs text-teal-100">{deals.length} {t("deals.title").toLowerCase()}</p>
+              <p className="text-xs opacity-70">{deals.length} {t("deals.title").toLowerCase()}</p>
             </div>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-white/20 hover:bg-white/30 text-white border-white/30 h-8" size="sm">
+              <Button className="bg-background text-foreground hover:bg-background/90 h-8" size="sm">
                 <Plus className="mr-1.5 h-3.5 w-3.5" />
                 {t("deals.createDeal")}
               </Button>
