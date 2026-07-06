@@ -201,7 +201,7 @@ export default function BrandsPage() {
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-white text-teal-600 hover:bg-teal-50 shadow-sm h-8" size="sm">
+              <Button className="bg-black hover:bg-black/80 text-white h-8" size="sm">
                 <Plus className="mr-1.5 h-3.5 w-3.5" /> Add Brand
               </Button>
             </DialogTrigger>
@@ -493,7 +493,7 @@ export default function BrandsPage() {
             <p className="text-muted-foreground mt-2 mb-6 max-w-md">
               Add your first brand to start tracking your partnerships.
             </p>
-            <Button onClick={() => setIsDialogOpen(true)} className="bg-teal-600 hover:bg-teal-700">
+            <Button onClick={() => setIsDialogOpen(true)} className="bg-black hover:bg-black/80 text-white">
               <Plus className="mr-2 h-4 w-4" /> Add Brand
             </Button>
           </CardContent>

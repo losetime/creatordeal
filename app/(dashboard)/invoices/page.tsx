@@ -284,7 +284,7 @@ export default function InvoicesPage() {
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-white text-teal-600 hover:bg-teal-50 shadow-sm h-8" size="sm">
+              <Button className="bg-black hover:bg-black/80 text-white h-8" size="sm">
                 <Plus className="mr-1.5 h-3.5 w-3.5" /> {t("invoices.createInvoice")}
               </Button>
             </DialogTrigger>
