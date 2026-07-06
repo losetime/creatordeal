@@ -45,15 +45,15 @@ const getFollowerTier = (count: number) => {
 function LoadingSkeleton() {
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 p-5 text-white shadow-elevated">
+      <div className="relative overflow-hidden p-5 text-white shadow-elevated" style={{ backgroundColor: "#0d9488" }}>
         <div className="absolute inset-0 dot-pattern opacity-15" />
         <div className="relative flex items-center gap-2">
-          <div className="rounded-lg bg-white/15 p-1.5">
+          <div className="bg-white/15 p-1.5">
             <BarChart3 className="h-5 w-5" />
           </div>
           <div>
             <h2 className="text-xl font-bold">Rate Benchmarking</h2>
-            <p className="text-xs text-teal-100">See how your rates compare to market standards</p>
+            <p className="text-xs opacity-80">See how your rates compare to market standards</p>
           </div>
         </div>
       </div>
@@ -170,15 +170,15 @@ export default function RatesPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 p-5 text-white shadow-elevated">
+      <div className="relative overflow-hidden p-5 text-white shadow-elevated" style={{ backgroundColor: "#0d9488" }}>
         <div className="absolute inset-0 dot-pattern opacity-15" />
         <div className="relative flex items-center gap-2">
-          <div className="rounded-lg bg-white/15 p-1.5">
+          <div className="bg-white/15 p-1.5">
             <BarChart3 className="h-5 w-5" />
           </div>
           <div>
             <h2 className="text-xl font-bold">{t("rates.title")}</h2>
-            <p className="text-xs text-teal-100">{t("rates.subtitle")}</p>
+            <p className="text-xs opacity-80">{t("rates.subtitle")}</p>
           </div>
         </div>
       </div>
