@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { generateStoragePath } from "@/lib/utils"
 
 export async function POST(request: Request) {
   try {
@@ -33,10 +34,10 @@ export async function POST(request: Request) {
     }
 
     // Upload file to Supabase Storage
-    const fileName = `${user.id}/${dealId}/${Date.now()}-${file.name}`
+    const storageFileName = generateStoragePath(user.id, "contracts", file.name, dealId)
     const { error: uploadError } = await supabase.storage
       .from("contracts")
-      .upload(fileName, file, {
+      .upload(storageFileName, file, {
         contentType: file.type || "application/pdf",
       })
 
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
     // Get the signed URL for the uploaded file
     const { data: urlData } = await supabase.storage
       .from("contracts")
-      .createSignedUrl(fileName, 3600)
+      .createSignedUrl(storageFileName, 3600)
 
     const fileUrl = urlData?.signedUrl || ""
 

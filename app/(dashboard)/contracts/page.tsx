@@ -19,12 +19,14 @@ import {
 import { toast } from "sonner"
 import {
   FileText, CheckCircle,
-  Clock, Trash2, Eye, Sparkles, Scan, Plus, Search
+  Clock, Trash2, Eye, Sparkles, Scan, Plus, Search, Wand2
 } from "lucide-react"
+import { SmartDealCreator } from "@/components/smart-deal-creator"
 
 export default function ContractsPage() {
   const { t } = useLocale()
   const [showUpload, setShowUpload] = useState(false)
+  const [showSmartCreate, setShowSmartCreate] = useState(false)
   const [selectedDealId, setSelectedDealId] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [selectedContractId, setSelectedContractId] = useState<string | null>(null)
@@ -103,15 +105,41 @@ export default function ContractsPage() {
               <p className="text-xs text-teal-100">{t("contracts.subtitle")}</p>
             </div>
           </div>
-          <Button
-            onClick={() => setShowUpload(!showUpload)}
-            className="bg-white/20 hover:bg-white/30 text-white border-white/30"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Add Contract
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => {
+                setShowSmartCreate(true)
+                setShowUpload(false)
+              }}
+              className="bg-white hover:bg-white/90 text-teal-600 border-white"
+            >
+              <Wand2 className="mr-2 h-4 w-4" />
+              Smart Create
+            </Button>
+            <Button
+              onClick={() => {
+                setShowUpload(!showUpload)
+                setShowSmartCreate(false)
+              }}
+              className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Manual Upload
+            </Button>
+          </div>
         </div>
       </div>
+
+      {/* Smart Create */}
+      {showSmartCreate && (
+        <SmartDealCreator
+          onComplete={() => {
+            setShowSmartCreate(false)
+            utils.contracts.list.invalidate()
+            utils.deals.list.invalidate()
+          }}
+        />
+      )}
 
       {/* Upload Area */}
       {showUpload && (

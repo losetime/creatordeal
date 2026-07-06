@@ -243,7 +243,28 @@ export default function InvoicesPage() {
       window.open(invoice.pdf_url, "_blank")
       return
     }
-    toast.info("Generating PDF...", { description: "Send the invoice first to generate a PDF." })
+    // Generate PDF on the fly
+    try {
+      const res = await fetch("/api/invoices/download", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invoice_id: invoice.id }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        toast.error("Failed to download", { description: data.error })
+        return
+      }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${invoice.invoice_number}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      toast.error("Failed to download invoice")
+    }
   }
 
   return (
@@ -284,7 +305,7 @@ export default function InvoicesPage() {
                     <SelectContent>
                       {deals?.map((deal) => (
                         <SelectItem key={deal.id} value={deal.id}>
-                          {deal.title} — {deal.brand.name}
+                          {deal.title} — {deal.brand?.name || deal.brands?.name || "Unknown"}
                         </SelectItem>
                       ))}
                     </SelectContent>

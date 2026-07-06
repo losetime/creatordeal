@@ -118,7 +118,7 @@ export const dealsRouter = router({
     .mutation(async ({ ctx, input }) => {
       const { data: currentDeal, error: fetchError } = await ctx.supabase
         .from("deals")
-        .select("stage, title")
+        .select("stage, title, amount, currency, payment_deadline")
         .eq("id", input.id)
         .eq("user_id", ctx.user.id)
         .single()
@@ -144,6 +144,49 @@ export const dealsRouter = router({
         .single()
 
       if (error) throw error
+
+      // Auto-create invoice when moving to "published"
+      if (input.stage === "published" && currentDeal.amount) {
+        // Check if invoice already exists for this deal
+        const { data: existingInvoice } = await ctx.supabase
+          .from("invoices")
+          .select("id")
+          .eq("deal_id", input.id)
+          .eq("user_id", ctx.user.id)
+          .limit(1)
+          .single()
+
+        if (!existingInvoice) {
+          // Generate invoice number
+          const now = new Date()
+          const year = now.getFullYear()
+          const month = String(now.getMonth() + 1).padStart(2, "0")
+          const timestamp = Date.now().toString(36).toUpperCase()
+          const invoiceNumber = `INV-${year}${month}-${timestamp}`
+
+          // Create draft invoice
+          const dueDate = currentDeal.payment_deadline || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+
+          await ctx.supabase.from("invoices").insert({
+            deal_id: input.id,
+            user_id: ctx.user.id,
+            invoice_number: invoiceNumber,
+            amount: currentDeal.amount,
+            currency: currentDeal.currency || "USD",
+            status: "draft",
+            due_date: dueDate,
+          })
+
+          // Add notification
+          await ctx.supabase.from("notifications").insert({
+            user_id: ctx.user.id,
+            type: "deal_update",
+            title: "Invoice auto-created",
+            message: `Draft invoice ${invoiceNumber} created for $${currentDeal.amount.toLocaleString()}`,
+            deal_id: input.id,
+          })
+        }
+      }
 
       const stageLabels: Record<string, string> = {
         signed: "Deal signed!",

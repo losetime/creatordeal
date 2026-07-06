@@ -321,13 +321,13 @@ export default function SettingsPage() {
                         </div>
                         <label className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
                           <span className="text-xs text-white font-medium">Upload</span>
-                          <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                           <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                             const file = e.target.files?.[0]
                             if (!file) return
                             const { createClient } = await import("@/lib/supabase/client")
+                            const { generateStoragePath } = await import("@/lib/utils")
                             const supabase = createClient()
-                            const ext = file.name.split(".").pop() || "jpg"
-                            const fileName = `avatars/${user?.id}/${Date.now()}.${ext}`
+                            const fileName = generateStoragePath(user?.id || "", "avatars", file.name)
                             const { error } = await supabase.storage.from("avatars").upload(fileName, file, {
                               contentType: file.type,
                               upsert: true,
