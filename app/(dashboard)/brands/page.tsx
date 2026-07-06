@@ -187,16 +187,16 @@ export default function BrandsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="relative overflow-hidden p-5 text-white shadow-elevated" style={{ backgroundColor: "#0d9488" }}">
+      <div className="relative overflow-hidden p-5 text-white shadow-elevated" style={{ backgroundColor: "#0d9488" }}>
         <div className="absolute inset-0 dot-pattern opacity-15" />
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="rounded-lg bg-white/15 p-1.5">
+            <div className="bg-white/15 p-1.5">
               <Building2 className="h-5 w-5" />
             </div>
             <div>
               <h2 className="text-xl font-bold">Brands</h2>
-              <p className="text-xs text-teal-100">{brands?.length ?? 0} brands in your network</p>
+              <p className="text-xs opacity-80">{brands?.length ?? 0} brands in your network</p>
             </div>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

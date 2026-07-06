@@ -93,16 +93,16 @@ export default function ContractsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="relative overflow-hidden p-5 text-white shadow-elevated" style={{ backgroundColor: "#0d9488" }}">
+      <div className="relative overflow-hidden p-5 text-white shadow-elevated" style={{ backgroundColor: "#0d9488" }}>
         <div className="absolute inset-0 dot-pattern opacity-15" />
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="rounded-lg bg-white/15 p-1.5">
+            <div className="bg-white/15 p-1.5">
               <Scan className="h-5 w-5" />
             </div>
             <div>
               <h2 className="text-xl font-bold">{t("contracts.title")}</h2>
-              <p className="text-xs text-teal-100">{t("contracts.subtitle")}</p>
+              <p className="text-xs opacity-80">{t("contracts.subtitle")}</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -111,7 +111,7 @@ export default function ContractsPage() {
                 setShowSmartCreate(true)
                 setShowUpload(false)
               }}
-              className="bg-white hover:bg-white/90 text-teal-600 border-white"
+              className="bg-white/20 hover:bg-white/30 text-white border-white/20"
             >
               <Wand2 className="mr-2 h-4 w-4" />
               Smart Create
@@ -160,7 +160,7 @@ export default function ContractsPage() {
                       {deals?.map((deal) => (
                         <SelectItem key={deal.id} value={deal.id}>
                           {deal.title}
-                          {deal.brands?.name ? ` â€?${deal.brands.name}` : ""}
+                          {deal.brands?.name ? ` â€” ${deal.brands.name}` : ""}
                         </SelectItem>
                       ))}
                       {deals?.length === 0 && (
@@ -188,7 +188,7 @@ export default function ContractsPage() {
                 <Button
                   onClick={handleUpload}
                   disabled={uploading || !selectedDealId || !selectedFile}
-                  className="hover:opacity-90" style={{ backgroundColor: "#0d9488" }} shadow-md"
+                  className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 shadow-md"
                 >
                   {uploading ? (
                     <>
@@ -282,7 +282,7 @@ export default function ContractsPage() {
                               {contract.file_name}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              {brand || "Unknown brand"} {deal ? `â€?${deal}` : ""} â€?{formatDate(contract.created_at)}
+                              {brand || "Unknown brand"} {deal ? `â€¢ ${deal}` : ""} â€¢ {formatDate(contract.created_at)}
                             </p>
                           </div>
                         </div>
@@ -339,8 +339,8 @@ export default function ContractsPage() {
                     </CardTitle>
                     <CardDescription>
                       {selectedContract?.deals?.brands?.name || "Unknown brand"}
-                      {selectedContract?.deals?.title ? ` â€?${selectedContract.deals.title}` : ""}
-                      {selectedContract ? ` â€?Added ${formatDate(selectedContract.created_at)}` : ""}
+                      {selectedContract?.deals?.title ? ` â€¢ ${selectedContract.deals.title}` : ""}
+                      {selectedContract ? ` â€¢ Added ${formatDate(selectedContract.created_at)}` : ""}
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">

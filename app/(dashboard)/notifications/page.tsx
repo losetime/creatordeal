@@ -67,7 +67,7 @@ export default function NotificationsPage() {
   if (isLoading) {
     return (
       <div className="space-y-6 animate-fade-in">
-        <div className="relative overflow-hidden p-5 text-white shadow-elevated" style={{ backgroundColor: "#0d9488" }}">
+        <div className="relative overflow-hidden p-5 text-white shadow-elevated" style={{ backgroundColor: "#0d9488" }}>
           <div className="absolute inset-0 dot-pattern opacity-15" />
           <div className="relative flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -112,7 +112,7 @@ export default function NotificationsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="relative overflow-hidden p-5 text-white shadow-elevated" style={{ backgroundColor: "#0d9488" }}">
+      <div className="relative overflow-hidden p-5 text-white shadow-elevated" style={{ backgroundColor: "#0d9488" }}>
         <div className="absolute inset-0 dot-pattern opacity-15" />
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-2">
