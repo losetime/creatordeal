@@ -81,6 +81,11 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
+/* Force all rounded corners to 0 */
+[class*="rounded"] {
+  border-radius: 0 !important;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
