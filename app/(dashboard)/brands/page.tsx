@@ -266,7 +266,7 @@ export default function BrandsPage() {
                   Cancel
                 </Button>
                 <Button
-                  className="bg-teal-600 hover:bg-teal-700"
+                  className="bg-black hover:bg-black/80 text-white"
                   onClick={handleAddBrand}
                   disabled={createBrand.isPending}
                 >
@@ -341,7 +341,7 @@ export default function BrandsPage() {
               Cancel
             </Button>
             <Button
-              className="bg-teal-600 hover:bg-teal-700"
+              className="bg-black hover:bg-black/80 text-white"
               onClick={handleSaveEdit}
               disabled={updateBrand.isPending}
             >

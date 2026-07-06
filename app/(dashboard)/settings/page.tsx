@@ -40,7 +40,7 @@ const languages = [
   { value: "es", label: "Español" },
   { value: "fr", label: "Français" },
   { value: "de", label: "Deutsch" },
-  { value: "ja", label: "日本語" },
+  { value: "ja", label: "日本�? },
 ]
 
 const currencies = [
@@ -537,7 +537,7 @@ export default function SettingsPage() {
                   <div className="rounded-lg p-4 bg-slate-50">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-semibold">{planLabel} Plan — $9.90/mo</p>
+                        <p className="font-semibold">{planLabel} Plan �?$9.90/mo</p>
                         <p className="text-sm text-muted-foreground mt-1">
                           {profile?.plan === "pro" || profile?.plan === "team"
                             ? "Unlimited deals, invoicing, AI contract scanner, rate benchmarks, priority support"
@@ -557,7 +557,7 @@ export default function SettingsPage() {
                       <div className="flex gap-2">
                         {profile?.plan !== "pro" && (
                           <>
-                            <Button onClick={handleUpgrade}>Subscribe — $9.90/mo</Button>
+                            <Button onClick={handleUpgrade}>Subscribe �?$9.90/mo</Button>
                             <Button variant="outline" onClick={handleShowConfirmDialog}>
                               I&apos;ve Paid
                             </Button>
@@ -614,9 +614,9 @@ export default function SettingsPage() {
                             <CreditCard className="h-4 w-4 text-violet-600" />
                           </div>
                           <div>
-                            <p className="text-sm font-medium">Creator Club — Monthly</p>
+                            <p className="text-sm font-medium">Creator Club �?Monthly</p>
                             <p className="text-xs text-muted-foreground">
-                              {profile.payment_submitted_at ? formatDate(profile.payment_submitted_at) : "—"}
+                              {profile.payment_submitted_at ? formatDate(profile.payment_submitted_at) : "�?}
                             </p>
                           </div>
                         </div>

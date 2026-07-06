@@ -411,7 +411,7 @@ export default function PaymentsPage() {
                       <div className="min-w-0">
                         <p className="font-semibold text-sm truncate group-hover:text-emerald-700 transition-colors">{invoice.invoice_number}</p>
                         <p className="text-xs text-muted-foreground truncate">
-                          {dealTitle} â€¢ {brandName}
+                          {dealTitle} â€?{brandName}
                         </p>
                       </div>
                     </div>
@@ -419,10 +419,10 @@ export default function PaymentsPage() {
                       <div className="text-right min-w-[100px]">
                         <p className="font-bold text-sm">{formatCurrency(invoice.amount ?? 0)}</p>
                         <p className="text-xs text-muted-foreground">
-                          Due {invoice.due_date ? formatDate(invoice.due_date) : "â€”"}
+                          Due {invoice.due_date ? formatDate(invoice.due_date) : "â€?}
                           {invoice.paid_at && (
                             <span className="text-emerald-600 font-medium">
-                              {" "}â€¢ Paid {formatDate(invoice.paid_at)}
+                              {" "}â€?Paid {formatDate(invoice.paid_at)}
                             </span>
                           )}
                         </p>

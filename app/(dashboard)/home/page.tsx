@@ -442,7 +442,7 @@ export default function DashboardPage() {
         <CardContent className="pt-0">
           <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
             <Link href="/deals">
-              <Button className="w-full h-9 bg-teal-600 hover:bg-teal-700 shadow-sm transition-all" variant="default">
+              <Button className="w-full h-9 bg-black hover:bg-black/80 text-white shadow-sm transition-all" variant="default">
                 <Plus className="mr-1.5 h-3.5 w-3.5" /> {t("home.newDeal")}
               </Button>
             </Link>

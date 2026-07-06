@@ -305,7 +305,7 @@ export default function InvoicesPage() {
                     <SelectContent>
                       {deals?.map((deal) => (
                         <SelectItem key={deal.id} value={deal.id}>
-                          {deal.title} â€” {deal.brand?.name || deal.brands?.name || "Unknown"}
+                          {deal.title} â€?{deal.brand?.name || deal.brands?.name || "Unknown"}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -347,7 +347,7 @@ export default function InvoicesPage() {
                   Cancel
                 </Button>
                 <Button
-                  className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600"
+                  className="bg-black hover:bg-black/80 text-white"
                   onClick={handleCreateInvoice}
                   disabled={createInvoice.isPending}
                 >
@@ -431,7 +431,7 @@ export default function InvoicesPage() {
                       <div className="min-w-0">
                         <p className="font-semibold text-sm truncate group-hover:text-teal-700 transition-colors">{invoice.invoice_number}</p>
                         <p className="text-xs text-muted-foreground truncate">
-                          {invoice.deals?.title || "Deal"} â€¢ {invoice.deals?.brands?.name || "Brand"}
+                          {invoice.deals?.title || "Deal"} â€?{invoice.deals?.brands?.name || "Brand"}
                         </p>
                       </div>
                     </div>
@@ -480,7 +480,7 @@ export default function InvoicesPage() {
                             size="sm"
                             onClick={() => handleSend(invoice.id)}
                             disabled={sendingId === invoice.id}
-                            className="h-7 bg-teal-600 hover:bg-teal-700 text-white px-2"
+                            className="h-7 bg-black hover:bg-black/80 text-white text-white px-2"
                           >
                             {sendingId === invoice.id ? (
                               <Loader2 className="mr-1 h-3 w-3 animate-spin" />
@@ -516,7 +516,7 @@ export default function InvoicesPage() {
             {previewInvoice?.pdf_url ? (
               <Button
                 onClick={() => window.open(previewInvoice.pdf_url!, "_blank")}
-                className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600"
+                className="bg-black hover:bg-black/80 text-white"
               >
                 <Download className="mr-2 h-4 w-4" /> Download PDF
               </Button>
@@ -526,7 +526,7 @@ export default function InvoicesPage() {
                   setPreviewInvoice(null)
                   toast.info("Send the invoice first to generate a PDF")
                 }}
-                className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600"
+                className="bg-black hover:bg-black/80 text-white"
               >
                 <Download className="mr-2 h-4 w-4" /> Generate PDF
               </Button>

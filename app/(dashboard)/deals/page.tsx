@@ -264,7 +264,7 @@ export default function DealsPage() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                <Button className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600" onClick={handleCreateDeal} disabled={createMutation.isPending}>
+                <Button className="bg-black hover:bg-black/80 text-white" onClick={handleCreateDeal} disabled={createMutation.isPending}>
                   {createMutation.isPending ? "Creating..." : "Create Deal"}
                 </Button>
               </DialogFooter>
@@ -407,7 +407,7 @@ export default function DealsPage() {
               {hasFilters ? "Try adjusting your filters." : "Upload a contract or create a deal to get started."}
             </p>
             {!hasFilters && (
-              <Button onClick={() => setIsDialogOpen(true)} className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 shadow-md">
+              <Button onClick={() => setIsDialogOpen(true)} className="bg-black hover:bg-black/80 text-white shadow-md">
                 <Plus className="mr-2 h-4 w-4" /> Create Deal
               </Button>
             )}
@@ -459,7 +459,7 @@ export default function DealsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-            <Button className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600" onClick={handleSaveEdit} disabled={updateMutation.isPending}>
+            <Button className="bg-black hover:bg-black/80 text-white" onClick={handleSaveEdit} disabled={updateMutation.isPending}>
               {updateMutation.isPending ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>

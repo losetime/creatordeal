@@ -238,7 +238,7 @@ export default function RatesPage() {
               />
             </div>
             <Button
-              className="bg-teal-600 hover:bg-teal-700 h-9"
+              className="bg-black hover:bg-black/80 text-white h-9"
               onClick={handleSaveRate}
               disabled={createRate.isPending}
             >
@@ -259,7 +259,7 @@ export default function RatesPage() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-base">
-                {platforms.find((p) => p.value === platform)?.label} â€” {tier.label} Tier ({tier.range})
+                {platforms.find((p) => p.value === platform)?.label} â€?{tier.label} Tier ({tier.range})
               </CardTitle>
               <CardDescription className="text-xs">
                 {getDataSourceLabel()}
@@ -317,7 +317,7 @@ export default function RatesPage() {
                   <span className="w-12 text-xs text-muted-foreground">Range</span>
                   <div className="flex-1 flex items-center gap-2 text-xs text-muted-foreground">
                     <span>{formatCurrency(marketP25)}</span>
-                    <span className="text-slate-300">â€”</span>
+                    <span className="text-slate-300">â€?/span>
                     <span>{formatCurrency(marketP75)}</span>
                     <Badge variant="secondary" className="text-[10px] ml-1">
                       25th-75th percentile
@@ -368,7 +368,7 @@ export default function RatesPage() {
                     <span className="text-xs text-muted-foreground capitalize">{entry.deliverable_type}</span>
                     {entry.deals && (
                       <span className="text-xs text-muted-foreground">
-                        â€” {entry.deals.title}
+                        â€?{entry.deals.title}
                         {entry.deals.brands?.name && ` Â· ${entry.deals.brands.name}`}
                       </span>
                     )}
