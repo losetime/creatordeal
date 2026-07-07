@@ -269,10 +269,10 @@ export default function ContractsPage() {
 
       {/* Contract Detail Dialog */}
       <Dialog open={showDetail} onOpenChange={setShowDetail}>
-        <DialogContent className="max-w-4xl w-[80vw] max-h-[85vh] overflow-y-auto">
-          <DialogHeader className="flex flex-row items-start justify-between pr-8">
+        <DialogContent className="max-w-4xl w-[80vw] max-h-[85vh] overflow-y-auto p-8">
+          <DialogHeader className="flex flex-row items-start justify-between pr-8 pb-2">
             <div>
-              <DialogTitle className="flex items-center gap-2">
+              <DialogTitle className="flex items-center gap-2 mb-1">
                 <FileText className="h-5 w-5 text-teal-600" />
                 {selectedContract?.file_name}
               </DialogTitle>
