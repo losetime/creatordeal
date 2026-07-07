@@ -27,6 +27,46 @@ export const contractsRouter = router({
       return data
     }),
 
+  getFileUrl: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const { data: contract, error } = await ctx.supabase
+        .from("contracts")
+        .select("file_name")
+        .eq("id", input.id)
+        .single()
+
+      if (error || !contract) {
+        throw new Error("Contract not found")
+      }
+
+      // Extract storage path from file_url or construct it
+      // For now, we'll use the contract's file_name to generate a new signed URL
+      // The storage path format is: userId/temp/timestamp-filename or userId/dealId/timestamp-filename
+      const { data: urlData, error: urlError } = await supabase.storage
+        .from("contracts")
+        .list("", { search: contract.file_name })
+
+      if (urlError || !urlData || urlData.length === 0) {
+        // Fallback: try to find any file matching the name
+        const { data: files } = await supabase.storage.from("contracts").list()
+        const matchingFile = files?.find(f => f.name.includes(contract.file_name))
+        if (!matchingFile) {
+          throw new Error("File not found in storage")
+        }
+        const { data: newUrl } = await supabase.storage
+          .from("contracts")
+          .createSignedUrl(matchingFile.name, 3600)
+        return { url: newUrl?.signedUrl || "" }
+      }
+
+      const { data: newUrl } = await supabase.storage
+        .from("contracts")
+        .createSignedUrl(urlData[0].name, 3600)
+
+      return { url: newUrl?.signedUrl || "" }
+    }),
+
   create: protectedProcedure
     .input(
       z.object({

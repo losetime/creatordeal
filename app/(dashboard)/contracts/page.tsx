@@ -61,9 +61,25 @@ export default function ContractsPage() {
   const risks = selectedContract?.risks
   const usageRights = selectedContract?.usage_rights
 
+  const getFileUrlMutation = trpc.contracts.getFileUrl.useMutation()
+
   const handleViewContract = (contractId: string) => {
     setSelectedContractId(contractId)
     setShowDetail(true)
+  }
+
+  const handleViewFile = async () => {
+    if (!selectedContract) return
+    try {
+      const result = await getFileUrlMutation.mutateAsync({ id: selectedContract.id })
+      if (result.url) {
+        window.open(result.url, "_blank")
+      } else {
+        toast.error("File not found")
+      }
+    } catch (err) {
+      toast.error("Failed to get file URL")
+    }
   }
 
   return (
@@ -286,10 +302,11 @@ export default function ContractsPage() {
               <Button
                 className="bg-black hover:bg-black/80 text-white"
                 size="sm"
-                onClick={() => window.open(selectedContract.file_url!, "_blank")}
+                onClick={handleViewFile}
+                disabled={getFileUrlMutation.isPending}
               >
                 <Eye className="mr-1.5 h-4 w-4" />
-                View File
+                {getFileUrlMutation.isPending ? "Loading..." : "View File"}
               </Button>
             )}
           </DialogHeader>
