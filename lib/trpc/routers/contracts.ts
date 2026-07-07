@@ -40,27 +40,37 @@ export const contractsRouter = router({
         throw new Error("Contract not found")
       }
 
-      // List all files and find the matching one
-      const { data: files, error: listError } = await ctx.supabase.storage.from("contracts").list("", { recursive: true })
+      // Search user's folder recursively for matching file
+      const userId = ctx.user.id
+      const { data: folders } = await ctx.supabase.storage.from("contracts").list(userId, { limit: 100 })
 
-      if (listError || !files) {
-        throw new Error("Could not list storage files")
+      if (!folders) {
+        throw new Error("Could not list storage")
       }
 
-      const matchingFile = files.find(f => f.name.includes(contract.file_name))
-      if (!matchingFile) {
-        throw new Error("File not found in storage")
+      // Check each subfolder
+      for (const folder of folders) {
+        const { data: files } = await ctx.supabase.storage.from("contracts").list(`${userId}/${folder.name}`, { limit: 100 })
+        if (files) {
+          const match = files.find(f => f.name.includes(contract.file_name) || contract.file_name.includes(f.name.replace(/^\d+-/, '')))
+          if (match) {
+            const fullPath = `${userId}/${folder.name}/${match.name}`
+            const { data: newUrl } = await ctx.supabase.storage.from("contracts").createSignedUrl(fullPath, 3600)
+            return { url: newUrl?.signedUrl || "" }
+          }
+        }
       }
 
-      const { data: newUrl, error: urlError } = await ctx.supabase.storage
-        .from("contracts")
-        .createSignedUrl(matchingFile.name, 3600)
-
-      if (urlError) {
-        throw new Error("Could not generate signed URL")
+      // Fallback: try to create URL with a constructed path
+      const { data: allFiles } = await ctx.supabase.storage.from("contracts").list("", { limit: 500, search: contract.file_name.split(".")[0] })
+      if (allFiles && allFiles.length > 0) {
+        const match = allFiles[0]
+        // Reconstruct full path from metadata
+        const { data: newUrl } = await ctx.supabase.storage.from("contracts").createSignedUrl(match.fullPath || match.name, 3600)
+        return { url: newUrl?.signedUrl || "" }
       }
 
-      return { url: newUrl?.signedUrl || "" }
+      throw new Error("File not found in storage")
     }),
 
   create: protectedProcedure
