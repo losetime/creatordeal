@@ -71,34 +71,30 @@ export default function ContractsPage() {
 
   const handleViewFile = async () => {
     if (!selectedContract) return
-    try {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
 
-      const ext = selectedContract.file_name.split(".").pop() || "txt"
-      const { data: folders } = await supabase.storage.from("contracts").list(user.id, { limit: 100 })
+    const ext = selectedContract.file_name.split(".").pop() || "txt"
+    const { data: folders } = await supabase.storage.from("contracts").list(user.id, { limit: 100 })
 
-      if (folders) {
-        for (const folder of folders) {
-          const { data: files } = await supabase.storage.from("contracts").list(`${user.id}/${folder.name}`, { limit: 100 })
-          if (files) {
-            const match = files.find(f => f.name.endsWith(`.${ext}`))
-            if (match) {
-              const fullPath = `${user.id}/${folder.name}/${match.name}`
-              const { data } = await supabase.storage.from("contracts").createSignedUrl(fullPath, 3600)
-              if (data?.signedUrl) {
-                window.open(data.signedUrl, "_blank")
-                return
-              }
+    if (folders) {
+      for (const folder of folders) {
+        const { data: files } = await supabase.storage.from("contracts").list(`${user.id}/${folder.name}`, { limit: 100 })
+        if (files) {
+          const match = files.find(f => f.name.endsWith(`.${ext}`))
+          if (match) {
+            const fullPath = `${user.id}/${folder.name}/${match.name}`
+            const { data } = await supabase.storage.from("contracts").createSignedUrl(fullPath, 3600)
+            if (data?.signedUrl) {
+              window.open(data.signedUrl, "_blank")
+              return
             }
           }
         }
       }
-      toast.error("File not found")
-    } catch (err) {
-      toast.error("Failed to get file URL")
     }
+    toast.error("File not found")
   }
 
   return (
