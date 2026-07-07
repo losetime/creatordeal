@@ -261,6 +261,14 @@ export default function DealsPage() {
                     <Input type="date" value={newDeal.payment_deadline} onChange={(e) => setNewDeal({ ...newDeal, payment_deadline: e.target.value })} />
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <Label>Payment Terms</Label>
+                  <Input placeholder="Net 30" value={newDeal.payment_terms} onChange={(e) => setNewDeal({ ...newDeal, payment_terms: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Notes</Label>
+                  <Input placeholder="Additional notes..." value={newDeal.notes} onChange={(e) => setNewDeal({ ...newDeal, notes: e.target.value })} />
+                </div>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
