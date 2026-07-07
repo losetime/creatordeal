@@ -269,17 +269,30 @@ export default function ContractsPage() {
 
       {/* Contract Detail Dialog */}
       <Dialog open={showDetail} onOpenChange={setShowDetail}>
-        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-teal-600" />
-              {selectedContract?.file_name}
-            </DialogTitle>
-            <DialogDescription>
-              {selectedContract?.deals?.brands?.name || "Unknown brand"}
-              {selectedContract?.deals?.title ? ` • ${selectedContract.deals.title}` : ""}
-              {selectedContract ? ` • ${formatDate(selectedContract.created_at)}` : ""}
-            </DialogDescription>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader className="flex flex-row items-start justify-between pr-8">
+            <div>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-teal-600" />
+                {selectedContract?.file_name}
+              </DialogTitle>
+              <DialogDescription>
+                {selectedContract?.deals?.brands?.name || "Unknown brand"}
+                {selectedContract?.deals?.title ? ` • ${selectedContract.deals.title}` : ""}
+                {selectedContract ? ` • ${formatDate(selectedContract.created_at)}` : ""}
+              </DialogDescription>
+            </div>
+            {selectedContract?.file_url && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(selectedContract.file_url!, "_blank")}
+                className="flex-shrink-0"
+              >
+                <Eye className="mr-1.5 h-4 w-4" />
+                View File
+              </Button>
+            )}
           </DialogHeader>
 
           <div className="space-y-4 mt-4">
@@ -340,18 +353,6 @@ export default function ContractsPage() {
               </div>
             )}
 
-            {/* View File Button */}
-            {selectedContract?.file_url && (
-              <div className="pt-2">
-                <Button
-                  variant="outline"
-                  onClick={() => window.open(selectedContract.file_url!, "_blank")}
-                >
-                  <Eye className="mr-2 h-4 w-4" />
-                  View File
-                </Button>
-              </div>
-            )}
           </div>
         </DialogContent>
       </Dialog>
