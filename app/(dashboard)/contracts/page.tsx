@@ -76,22 +76,34 @@ export default function ContractsPage() {
     if (!user) return
 
     const ext = selectedContract.file_name.split(".").pop() || "txt"
-    const { data: folders } = await supabase.storage.from("contracts").list(user.id, { limit: 100 })
+    // Search in contracts/contracts/userId/temp/ path
+    const { data: files } = await supabase.storage.from("contracts").list(`contracts/${user.id}/temp`, { limit: 100 })
 
     let fileUrl = ""
 
-    if (folders) {
-      for (const folder of folders) {
-        const { data: files } = await supabase.storage.from("contracts").list(`${user.id}/${folder.name}`, { limit: 100 })
-        if (files) {
-          const match = files.find(f => f.name.endsWith(`.${ext}`))
-          if (match) {
-            const fullPath = `${user.id}/${folder.name}/${match.name}`
-            const { data } = await supabase.storage.from("contracts").createSignedUrl(fullPath, 3600)
-            if (data?.signedUrl) {
-              fileUrl = data.signedUrl
-              break
-            }
+    if (files) {
+      const match = files.find(f => f.name.endsWith(`.${ext}`))
+      if (match) {
+        const fullPath = `contracts/${user.id}/temp/${match.name}`
+        const { data } = await supabase.storage.from("contracts").createSignedUrl(fullPath, 3600)
+        if (data?.signedUrl) {
+          fileUrl = data.signedUrl
+        }
+      }
+    }
+
+    if (fileUrl) {
+      const a = document.createElement("a")
+      a.href = fileUrl
+      a.target = "_blank"
+      a.download = selectedContract.file_name
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+    } else {
+      toast.error("File not found")
+    }
+  }
           }
         }
       }
