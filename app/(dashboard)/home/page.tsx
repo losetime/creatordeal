@@ -50,13 +50,18 @@ export default function DashboardPage() {
 
   const upcomingDeadlines = useMemo(() => {
     if (!deals) return []
+    const now = new Date()
     return deals
-      .filter((deal) => deal.content_deadline)
+      .filter((deal) => {
+        if (!deal.content_deadline) return false
+        const deadline = new Date(deal.content_deadline)
+        const diffDays = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+        return diffDays >= 0 && diffDays <= 30 // 只显示未来30天内的交易
+      })
       .sort((a, b) => new Date(a.content_deadline!).getTime() - new Date(b.content_deadline!).getTime())
       .slice(0, 5)
       .map((deal) => {
         const deadline = new Date(deal.content_deadline!)
-        const now = new Date()
         const diffDays = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
         const urgent = diffDays <= 2
         return {
@@ -209,9 +214,9 @@ export default function DashboardPage() {
       trend: "up" as const,
       trendValue: revenueThisMonth.thisMonth,
       icon: DollarSign,
-      color: "#0d9488",
-      bgColor: "bg-teal-50",
-      iconColor: "text-teal-600",
+      color: "#059669",
+      bgColor: "bg-emerald-50",
+      iconColor: "text-emerald-600",
     },
     {
       title: t("home.pendingPayments"),
@@ -221,9 +226,9 @@ export default function DashboardPage() {
       trend: "warning" as const,
       trendValue: overdueInvoiceCount,
       icon: Clock,
-      color: "#0d9488",
-      bgColor: "bg-teal-50",
-      iconColor: "text-teal-600",
+      color: "#dc2626",
+      bgColor: "bg-rose-50",
+      iconColor: "text-rose-600",
     },
     {
       title: t("home.totalDeals"),
@@ -233,9 +238,9 @@ export default function DashboardPage() {
       trend: "up" as const,
       trendValue: 0,
       icon: TrendingUp,
-      color: "#0d9488",
-      bgColor: "bg-teal-50",
-      iconColor: "text-teal-600",
+      color: "#475569",
+      bgColor: "bg-slate-100",
+      iconColor: "text-slate-600",
     },
   ]
 
