@@ -269,7 +269,7 @@ export default function ContractsPage() {
 
       {/* Contract Detail Dialog */}
       <Dialog open={showDetail} onOpenChange={setShowDetail}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl w-[95vw] max-h-[85vh] overflow-y-auto">
           <DialogHeader className="flex flex-row items-start justify-between pr-8">
             <div>
               <DialogTitle className="flex items-center gap-2">
