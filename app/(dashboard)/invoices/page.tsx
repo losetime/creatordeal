@@ -154,6 +154,8 @@ export default function InvoicesPage() {
   const [newCurrency, setNewCurrency] = useState("USD")
   const [newDueDate, setNewDueDate] = useState("")
   const [newNotes, setNewNotes] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [statusFilter, setStatusFilter] = useState("")
 
   const utils = trpc.useUtils()
 
@@ -186,7 +188,20 @@ export default function InvoicesPage() {
     },
   })
 
-  const invoiceList = invoices ?? []
+  const invoiceList = (invoices ?? []).filter((inv) => {
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      const matchesSearch = 
+        inv.invoice_number?.toLowerCase().includes(query) ||
+        inv.deals?.title?.toLowerCase().includes(query) ||
+        inv.deals?.brands?.name?.toLowerCase().includes(query)
+      if (!matchesSearch) return false
+    }
+    if (statusFilter && inv.status !== statusFilter) {
+      return false
+    }
+    return true
+  })
 
   const totalPending = invoiceList
     .filter((inv) => !["paid", "cancelled"].includes(inv.status))
@@ -362,7 +377,7 @@ export default function InvoicesPage() {
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="relative overflow-hidden shadow-card border-0">
-          <div className="absolute top-0 left-0 h-full w-1 bg-gradient-to-b from-amber-500 to-orange-500" />
+          <div className="absolute top-0 left-0 h-full w-1" style={{ backgroundColor: "#f59e0b" }} />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Pending</CardTitle>
             <div className="rounded-lg bg-amber-50 p-2">
@@ -377,7 +392,7 @@ export default function InvoicesPage() {
           </CardContent>
         </Card>
         <Card className="relative overflow-hidden shadow-card border-0">
-          <div className="absolute top-0 left-0 h-full w-1 bg-gradient-to-b from-emerald-500 to-teal-500" />
+          <div className="absolute top-0 left-0 h-full w-1" style={{ backgroundColor: "#059669" }} />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Paid</CardTitle>
             <div className="rounded-lg bg-emerald-50 p-2">
@@ -392,6 +407,41 @@ export default function InvoicesPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Search and Filter */}
+      <Card className="shadow-card border-0">
+        <CardContent className="p-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search invoices..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 h-8 bg-slate-50"
+              />
+            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="rounded border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs h-8"
+            >
+              <option value="">All Status</option>
+              <option value="draft">Draft</option>
+              <option value="sent">Sent</option>
+              <option value="viewed">Viewed</option>
+              <option value="paid">Paid</option>
+              <option value="overdue">Overdue</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            {(searchQuery || statusFilter) && (
+              <Button variant="ghost" size="sm" onClick={() => { setSearchQuery(""); setStatusFilter(""); }} className="text-rose-600 hover:bg-rose-50 h-8 px-2 text-xs">
+                <X className="mr-1 h-3 w-3" /> Clear
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Invoices List */}
       <Card className="shadow-card overflow-hidden border-0">
