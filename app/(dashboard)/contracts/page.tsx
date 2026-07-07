@@ -269,7 +269,7 @@ export default function ContractsPage() {
 
       {/* Contract Detail Dialog */}
       <Dialog open={showDetail} onOpenChange={setShowDetail}>
-        <DialogContent className="max-w-6xl w-[95vw] max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl w-[80vw] max-h-[85vh] overflow-y-auto">
           <DialogHeader className="flex flex-row items-start justify-between pr-8">
             <div>
               <DialogTitle className="flex items-center gap-2">
@@ -284,10 +284,9 @@ export default function ContractsPage() {
             </div>
             {selectedContract?.file_url && (
               <Button
-                variant="outline"
+                className="bg-black hover:bg-black/80 text-white"
                 size="sm"
                 onClick={() => window.open(selectedContract.file_url!, "_blank")}
-                className="flex-shrink-0"
               >
                 <Eye className="mr-1.5 h-4 w-4" />
                 View File
