@@ -70,7 +70,7 @@ export default function LoginPage() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
               <Zap className="h-6 w-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-white">CreatorDeal</span>
+            <span className="text-2xl font-bold text-foreground">CreatorDeal</span>
           </Link>
         </div>
         <Card className="border-white/10 bg-white/5 backdrop-blur-sm">
