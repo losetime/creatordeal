@@ -78,6 +78,8 @@ export default function ContractsPage() {
     const ext = selectedContract.file_name.split(".").pop() || "txt"
     const { data: folders } = await supabase.storage.from("contracts").list(user.id, { limit: 100 })
 
+    let fileUrl = ""
+
     if (folders) {
       for (const folder of folders) {
         const { data: files } = await supabase.storage.from("contracts").list(`${user.id}/${folder.name}`, { limit: 100 })
@@ -87,14 +89,20 @@ export default function ContractsPage() {
             const fullPath = `${user.id}/${folder.name}/${match.name}`
             const { data } = await supabase.storage.from("contracts").createSignedUrl(fullPath, 3600)
             if (data?.signedUrl) {
-              window.open(data.signedUrl, "_blank")
-              return
+              fileUrl = data.signedUrl
+              break
             }
           }
         }
       }
     }
-    toast.error("File not found")
+
+    if (fileUrl) {
+      setShowDetail(false)
+      setTimeout(() => window.open(fileUrl, "_blank"), 100)
+    } else {
+      toast.error("File not found")
+    }
   }
 
   return (
