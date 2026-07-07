@@ -98,8 +98,14 @@ export default function ContractsPage() {
     }
 
     if (fileUrl) {
-      setShowDetail(false)
-      setTimeout(() => window.open(fileUrl, "_blank"), 100)
+      // Create a hidden link and trigger download
+      const a = document.createElement("a")
+      a.href = fileUrl
+      a.target = "_blank"
+      a.download = selectedContract.file_name
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
     } else {
       toast.error("File not found")
     }
