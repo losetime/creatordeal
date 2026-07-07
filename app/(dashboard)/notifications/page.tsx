@@ -87,7 +87,7 @@ export default function NotificationsPage() {
             <Skeleton key={i} className="h-7 w-16" />
           ))}
         </div>
-        <Card>
+      <Card className="py-0">
           <CardContent className="p-0">
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex items-start gap-4 p-4 border-b border-border last:border-0">
