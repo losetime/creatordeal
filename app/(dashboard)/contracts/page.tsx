@@ -104,24 +104,6 @@ export default function ContractsPage() {
       toast.error("File not found")
     }
   }
-          }
-        }
-      }
-    }
-
-    if (fileUrl) {
-      // Create a hidden link and trigger download
-      const a = document.createElement("a")
-      a.href = fileUrl
-      a.target = "_blank"
-      a.download = selectedContract.file_name
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-    } else {
-      toast.error("File not found")
-    }
-  }
 
   return (
     <div className="space-y-6 animate-fade-in">
