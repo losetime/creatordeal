@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { trpc } from "@/lib/trpc/client"
+import { createClient } from "@/lib/supabase/client"
 import { formatDate } from "@/lib/utils"
 import { useLocale } from "@/hooks/use-locale"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -71,12 +72,31 @@ export default function ContractsPage() {
   const handleViewFile = async () => {
     if (!selectedContract) return
     try {
-      const result = await getFileUrlMutation.mutateAsync({ id: selectedContract.id })
-      if (result.url) {
-        window.open(result.url, "_blank")
-      } else {
-        toast.error("File not found")
+      // Use client-side Supabase to get fresh signed URL
+      const supabase = createClient()
+      const userId = supabase.auth.getUser().then(r => r.data.user?.id)
+      const uid = (await userId) || ""
+
+      // Search for the file in user's folder
+      const { data: folders } = await supabase.storage.from("contracts").list(uid, { limit: 100 })
+
+      if (folders) {
+        for (const folder of folders) {
+          const { data: files } = await supabase.storage.from("contracts").list(`${uid}/${folder.name}`, { limit: 100 })
+          if (files) {
+            const match = files.find(f => f.name.includes(selectedContract.file_name) || selectedContract.file_name.includes(f.name.replace(/^\d+-/, '')))
+            if (match) {
+              const fullPath = `${uid}/${folder.name}/${match.name}`
+              const { data } = await supabase.storage.from("contracts").createSignedUrl(fullPath, 3600)
+              if (data?.signedUrl) {
+                window.open(data.signedUrl, "_blank")
+                return
+              }
+            }
+          }
+        }
       }
+      toast.error("File not found")
     } catch (err) {
       toast.error("Failed to get file URL")
     }
