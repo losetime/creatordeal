@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { toast } from "sonner"
-import { Plus, FileText, Send, CheckCircle, Clock, AlertCircle, Download, Eye, Receipt, Sparkles, Trash2, Loader2 } from "lucide-react"
+import { Plus, FileText, Send, CheckCircle, Clock, AlertCircle, Download, Eye, Receipt, Sparkles, Trash2, Loader2, Search, X } from "lucide-react"
 import { trpc } from "@/lib/trpc/client"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { useLocale } from "@/hooks/use-locale"
