@@ -40,7 +40,7 @@ const languages = [
   { value: "es", label: "Español" },
   { value: "fr", label: "Français" },
   { value: "de", label: "Deutsch" },
-  { value: "ja", label: "日本語" },
+  { value: "ja", label: "日本�? },
 ]
 
 const currencies = [
@@ -506,7 +506,29 @@ export default function SettingsPage() {
                             {invoice.status}
                           </Badge>
                           <span className="text-sm font-medium">{formatCurrency(invoice.amount)}</span>
-                          <Button variant="ghost" size="sm" onClick={() => toast.success("Invoice downloaded", { description: `${invoice.invoice_number}.pdf` })}>
+                          <Button variant="ghost" size="sm" onClick={async () => {
+                            try {
+                              const res = await fetch("/api/invoices/download", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ invoice_id: invoice.id }),
+                              });
+                              if (!res.ok) {
+                                const data = await res.json();
+                                toast.error("Failed to download", { description: data.error });
+                                return;
+                              }
+                              const blob = await res.blob();
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement("a");
+                              a.href = url;
+                              a.download = `${invoice.invoice_number}.pdf`;
+                              a.click();
+                              URL.revokeObjectURL(url);
+                            } catch {
+                              toast.error("Failed to download invoice");
+                            }
+                          }}>
                             <Download className="h-4 w-4" />
                           </Button>
                         </div>
@@ -537,7 +559,7 @@ export default function SettingsPage() {
                   <div className="rounded-lg p-4 bg-slate-50">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-semibold">{planLabel} Plan — $9.90/mo</p>
+                        <p className="font-semibold">{planLabel} Plan �?$9.90/mo</p>
                         <p className="text-sm text-muted-foreground mt-1">
                           {profile?.plan === "pro" || profile?.plan === "team"
                             ? "Unlimited deals, invoicing, AI contract scanner, rate benchmarks, priority support"
@@ -557,7 +579,7 @@ export default function SettingsPage() {
                       <div className="flex gap-2">
                         {profile?.plan !== "pro" && (
                           <>
-                            <Button onClick={handleUpgrade}>Subscribe — $9.90/mo</Button>
+                            <Button onClick={handleUpgrade}>Subscribe �?$9.90/mo</Button>
                             <Button variant="outline" onClick={handleShowConfirmDialog}>
                               I&apos;ve Paid
                             </Button>
@@ -614,9 +636,9 @@ export default function SettingsPage() {
                             <CreditCard className="h-4 w-4 text-violet-600" />
                           </div>
                           <div>
-                            <p className="text-sm font-medium">Creator Club — Monthly</p>
+                            <p className="text-sm font-medium">Creator Club �?Monthly</p>
                             <p className="text-xs text-muted-foreground">
-                              {profile.payment_submitted_at ? formatDate(profile.payment_submitted_at) : "—"}
+                              {profile.payment_submitted_at ? formatDate(profile.payment_submitted_at) : "�?}
                             </p>
                           </div>
                         </div>
@@ -810,7 +832,7 @@ export default function SettingsPage() {
                           onChange={() => toggleNotification("pushEnabled")}
                           className="sr-only peer"
                         />
-                        <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
+                        <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
                       </label>
                     </div>
 
@@ -827,7 +849,7 @@ export default function SettingsPage() {
                             onChange={() => toggleNotification("pushDeadline")}
                             className="sr-only peer"
                           />
-                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
+                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
                         </label>
                       </div>
 
@@ -843,7 +865,7 @@ export default function SettingsPage() {
                             onChange={() => toggleNotification("pushPayment")}
                             className="sr-only peer"
                           />
-                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
+                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
                         </label>
                       </div>
 
@@ -859,7 +881,7 @@ export default function SettingsPage() {
                             onChange={() => toggleNotification("pushDealUpdate")}
                             className="sr-only peer"
                           />
-                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
+                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
                         </label>
                       </div>
                     </div>

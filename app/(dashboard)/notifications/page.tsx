@@ -128,7 +128,7 @@ export default function NotificationsPage() {
             variant="secondary"
             onClick={() => markAllAsReadMutation.mutate()}
             disabled={unreadCount === 0 || markAllAsReadMutation.isPending}
-            className="bg-white/15 hover:bg-white/25 text-white border-0 h-8"
+            className="bg-black hover:bg-black/80 text-white border-0 h-8"
             size="sm"
           >
             <CheckCircle className="mr-1.5 h-3.5 w-3.5" /> Mark All Read
@@ -158,7 +158,7 @@ export default function NotificationsPage() {
         )}
       </div>
 
-      <Card className="notifications-list">
+      <div className="flex flex-col gap-6 border border-border bg-card text-card-foreground">
         <CardContent className="p-0">
           {filteredNotifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
@@ -242,7 +242,7 @@ export default function NotificationsPage() {
             </div>
           )}
         </CardContent>
-      </Card>
+      </div>
     </div>
   )
 }
