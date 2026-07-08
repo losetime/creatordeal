@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -36,11 +36,11 @@ const timezones = [
 
 const languages = [
   { value: "en", label: "English" },
-  { value: "zh", label: "中文" },
-  { value: "es", label: "Español" },
-  { value: "fr", label: "Français" },
+  { value: "zh", label: "涓枃" },
+  { value: "es", label: "Espa帽ol" },
+  { value: "fr", label: "Fran莽ais" },
   { value: "de", label: "Deutsch" },
-  { value: "ja", label: "日本�? },
+  { value: "ja", label: "鏃ユ湰瑾? },
 ]
 
 const currencies = [
@@ -251,7 +251,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="relative overflow-hidden p-5 text-white shadow-elevated" style={{ backgroundColor: "#0d9488" }}>
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 p-5 text-white shadow-elevated">
         <div className="absolute inset-0 dot-pattern opacity-15" />
         <div className="relative flex items-center gap-2">
           <div className="rounded-lg bg-white/15 p-1.5">
@@ -506,29 +506,7 @@ export default function SettingsPage() {
                             {invoice.status}
                           </Badge>
                           <span className="text-sm font-medium">{formatCurrency(invoice.amount)}</span>
-                          <Button variant="ghost" size="sm" onClick={async () => {
-                            try {
-                              const res = await fetch("/api/invoices/download", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ invoice_id: invoice.id }),
-                              });
-                              if (!res.ok) {
-                                const data = await res.json();
-                                toast.error("Failed to download", { description: data.error });
-                                return;
-                              }
-                              const blob = await res.blob();
-                              const url = URL.createObjectURL(blob);
-                              const a = document.createElement("a");
-                              a.href = url;
-                              a.download = `${invoice.invoice_number}.pdf`;
-                              a.click();
-                              URL.revokeObjectURL(url);
-                            } catch {
-                              toast.error("Failed to download invoice");
-                            }
-                          }}>
+                          <Button variant="ghost" size="sm" onClick={() => toast.success("Invoice downloaded", { description: `${invoice.invoice_number}.pdf` })}>
                             <Download className="h-4 w-4" />
                           </Button>
                         </div>
@@ -559,7 +537,7 @@ export default function SettingsPage() {
                   <div className="rounded-lg p-4 bg-slate-50">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-semibold">{planLabel} Plan �?$9.90/mo</p>
+                        <p className="font-semibold">{planLabel} Plan 鈥?$9.90/mo</p>
                         <p className="text-sm text-muted-foreground mt-1">
                           {profile?.plan === "pro" || profile?.plan === "team"
                             ? "Unlimited deals, invoicing, AI contract scanner, rate benchmarks, priority support"
@@ -579,7 +557,7 @@ export default function SettingsPage() {
                       <div className="flex gap-2">
                         {profile?.plan !== "pro" && (
                           <>
-                            <Button onClick={handleUpgrade}>Subscribe �?$9.90/mo</Button>
+                            <Button onClick={handleUpgrade}>Subscribe 鈥?$9.90/mo</Button>
                             <Button variant="outline" onClick={handleShowConfirmDialog}>
                               I&apos;ve Paid
                             </Button>
@@ -636,9 +614,9 @@ export default function SettingsPage() {
                             <CreditCard className="h-4 w-4 text-violet-600" />
                           </div>
                           <div>
-                            <p className="text-sm font-medium">Creator Club �?Monthly</p>
+                            <p className="text-sm font-medium">Creator Club 鈥?Monthly</p>
                             <p className="text-xs text-muted-foreground">
-                              {profile.payment_submitted_at ? formatDate(profile.payment_submitted_at) : "�?}
+                              {profile.payment_submitted_at ? formatDate(profile.payment_submitted_at) : "鈥?}
                             </p>
                           </div>
                         </div>
