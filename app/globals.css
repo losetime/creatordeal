@@ -88,6 +88,10 @@ body {
 }
 
 @layer utilities {
+  .notifications-list [data-slot="card"] {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
   .text-balance {
     text-wrap: balance;
   }

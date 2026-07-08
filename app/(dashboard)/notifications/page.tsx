@@ -87,7 +87,7 @@ export default function NotificationsPage() {
             <Skeleton key={i} className="h-7 w-16" />
           ))}
         </div>
-      <div className="border border-foreground bg-card">
+      <div className="flex flex-col gap-6 border border-foreground bg-card py-0 text-card-foreground">
           <CardContent className="p-0">
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex items-start gap-4 p-4 border-b border-border last:border-0">
@@ -104,7 +104,7 @@ export default function NotificationsPage() {
               </div>
             ))}
           </CardContent>
-        </Card>
+        </div>
       </div>
     )
   }
@@ -158,7 +158,7 @@ export default function NotificationsPage() {
         )}
       </div>
 
-      <Card>
+      <Card className="notifications-list">
         <CardContent className="p-0">
           {filteredNotifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
