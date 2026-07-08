@@ -82,8 +82,20 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
-/* Force all rounded corners to 0 */
-[class*="rounded"] {
+/* Remove rounded corners on specific elements, keep switch rounded */
+[data-slot="card"],
+[data-slot="dialog-content"],
+button:not(.peer),
+input,
+select,
+.badge-pill,
+[data-slot="select-trigger"],
+[data-slot="select-content"],
+[data-slot="dropdown-menu-content"],
+[data-slot="sidebar-menu-button"],
+[class*="rounded-md"]:not(.peer),
+[class*="rounded-lg"]:not(.peer),
+[class*="rounded-xl"]:not(.peer) {
   border-radius: 0 !important;
 }
 

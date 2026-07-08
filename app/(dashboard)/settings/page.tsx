@@ -350,7 +350,7 @@ export default function SettingsPage() {
                     </div>
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="full_name" className="text-sm font-medium">{t("settings.fullName")}</Label>
+                        <Label htmlFor="full_name" className="text-sm font-medium mb-2 block">{t("settings.fullName")}</Label>
                         {isEditingName ? (
                           <div className="flex gap-2">
                             <Input
@@ -380,7 +380,7 @@ export default function SettingsPage() {
                         )}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="email" className="text-sm font-medium">{t("settings.email")}</Label>
+                        <Label htmlFor="email" className="text-sm font-medium mb-2 block">{t("settings.email")}</Label>
                         <Input
                           id="email"
                           type="email"
@@ -439,7 +439,7 @@ export default function SettingsPage() {
                       </div>
                       {profile?.created_at && (
                         <div className="space-y-2">
-                          <Label className="text-sm font-medium">{t("settings.memberSince")}</Label>
+                          <Label className="text-sm font-medium mb-2 block">{t("settings.memberSince")}</Label>
                           <div className="flex h-9 w-full items-center rounded-md border border-input bg-slate-50 px-3 py-1 text-sm text-muted-foreground">
                             {formatDate(profile.created_at)}
                           </div>
@@ -810,7 +810,7 @@ export default function SettingsPage() {
                           onChange={() => toggleNotification("pushEnabled")}
                           className="sr-only peer"
                         />
-                        <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
+                        <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
                       </label>
                     </div>
 
@@ -827,7 +827,7 @@ export default function SettingsPage() {
                             onChange={() => toggleNotification("pushDeadline")}
                             className="sr-only peer"
                           />
-                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
+                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
                         </label>
                       </div>
 
@@ -843,7 +843,7 @@ export default function SettingsPage() {
                             onChange={() => toggleNotification("pushPayment")}
                             className="sr-only peer"
                           />
-                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
+                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
                         </label>
                       </div>
 
@@ -859,7 +859,7 @@ export default function SettingsPage() {
                             onChange={() => toggleNotification("pushDealUpdate")}
                             className="sr-only peer"
                           />
-                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
+                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
                         </label>
                       </div>
                     </div>
