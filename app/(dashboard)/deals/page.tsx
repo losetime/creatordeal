@@ -26,7 +26,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import {
   Plus, DollarSign, Calendar, Search, X, Trash2, Pencil,
-  Handshake, Filter, Sparkles, ChevronRight, ChevronDown,
+  Handshake, Filter, Sparkles, ChevronRight, ChevronDown, FileText,
 } from "lucide-react"
 import { trpc } from "@/lib/trpc/client"
 import { formatCurrency, formatDate } from "@/lib/utils"
@@ -281,6 +281,12 @@ export default function DealsPage() {
         </div>
       </div>
 
+      {/* Tip Banner */}
+      <div className="flex items-start gap-3 p-3 bg-teal-50 border border-teal-100 rounded-lg text-sm text-teal-800">
+        <FileText className="h-4 w-4 mt-0.5 shrink-0 text-teal-600" />
+        <p><strong>Pro tip:</strong> Go to Contracts to upload a contract — AI will automatically extract key information and create a deal and brand for you.</p>
+      </div>
+
       {/* Filters */}
       <Card className="shadow-card border-0 bg-white">
         <CardContent className="p-3">
@@ -356,7 +362,7 @@ export default function DealsPage() {
                             </div>
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                               {stageIdx < stages.length - 1 && deal.stage !== "closed" && (
-                                <Button variant="ghost" size="sm" onClick={() => moveToNextStage(deal)} className="h-7 px-2 text-xs text-teal-600 hover:bg-teal-50">
+                                <Button size="sm" onClick={() => moveToNextStage(deal)} className="h-7 px-2 text-xs bg-black hover:bg-black/80 text-white">
                                   <ChevronRight className="h-3 w-3 mr-0.5" /> Next
                                 </Button>
                               )}

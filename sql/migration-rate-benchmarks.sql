@@ -44,7 +44,10 @@ CREATE INDEX IF NOT EXISTS idx_rate_aggregates_lookup ON rate_aggregates(platfor
 ALTER TABLE rate_benchmarks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rate_aggregates ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Anyone can view rate benchmarks" ON rate_benchmarks;
 CREATE POLICY "Anyone can view rate benchmarks" ON rate_benchmarks FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Anyone can view rate aggregates" ON rate_aggregates;
 CREATE POLICY "Anyone can view rate aggregates" ON rate_aggregates FOR SELECT USING (true);
 
 -- 5. Add anti-abuse fields to rate_history
@@ -88,6 +91,51 @@ INSERT INTO rate_benchmarks (platform, follower_tier, deliverable_type, min_rate
 ('tiktok', 'mid', 'video', 500, 1500, 2500, 4000, 5000, 0, 'industry_report'),
 ('tiktok', 'macro', 'video', 800, 2000, 3500, 4500, 5000, 0, 'industry_report'),
 ('tiktok', 'mega', 'video', 5000, 10000, 25000, 40000, 50000, 0, 'industry_report')
+ON CONFLICT (platform, follower_tier, deliverable_type) DO UPDATE SET
+  min_rate = EXCLUDED.min_rate,
+  p25_rate = EXCLUDED.p25_rate,
+  median_rate = EXCLUDED.median_rate,
+  p75_rate = EXCLUDED.p75_rate,
+  max_rate = EXCLUDED.max_rate,
+  last_updated = NOW();
+
+-- 9. Pre-seeded Instagram Story benchmark data (typically 30-50% of post rates)
+INSERT INTO rate_benchmarks (platform, follower_tier, deliverable_type, min_rate, p25_rate, median_rate, p75_rate, max_rate, sample_size, source) VALUES
+('instagram', 'nano', 'story', 5, 15, 30, 50, 70, 0, 'industry_report'),
+('instagram', 'micro', 'story', 50, 100, 175, 250, 300, 0, 'industry_report'),
+('instagram', 'mid', 'story', 250, 750, 1250, 2000, 2500, 0, 'industry_report'),
+('instagram', 'macro', 'story', 2500, 3250, 4000, 4750, 5000, 0, 'industry_report'),
+('instagram', 'mega', 'story', 5000, 7500, 12500, 25000, 50000, 0, 'industry_report')
+ON CONFLICT (platform, follower_tier, deliverable_type) DO UPDATE SET
+  min_rate = EXCLUDED.min_rate,
+  p25_rate = EXCLUDED.p25_rate,
+  median_rate = EXCLUDED.median_rate,
+  p75_rate = EXCLUDED.p75_rate,
+  max_rate = EXCLUDED.max_rate,
+  last_updated = NOW();
+
+-- 10. Pre-seeded Instagram Reel benchmark data (similar to TikTok video rates)
+INSERT INTO rate_benchmarks (platform, follower_tier, deliverable_type, min_rate, p25_rate, median_rate, p75_rate, max_rate, sample_size, source) VALUES
+('instagram', 'nano', 'reel', 8, 20, 40, 70, 120, 0, 'industry_report'),
+('instagram', 'micro', 'reel', 80, 175, 300, 450, 600, 0, 'industry_report'),
+('instagram', 'mid', 'reel', 400, 1200, 2000, 3200, 4000, 0, 'industry_report'),
+('instagram', 'macro', 'reel', 4000, 5500, 7000, 8500, 10000, 0, 'industry_report'),
+('instagram', 'mega', 'reel', 8000, 12000, 20000, 40000, 80000, 0, 'industry_report')
+ON CONFLICT (platform, follower_tier, deliverable_type) DO UPDATE SET
+  min_rate = EXCLUDED.min_rate,
+  p25_rate = EXCLUDED.p25_rate,
+  median_rate = EXCLUDED.median_rate,
+  p75_rate = EXCLUDED.p75_rate,
+  max_rate = EXCLUDED.max_rate,
+  last_updated = NOW();
+
+-- 11. Pre-seeded YouTube Short benchmark data (similar to TikTok video rates)
+INSERT INTO rate_benchmarks (platform, follower_tier, deliverable_type, min_rate, p25_rate, median_rate, p75_rate, max_rate, sample_size, source) VALUES
+('youtube', 'nano', 'short', 10, 25, 50, 100, 150, 0, 'industry_report'),
+('youtube', 'micro', 'short', 100, 200, 400, 600, 800, 0, 'industry_report'),
+('youtube', 'mid', 'short', 400, 1000, 2000, 3000, 4000, 0, 'industry_report'),
+('youtube', 'macro', 'short', 3000, 5000, 8000, 10000, 12000, 0, 'industry_report'),
+('youtube', 'mega', 'short', 8000, 12000, 18000, 25000, 40000, 0, 'industry_report')
 ON CONFLICT (platform, follower_tier, deliverable_type) DO UPDATE SET
   min_rate = EXCLUDED.min_rate,
   p25_rate = EXCLUDED.p25_rate,

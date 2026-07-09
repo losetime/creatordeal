@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
 import { createClient } from "@/lib/supabase/server"
-import { renderToBuffer } from "@react-pdf/renderer"
+import { createAdminClient } from "@/lib/supabase/admin"
 import React from "react"
-import { InvoicePDF } from "@/components/invoice-pdf"
 
 function getResend() {
   return new Resend(process.env.RESEND_API_KEY)
@@ -44,17 +43,41 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "invoice_id required" }, { status: 400 })
     }
 
-    // Fetch invoice with deal and brand info
-    const { data: invoice, error: invError } = await supabase
+    // Use admin client to bypass RLS for all queries
+    const admin = createAdminClient()
+
+    // Fetch invoice
+    const { data: invoice, error: invError } = await admin
       .from("invoices")
-      .select("*, deals(title, brand_id, brands(name, contact_email, contact_name, address, country, tax_id))")
+      .select("*")
       .eq("id", invoice_id)
       .eq("user_id", user.id)
       .single()
 
     if (invError || !invoice) {
-      return NextResponse.json({ error: "Invoice not found" }, { status: 404 })
+      return NextResponse.json({ error: "Invoice not found", details: invError }, { status: 404 })
     }
+
+    // Fetch deal
+    const { data: deal } = await admin
+      .from("deals")
+      .select("title, brand_id")
+      .eq("id", invoice.deal_id)
+      .single()
+
+    // Fetch brand
+    let brand: any = null
+    if (deal?.brand_id) {
+      const { data: brandData } = await supabase
+        .from("brands")
+        .select("name, contact_email, contact_name, address, country, tax_id")
+        .eq("id", deal.brand_id)
+        .single()
+      brand = brandData
+    }
+
+    // Fallback: use user's own email if brand has no contact_email
+    const contactEmail = brand?.contact_email || user.email
 
     // Fetch user profile for issuer info
     const { data: profile } = await supabase
@@ -63,50 +86,66 @@ export async function POST(request: Request) {
       .eq("id", user.id)
       .single()
 
-    const brand = invoice.deals?.brands
-    if (!brand?.contact_email) {
+    if (!contactEmail) {
       return NextResponse.json(
-        { error: "Brand contact email not found. Please add an email to the brand." },
+        { error: "No contact email available. Please add an email to the brand or your profile." },
         { status: 400 }
       )
     }
 
-    // Generate PDF
-    const element = React.createElement(InvoicePDF, {
-      invoiceNumber: invoice.invoice_number,
-      invoiceDate: formatDate(invoice.created_at),
-      dueDate: formatDate(invoice.due_date),
-      amount: invoice.amount,
-      currency: invoice.currency || "USD",
-      taxRate: invoice.tax_rate || 0,
-      taxAmount: invoice.tax_amount || 0,
-      notes: invoice.notes,
-      paymentTerms: invoice.payment_terms || "Net 30",
-      issuer: {
-        name: profile?.full_name || "Creator",
-        email: profile?.email || user.email || "",
-        address: [profile?.address, profile?.city, profile?.state, profile?.zip_code, profile?.country]
-          .filter(Boolean)
-          .join(", "),
-          taxId: profile?.tax_id || undefined,
-        },
-        recipient: {
-          name: brand.name,
-          email: brand.contact_email,
-          address: brand.address || undefined,
-          taxId: brand.tax_id || undefined,
-        },
-        items: [
-          {
-            description: invoice.deals?.title || "Sponsored Content",
-            quantity: 1,
-            rate: invoice.amount,
-            amount: invoice.amount,
-          },
-        ],
-      })
+    // Generate PDF using dynamic import of @react-pdf/renderer
+    const { renderToBuffer, Document, Page, View, Text } = await import("@react-pdf/renderer")
 
-    const pdfBuffer = await renderToBuffer(element as any)
+    const fmt = (v: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: invoice.currency || "USD" }).format(v)
+
+    const element = React.createElement(Document, null,
+      React.createElement(Page, { size: "A4", style: { padding: 40, fontFamily: "Helvetica", fontSize: 10 } },
+        React.createElement(View, { style: { flexDirection: "row", justifyContent: "space-between", marginBottom: 30 } },
+          React.createElement(Text, { style: { fontSize: 20, fontWeight: "bold", color: "#0d9488" } }, "CreatorDeal"),
+          React.createElement(View, null,
+            React.createElement(Text, { style: { fontSize: 28, fontWeight: "bold", color: "#0d9488", textAlign: "right" } }, "INVOICE"),
+            React.createElement(Text, { style: { fontSize: 10, color: "#6b7280", textAlign: "right", marginTop: 4 } }, invoice.invoice_number)
+          )
+        ),
+        React.createElement(View, { style: { flexDirection: "row", justifyContent: "space-between", marginBottom: 30 } },
+          React.createElement(View, { style: { width: "45%" } },
+            React.createElement(Text, { style: { fontSize: 8, color: "#9ca3af", textTransform: "uppercase", marginBottom: 4 } }, "From"),
+            React.createElement(Text, { style: { fontSize: 11, fontWeight: "bold", marginBottom: 2 } }, profile?.full_name || "Creator"),
+            React.createElement(Text, { style: { fontSize: 10, color: "#6b7280" } }, profile?.email || user.email)
+          ),
+          React.createElement(View, { style: { width: "45%" } },
+            React.createElement(Text, { style: { fontSize: 8, color: "#9ca3af", textTransform: "uppercase", marginBottom: 4 } }, "To"),
+            React.createElement(Text, { style: { fontSize: 11, fontWeight: "bold", marginBottom: 2 } }, brand?.name || "Brand"),
+            React.createElement(Text, { style: { fontSize: 10, color: "#6b7280" } }, contactEmail)
+          )
+        ),
+        React.createElement(View, { style: { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: "#e5e7eb", paddingBottom: 8, marginBottom: 4 } },
+          React.createElement(Text, { style: { width: "55%", fontSize: 8, color: "#6b7280", textTransform: "uppercase" } }, "Description"),
+          React.createElement(Text, { style: { width: "15%", textAlign: "center", fontSize: 8, color: "#6b7280", textTransform: "uppercase" } }, "Qty"),
+          React.createElement(Text, { style: { width: "15%", textAlign: "right", fontSize: 8, color: "#6b7280", textTransform: "uppercase" } }, "Rate"),
+          React.createElement(Text, { style: { width: "15%", textAlign: "right", fontSize: 8, color: "#6b7280", textTransform: "uppercase" } }, "Amount")
+        ),
+        React.createElement(View, { style: { flexDirection: "row", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "#f3f4f6" } },
+          React.createElement(Text, { style: { width: "55%", fontSize: 10 } }, deal?.title || "Sponsored Content"),
+          React.createElement(Text, { style: { width: "15%", textAlign: "center", fontSize: 10 } }, "1"),
+          React.createElement(Text, { style: { width: "15%", textAlign: "right", fontSize: 10 } }, fmt(invoice.amount)),
+          React.createElement(Text, { style: { width: "15%", textAlign: "right", fontSize: 10 } }, fmt(invoice.amount))
+        ),
+        React.createElement(View, { style: { marginTop: 20 } },
+          React.createElement(View, { style: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 8, borderTopWidth: 2, borderTopColor: "#0d9488", marginTop: 4 } },
+            React.createElement(Text, { style: { fontSize: 12, fontWeight: "bold" } }, "Total"),
+            React.createElement(Text, { style: { fontSize: 14, fontWeight: "bold", color: "#0d9488" } }, fmt(invoice.amount))
+          )
+        ),
+        React.createElement(View, { style: { marginTop: 30 } },
+          React.createElement(Text, { style: { fontSize: 8, color: "#9ca3af", marginBottom: 4 } }, "Due Date"),
+          React.createElement(Text, { style: { fontSize: 10 } }, formatDate(invoice.due_date))
+        ),
+        React.createElement(Text, { style: { textAlign: "center", color: "#9ca3af", fontSize: 8, borderTopWidth: 1, borderTopColor: "#e5e7eb", paddingTop: 15, marginTop: 30 } }, "Generated by CreatorDeal")
+      )
+    )
+
+    const pdfBuffer = await renderToBuffer(element)
 
     // Upload PDF to Supabase Storage
     const pdfFileName = `${invoice.invoice_number}.pdf`
@@ -147,7 +186,7 @@ export async function POST(request: Request) {
           .label { color: #6b7280; font-size: 13px; }
           .value { font-weight: 600; font-size: 13px; }
           .amount { font-size: 28px; color: #0d9488; font-weight: bold; margin: 16px 0; }
-          .btn { display: inline-block; background: #0d9488; color: white !important; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; margin-right: 8px; }
+          .btn { display: inline-block; background: #0d9488; color: white !important; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-size: 13px; font-weight: 500; margin-right: 6px; }
           .btn-secondary { background: #6b7280; }
           .footer { text-align: center; color: #9ca3af; font-size: 11px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
         </style>
@@ -196,10 +235,14 @@ export async function POST(request: Request) {
 
     // Send email with PDF attachment
     const { error: emailError } = await getResend().emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "CreatorDeal <noreply@yourdomain.com>",
-      to: [brand.contact_email],
-      subject: `Invoice ${invoice.invoice_number} from ${profile?.full_name || "Creator"}`,
+      from: `${profile?.full_name || "Creator"} via CreatorDeal <${process.env.RESEND_FROM_EMAIL || "noreply@yourdomain.com"}>`,
+      to: [contactEmail],
+      subject: `${profile?.full_name || "Creator"} — Invoice ${invoice.invoice_number}`,
+      text: `Invoice ${invoice.invoice_number}\n\nAmount: ${formatAmount(invoice.amount)}\nDue: ${formatDate(invoice.due_date)}\n\nPlease review and process this invoice at your earliest convenience.\n\nSent via CreatorDeal — Sponsorship Management for Creators`,
       html: emailHtml,
+      headers: {
+        "List-Unsubscribe": `<${process.env.NEXT_PUBLIC_APP_URL || "https://creatordeal.cyberloom.work"}/invoices>`,
+      },
       attachments: pdfUrl
         ? [
             {
@@ -230,13 +273,13 @@ export async function POST(request: Request) {
       user_id: user.id,
       type: "deal_update",
       title: "Invoice sent",
-      message: `${invoice.invoice_number} sent to ${brand.contact_email}`,
+      message: `${invoice.invoice_number} sent to ${contactEmail}`,
       deal_id: invoice.deal_id,
     })
 
     return NextResponse.json({ success: true, pdfUrl })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Send invoice error:", error)
-    return NextResponse.json({ error: "Failed to send invoice" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to send invoice", details: error?.message || String(error) }, { status: 500 })
   }
 }

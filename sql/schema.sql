@@ -123,7 +123,7 @@ CREATE TABLE rate_history (
   deliverable_type TEXT NOT NULL,
   follower_count INTEGER,
   engagement_rate DECIMAL(5,2),
-  amount DECIMAL(10,2),
+  amount DECIMAL(10,2) NOT NULL,
   currency TEXT DEFAULT 'USD',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -137,6 +137,7 @@ CREATE INDEX idx_invoices_status ON invoices(status);
 CREATE INDEX idx_notifications_user_id ON notifications(user_id);
 CREATE INDEX idx_notifications_read ON notifications(read);
 CREATE INDEX idx_brands_user_id ON brands(user_id);
+CREATE INDEX idx_rate_history_user_id ON rate_history(user_id);
 
 -- RLS策略
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
@@ -198,8 +199,17 @@ CREATE POLICY "Users can update own notifications" ON notifications FOR UPDATE U
 CREATE POLICY "Users can delete own notifications" ON notifications FOR DELETE USING (auth.uid() = user_id);
 
 -- Rate history policies
+DROP POLICY IF EXISTS "Users can view own rate history" ON rate_history;
 CREATE POLICY "Users can view own rate history" ON rate_history FOR SELECT USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users can create own rate history" ON rate_history;
 CREATE POLICY "Users can create own rate history" ON rate_history FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users can update own rate history" ON rate_history;
+CREATE POLICY "Users can update own rate history" ON rate_history FOR UPDATE USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users can delete own rate history" ON rate_history;
+CREATE POLICY "Users can delete own rate history" ON rate_history FOR DELETE USING (auth.uid() = user_id);
 
 -- 触发器：自动创建用户profile
 CREATE OR REPLACE FUNCTION public.handle_new_user()

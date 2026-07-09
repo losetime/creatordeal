@@ -1,5 +1,6 @@
 import { router, protectedProcedure } from "../server"
 import { z } from "zod"
+import { createAdminClient } from "@/lib/supabase/admin"
 
 function getFollowerTier(count: number): string {
   if (count >= 1000000) return "mega"
@@ -135,13 +136,91 @@ export const ratesRouter = router({
       byPlatform[r.platform].rates.push(r.amount)
     }
 
-    const stats = Object.entries(byPlatform).map(([platform, d]) => ({
-      platform,
-      avgRate: d.total / d.count,
-      totalDeals: d.count,
-      medianRate: d.rates.sort((a, b) => a - b)[Math.floor(d.rates.length / 2)],
-    }))
+    const stats = Object.entries(byPlatform).map(([platform, d]) => {
+      const sorted = [...d.rates].sort((a, b) => a - b)
+      const mid = Math.floor(sorted.length / 2)
+      const medianRate = sorted.length % 2 === 0
+        ? (sorted[mid - 1] + sorted[mid]) / 2
+        : sorted[mid]
+      return {
+        platform,
+        avgRate: d.total / d.count,
+        totalDeals: d.count,
+        medianRate,
+      }
+    })
 
     return stats
+  }),
+
+  // Refresh crowdsourced aggregates from rate_history
+  // Can be called periodically (e.g., via cron) or on-demand
+  refreshAggregates: protectedProcedure.mutation(async ({ ctx }) => {
+    const admin = createAdminClient()
+
+    // Compute aggregates using raw SQL for efficiency
+    const { data, error } = await admin.rpc("compute_rate_aggregates" as any)
+
+    // If the RPC doesn't exist, fall back to JS computation
+    if (error) {
+      // Fetch all rate_history records
+      const { data: rates, error: fetchError } = await ctx.supabase
+        .from("rate_history")
+        .select("platform, deliverable_type, follower_count, amount")
+
+      if (fetchError) throw fetchError
+      if (!rates || rates.length === 0) return { updated: 0 }
+
+      // Group by platform + deliverable_type + tier
+      const groups: Record<string, number[]> = {}
+      for (const r of rates) {
+        const tier = getFollowerTier(r.follower_count || 50000)
+        const key = `${r.platform}|${tier}|${r.deliverable_type}`
+        if (!groups[key]) groups[key] = []
+        groups[key].push(r.amount)
+      }
+
+      // Compute aggregates for each group
+      let updated = 0
+      for (const [key, amounts] of Object.entries(groups)) {
+        const [platform, follower_tier, deliverable_type] = key.split("|")
+        const sorted = [...amounts].sort((a, b) => a - b)
+        const n = sorted.length
+
+        const percentile = (p: number) => {
+          const idx = (p / 100) * (n - 1)
+          const low = Math.floor(idx)
+          const high = Math.ceil(idx)
+          if (low === high) return sorted[low]
+          return sorted[low] + (sorted[high] - sorted[low]) * (idx - low)
+        }
+
+        const avg = amounts.reduce((s, v) => s + v, 0) / n
+        const mid = Math.floor(n / 2)
+        const median = n % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid]
+
+        await admin.from("rate_aggregates").upsert(
+          {
+            platform,
+            follower_tier,
+            deliverable_type,
+            avg_rate: Math.round(avg * 100) / 100,
+            median_rate: Math.round(median * 100) / 100,
+            p10_rate: Math.round(percentile(10) * 100) / 100,
+            p25_rate: Math.round(percentile(25) * 100) / 100,
+            p75_rate: Math.round(percentile(75) * 100) / 100,
+            p90_rate: Math.round(percentile(90) * 100) / 100,
+            sample_count: n,
+            last_computed: new Date().toISOString(),
+          },
+          { onConflict: "platform,follower_tier,deliverable_type" }
+        )
+        updated++
+      }
+
+      return { updated }
+    }
+
+    return { updated: 0, message: "Used SQL RPC" }
   }),
 })

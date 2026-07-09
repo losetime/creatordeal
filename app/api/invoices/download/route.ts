@@ -46,7 +46,7 @@ export async function POST(request: Request) {
 
     const { data: invoice, error: invError } = await supabase
       .from("invoices")
-      .select("*, deals(title, brands(name))")
+      .select("*, deals(title, brand_id)")
       .eq("id", invoice_id).eq("user_id", user.id).single()
 
     if (invError || !invoice) return NextResponse.json({ error: "Invoice not found" }, { status: 404 })
@@ -54,7 +54,12 @@ export async function POST(request: Request) {
     const { data: profile } = await supabase
       .from("profiles").select("full_name, email").eq("id", user.id).single()
 
-    const brand = invoice.deals?.brands
+    let brand: any = null
+    if (invoice.deals?.brand_id) {
+      const { data: brandData } = await supabase
+        .from("brands").select("name").eq("id", invoice.deals.brand_id).single()
+      brand = brandData
+    }
     const fmt = (v: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: invoice.currency || "USD" }).format(v)
 
     const { Document, Page, View, Text } = require("@react-pdf/renderer")

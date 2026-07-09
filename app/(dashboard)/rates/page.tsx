@@ -32,6 +32,7 @@ const deliverableTypes = [
   { value: "post", label: "Post" },
   { value: "story", label: "Story" },
   { value: "reel", label: "Reel" },
+  { value: "short", label: "Short" },
 ] as const
 
 const getFollowerTier = (count: number) => {
@@ -190,35 +191,35 @@ export default function RatesPage() {
           <CardDescription>Enter your profile to get personalized benchmarks</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-4 items-end">
-            <div className="space-y-2">
-              <Label htmlFor="platform" className="text-sm">Platform</Label>
+          <div className="flex flex-wrap gap-x-6 gap-y-3 items-end">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="platform" className="text-sm whitespace-nowrap">Platform</Label>
               <select
                 id="platform"
                 value={platform}
                 onChange={(e) => setPlatform(e.target.value)}
-                className="rounded border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm h-9"
+                className="w-40 border border-input bg-slate-50 px-3 py-1 text-sm h-9 shadow-sm transition-colors focus:bg-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 {platforms.map((p) => (
                   <option key={p.value} value={p.value}>{p.label}</option>
                 ))}
               </select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="deliverableType" className="text-sm">Content Type</Label>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="deliverableType" className="text-sm whitespace-nowrap">Content Type</Label>
               <select
                 id="deliverableType"
                 value={deliverableType}
                 onChange={(e) => setDeliverableType(e.target.value)}
-                className="rounded border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm h-9"
+                className="w-40 border border-input bg-slate-50 px-3 py-1 text-sm h-9 shadow-sm transition-colors focus:bg-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 {deliverableTypes.map((dt) => (
                   <option key={dt.value} value={dt.value}>{dt.label}</option>
                 ))}
               </select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="followers" className="text-sm">Followers</Label>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="followers" className="text-sm whitespace-nowrap">Followers</Label>
               <Input
                 id="followers"
                 type="number"
@@ -227,8 +228,8 @@ export default function RatesPage() {
                 className="w-32 h-9"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="yourRate" className="text-sm">Your Rate ($)</Label>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="yourRate" className="text-sm whitespace-nowrap">Your Rate ($)</Label>
               <Input
                 id="yourRate"
                 type="number"

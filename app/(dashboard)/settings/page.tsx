@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { toast } from "sonner"
 import {
   User, CreditCard, Bell, Shield, Mail, Settings, Check,
-  Globe, Clock, DollarSign, Download, Smartphone, Key, CheckCircle
+  Globe, Clock, DollarSign, Download, Key, CheckCircle
 } from "lucide-react"
 import { trpc } from "@/lib/trpc/client"
 import { useAuth } from "@/lib/auth/context"
@@ -106,25 +106,9 @@ export default function SettingsPage() {
   const [editedName, setEditedName] = useState("")
 
   const [notifications, setNotifications] = useState({
-    emailDeadline7: true,
     emailDeadline3: true,
-    emailDeadline1: true,
     emailDeadlineToday: true,
-    emailPayment7: true,
-    emailPaymentToday: true,
-    emailPaymentOverdue: true,
-    emailDealUpdate: true,
-    pushEnabled: true,
-    pushDeadline: true,
-    pushPayment: true,
-    pushDealUpdate: false,
-  })
-
-  const [remindDays, setRemindDays] = useState({
-    deadline7: true,
-    deadline3: true,
-    deadline1: true,
-    deadlineToday: true,
+    emailPaymentOverdue: false,
   })
 
   const utils = trpc.useUtils()
@@ -135,6 +119,18 @@ export default function SettingsPage() {
 
   const { data: profile, isLoading: profileLoading } = trpc.profiles.get.useQuery()
   const { data: invoices, isLoading: invoicesLoading } = trpc.invoices.list.useQuery()
+  const { data: notifPrefs } = trpc.notificationPreferences.get.useQuery()
+
+  // Load notification preferences from database
+  useEffect(() => {
+    if (notifPrefs) {
+      setNotifications({
+        emailDeadline3: notifPrefs.email_deadline_3d ?? true,
+        emailDeadlineToday: notifPrefs.email_deadline_today ?? true,
+        emailPaymentOverdue: notifPrefs.email_payment_overdue ?? false,
+      })
+    }
+  }, [notifPrefs])
 
   const updateProfile = trpc.profiles.update.useMutation({
     onSuccess: () => {
@@ -144,6 +140,16 @@ export default function SettingsPage() {
     },
     onError: (error) => {
       toast.error("Failed to save profile", { description: error.message })
+    },
+  })
+
+  const updateNotifPrefs = trpc.notificationPreferences.update.useMutation({
+    onSuccess: () => {
+      utils.notificationPreferences.get.invalidate()
+      toast.success("Preferences saved", { description: "Notification settings updated." })
+    },
+    onError: (error) => {
+      toast.error("Failed to save preferences", { description: error.message })
     },
   })
 
@@ -164,10 +170,6 @@ export default function SettingsPage() {
     setNotifications({ ...notifications, [key]: !notifications[key] })
   }
 
-  const toggleRemindDays = (key: keyof typeof remindDays) => {
-    setRemindDays({ ...remindDays, [key]: !remindDays[key] })
-  }
-
   const handleSaveProfile = () => {
     if (!editedName.trim()) {
       toast.error("Name is required")
@@ -177,7 +179,11 @@ export default function SettingsPage() {
   }
 
   const handleSavePreferences = () => {
-    toast.success("Preferences saved", { description: "Notification settings updated." })
+    updateNotifPrefs.mutate({
+      email_deadline_3d: notifications.emailDeadline3,
+      email_deadline_today: notifications.emailDeadlineToday,
+      email_payment_overdue: notifications.emailPaymentOverdue,
+    })
   }
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
@@ -199,6 +205,7 @@ export default function SettingsPage() {
       toast.error("Please enter your Ko-fi order ID")
       return
     }
+    const isRenewal = profile?.plan === "pro"
     updateProfile.mutate({
       plan: "pro",
       subscription_status: "active",
@@ -206,8 +213,10 @@ export default function SettingsPage() {
       payment_order_id: kofiOrderId.trim(),
       payment_submitted_at: new Date().toISOString(),
     })
-    toast.success("Payment submitted for review", {
-      description: "Your account has been upgraded. An admin will verify your payment shortly.",
+    toast.success(isRenewal ? "Renewal submitted for review" : "Payment submitted for review", {
+      description: isRenewal
+        ? "Your renewal has been submitted. An admin will verify your payment shortly."
+        : "Your account has been upgraded. An admin will verify your payment shortly.",
     })
     setShowConfirmDialog(false)
     setKofiOrderId("")
@@ -228,10 +237,6 @@ export default function SettingsPage() {
     } else {
       toast.success("Reset link sent", { description: "Check your email for a password reset link." })
     }
-  }
-
-  const handleEnable2FA = () => {
-    toast.info("Coming soon", { description: "Two-factor authentication requires Supabase MFA integration." })
   }
 
   const navItems = [
@@ -553,6 +558,11 @@ export default function SettingsPage() {
                             <CheckCircle className="h-3 w-3" /> Active
                           </p>
                         )}
+                        {profile?.plan === "pro" && profile?.subscription_expires_at && (
+                          <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                            <Clock className="h-3 w-3" /> Expires {formatDate(profile.subscription_expires_at)}
+                          </p>
+                        )}
                       </div>
                       <div className="flex gap-2">
                         {profile?.plan !== "pro" && (
@@ -562,6 +572,11 @@ export default function SettingsPage() {
                               I&apos;ve Paid
                             </Button>
                           </>
+                        )}
+                        {profile?.plan === "pro" && !profile?.payment_pending && (
+                          <Button onClick={handleUpgrade} variant="outline">
+                            Renew — $9.90/mo
+                          </Button>
                         )}
                       </div>
                     </div>
@@ -697,205 +712,50 @@ export default function SettingsPage() {
                     </div>
                     Email Notifications
                   </h4>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-0">
+                    <div className="flex items-center justify-between py-4 border-b border-slate-200">
                       <div>
-                        <p className="text-sm font-medium">{t("settings.contentDeadlineReminders")}</p>
-                        <p className="text-xs text-muted-foreground">{t("settings.contentDeadlineDesc")}</p>
+                        <p className="text-sm font-medium">Content Deadline Reminders</p>
+                        <p className="text-xs text-muted-foreground">Remind you 3 days and on the day content is due</p>
                       </div>
-                      <div className="flex gap-2">
-                        {[
-                          { key: "emailDeadline7", label: "7d" },
-                          { key: "emailDeadline3", label: "3d" },
-                          { key: "emailDeadline1", label: "1d" },
-                          { key: "emailDeadlineToday", label: "Today" },
-                        ].map((item) => (
-                          <label
-                            key={item.key}
-                            className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full cursor-pointer transition-all ${
-                              notifications[item.key as keyof typeof notifications]
-                                ? "bg-teal-100 text-teal-700 border border-teal-200"
-                                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={notifications[item.key as keyof typeof notifications]}
-                              onChange={() => toggleNotification(item.key as keyof typeof notifications)}
-                              className="sr-only"
-                            />
-                            {item.label}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium">{t("settings.paymentReminders")}</p>
-                        <p className="text-xs text-muted-foreground">{t("settings.paymentDesc")}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        {[
-                          { key: "emailPayment7", label: "7d" },
-                          { key: "emailPaymentToday", label: "Due" },
-                          { key: "emailPaymentOverdue", label: "Overdue" },
-                        ].map((item) => (
-                          <label
-                            key={item.key}
-                            className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full cursor-pointer transition-all ${
-                              notifications[item.key as keyof typeof notifications]
-                                ? "bg-teal-100 text-teal-700 border border-teal-200"
-                                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={notifications[item.key as keyof typeof notifications]}
-                              onChange={() => toggleNotification(item.key as keyof typeof notifications)}
-                              className="sr-only"
-                            />
-                            {item.label}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium">{t("settings.dealUpdates")}</p>
-                        <p className="text-xs text-muted-foreground">{t("settings.dealUpdatesDesc")}</p>
-                      </div>
-                      <label
-                        className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full cursor-pointer transition-all ${
-                          notifications.emailDealUpdate
-                            ? "bg-teal-100 text-teal-700 border border-teal-200"
-                            : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                        }`}
-                      >
+                      <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={notifications.emailDealUpdate}
-                          onChange={() => toggleNotification("emailDealUpdate")}
-                          className="sr-only"
-                        />
-                        Enable
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Push Notifications */}
-                <div className="rounded-lg p-4 bg-slate-50">
-                  <h4 className="font-semibold mb-4 flex items-center gap-2">
-                    <div className="rounded-lg bg-violet-100 p-1">
-                      <Smartphone className="h-4 w-4 text-violet-600" />
-                    </div>
-                    Push Notifications
-                  </h4>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium">{t("settings.pushNotifications")}</p>
-                        <p className="text-xs text-muted-foreground">{t("settings.pushDesc")}</p>
-                      </div>
-                      <label
-                        className={`relative inline-flex items-center cursor-pointer ${
-                          notifications.pushEnabled ? "opacity-100" : "opacity-60"
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={notifications.pushEnabled}
-                          onChange={() => toggleNotification("pushEnabled")}
+                          checked={notifications.emailDeadline3 || notifications.emailDeadlineToday}
+                          onChange={(e) => {
+                            const checked = e.target.checked
+                            setNotifications({
+                              ...notifications,
+                              emailDeadline3: checked,
+                              emailDeadlineToday: checked,
+                            })
+                          }}
                           className="sr-only peer"
                         />
                         <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
                       </label>
                     </div>
 
-                    <div className={`space-y-3 ${!notifications.pushEnabled ? "opacity-50 pointer-events-none" : ""}`}>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium">{t("settings.deadlineAlerts")}</p>
-                          <p className="text-xs text-muted-foreground">{t("settings.deadlineAlertsDesc")}</p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={notifications.pushDeadline}
-                            onChange={() => toggleNotification("pushDeadline")}
-                            className="sr-only peer"
-                          />
-                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
-                        </label>
+                    <div className="flex items-center justify-between py-4">
+                      <div>
+                        <p className="text-sm font-medium">Payment Reminders</p>
+                        <p className="text-xs text-muted-foreground">Remind brand 1 day after payment is due (skips if already paid)</p>
                       </div>
-
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium">{t("settings.paymentAlerts")}</p>
-                          <p className="text-xs text-muted-foreground">{t("settings.paymentAlertsDesc")}</p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={notifications.pushPayment}
-                            onChange={() => toggleNotification("pushPayment")}
-                            className="sr-only peer"
-                          />
-                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
-                        </label>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium">{t("settings.pushDealUpdates")}</p>
-                          <p className="text-xs text-muted-foreground">{t("settings.pushDealUpdatesDesc")}</p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={notifications.pushDealUpdate}
-                            onChange={() => toggleNotification("pushDealUpdate")}
-                            className="sr-only peer"
-                          />
-                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Deadline Reminder Days */}
-                <div className="rounded-lg p-4 bg-slate-50">
-                  <h4 className="font-semibold mb-2 text-sm">{t("settings.defaultReminderDays")}</h4>
-                  <p className="text-xs text-muted-foreground mb-4">
-                    {t("settings.defaultReminderDesc")}
-                  </p>
-                  <div className="flex gap-2">
-                    {[
-                      { key: "deadline7", label: "7 days" },
-                      { key: "deadline3", label: "3 days" },
-                      { key: "deadline1", label: "1 day" },
-                      { key: "deadlineToday", label: "On due" },
-                    ].map((item) => (
-                      <label
-                        key={item.key}
-                        className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg cursor-pointer transition-all ${
-                          remindDays[item.key as keyof typeof remindDays]
-                            ? "bg-teal-600 text-white"
-                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                        }`}
-                      >
+                      <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={remindDays[item.key as keyof typeof remindDays]}
-                          onChange={() => toggleRemindDays(item.key as keyof typeof remindDays)}
-                          className="sr-only"
+                          checked={notifications.emailPaymentOverdue}
+                          onChange={() => toggleNotification("emailPaymentOverdue")}
+                          className="sr-only peer"
                         />
-                        {item.label}
+                        <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
                       </label>
-                    ))}
+                    </div>
+                    {notifications.emailPaymentOverdue && (
+                      <p className="text-xs text-red-600 pb-4">
+                        Please remember to confirm payment on the platform after receiving it, to avoid unnecessary misunderstandings with your brand partners.
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -927,30 +787,6 @@ export default function SettingsPage() {
                       </p>
                     </div>
                     <Button variant="outline" size="sm" onClick={handleChangePassword}>{t("settings.changePassword")}</Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Two-Factor Authentication */}
-              <Card className="shadow-card overflow-hidden border-0">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Smartphone className="h-4 w-4 text-violet-500" />
-                    {t("settings.twoFactor")}
-                  </CardTitle>
-                  <CardDescription>
-                    {t("settings.twoFactorDesc")}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-4 rounded-lg bg-slate-50">
-                    <div>
-                      <p className="font-medium">{t("settings.twoFactor")}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {t("settings.twoFactorDesc")}
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm" onClick={handleEnable2FA}>{t("settings.enable2fa")}</Button>
                   </div>
                 </CardContent>
               </Card>

@@ -165,7 +165,7 @@ export default function InvoicesPage() {
 
   const createInvoice = trpc.invoices.create.useMutation({
     onSuccess: () => {
-      utils.invoices.list.invalidate()
+      setTimeout(() => utils.invoices.list.invalidate(), 100)
       toast.success("Invoice created")
       setIsDialogOpen(false)
       setSelectedDealId("")
@@ -180,7 +180,7 @@ export default function InvoicesPage() {
 
   const deleteInvoice = trpc.invoices.delete.useMutation({
     onSuccess: () => {
-      utils.invoices.list.invalidate()
+      setTimeout(() => utils.invoices.list.invalidate(), 100)
       toast.success("Invoice deleted")
     },
     onError: (err) => {
@@ -230,6 +230,8 @@ export default function InvoicesPage() {
   }
 
   const [sendingId, setSendingId] = useState<string | null>(null)
+  const [sendSuccessOpen, setSendSuccessOpen] = useState(false)
+  const [sentInvoiceNumber, setSentInvoiceNumber] = useState("")
 
   const handleSend = async (id: string) => {
     setSendingId(id)
@@ -243,8 +245,11 @@ export default function InvoicesPage() {
       if (!res.ok) {
         toast.error("Failed to send invoice", { description: data.error })
       } else {
-        toast.success("Invoice sent!", { description: "PDF generated and email delivered." })
-        utils.invoices.list.invalidate()
+        const invoice = invoiceList.find((inv) => inv.id === id)
+        setSentInvoiceNumber(invoice?.invoice_number || "")
+        setSendSuccessOpen(true)
+        // Delay invalidation to avoid DOM conflict
+        setTimeout(() => utils.invoices.list.invalidate(), 100)
       }
     } catch {
       toast.error("Failed to send invoice")
@@ -372,6 +377,12 @@ export default function InvoicesPage() {
             </DialogContent>
           </Dialog>
         </div>
+      </div>
+
+      {/* Tip Banner */}
+      <div className="flex items-start gap-3 p-3 bg-teal-50 border border-teal-100 rounded-lg text-sm text-teal-800">
+        <FileText className="h-4 w-4 mt-0.5 shrink-0 text-teal-600" />
+        <p><strong>Pro tip:</strong> When a deal reaches the Published stage, an invoice will be automatically created for you — no manual entry needed.</p>
       </div>
 
       {/* Stats */}
@@ -581,6 +592,32 @@ export default function InvoicesPage() {
                 <Download className="mr-2 h-4 w-4" /> Generate PDF
               </Button>
             )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Success Dialog */}
+      <Dialog open={sendSuccessOpen} onOpenChange={setSendSuccessOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-emerald-500" />
+              Invoice Sent Successfully
+            </DialogTitle>
+            <DialogDescription>
+              {sentInvoiceNumber} has been sent and a PDF has been generated.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="p-3 bg-amber-50 rounded-lg text-sm text-amber-800">
+            <p>Didn&apos;t find it in your inbox? No worries — sometimes email providers are a bit overprotective. Please take a moment to check your spam or junk folder just in case.</p>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => setSendSuccessOpen(false)}
+              className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600"
+            >
+              Got it
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

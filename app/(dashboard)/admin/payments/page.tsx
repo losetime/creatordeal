@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
-import { Shield, CheckCircle, XCircle, Clock, User, Mail, Users } from "lucide-react"
+import { Shield, CheckCircle, XCircle, Clock, User, Mail, Users, Bell } from "lucide-react"
 import { trpc } from "@/lib/trpc/client"
 import { formatDate } from "@/lib/utils"
 
 export default function AdminPaymentsPage() {
   const [activeTab, setActiveTab] = useState<"pending" | "all">("pending")
   const [processingId, setProcessingId] = useState<string | null>(null)
+  const [checkingNotifs, setCheckingNotifs] = useState(false)
   const utils = trpc.useUtils()
 
   const { data: pendingUsers, isLoading: pendingLoading } = trpc.admin.getPendingPayments.useQuery()
@@ -52,6 +53,25 @@ export default function AdminPaymentsPage() {
     setProcessingId(null)
   }
 
+  const handleCheckNotifications = async () => {
+    setCheckingNotifs(true)
+    try {
+      const res = await fetch("/api/notifications/trigger", { method: "POST" })
+      const data = await res.json()
+      if (res.ok) {
+        toast.success("Notifications checked", {
+          description: `Sent ${data.results?.deadlineEmails || 0} deadline and ${data.results?.paymentEmails || 0} payment reminder emails.`,
+        })
+      } else {
+        toast.error("Failed", { description: data.error })
+      }
+    } catch {
+      toast.error("Failed to check notifications")
+    } finally {
+      setCheckingNotifs(false)
+    }
+  }
+
   const isLoading = activeTab === "pending" ? pendingLoading : allLoading
   const users = activeTab === "pending" ? pendingUsers : allUsers
 
@@ -60,14 +80,26 @@ export default function AdminPaymentsPage() {
       {/* Header */}
       <div className="relative overflow-hidden p-5 text-white shadow-elevated" style={{ backgroundColor: "#0d9488" }}>
         <div className="absolute inset-0 dot-pattern opacity-15" />
-        <div className="relative flex items-center gap-2">
-          <div className="rounded-lg bg-white/15 p-1.5">
-            <Shield className="h-5 w-5" />
+        <div className="relative flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="rounded-lg bg-white/15 p-1.5">
+              <Shield className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">Payment Verification</h2>
+              <p className="text-xs text-violet-100">Review and manage user subscription payments</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-xl font-bold">Payment Verification</h2>
-            <p className="text-xs text-violet-100">Review and manage user subscription payments</p>
-          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+            onClick={handleCheckNotifications}
+            disabled={checkingNotifs}
+          >
+            <Bell className="h-4 w-4 mr-1.5" />
+            {checkingNotifs ? "Checking..." : "Send Notifications"}
+          </Button>
         </div>
       </div>
 

@@ -57,6 +57,30 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Auto-downgrade expired subscriptions
+  if (user && !isAuthPage && !isLandingPage && !isLegalPage && !isApiRoute && !isStatic) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("plan, subscription_expires_at")
+      .eq("id", user.id)
+      .single()
+
+    if (profile?.plan === "pro" && profile?.subscription_expires_at) {
+      const expiresAt = new Date(profile.subscription_expires_at)
+      if (expiresAt < new Date()) {
+        // Subscription expired, downgrade to free
+        await supabase
+          .from("profiles")
+          .update({
+            plan: "free",
+            subscription_status: "expired",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", user.id)
+      }
+    }
+  }
+
   return supabaseResponse
 }
 

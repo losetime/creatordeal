@@ -9,6 +9,7 @@ import { ratesRouter } from "./routers/rates"
 import { paymentsRouter } from "./routers/payments"
 import { deliverablesRouter } from "./routers/deliverables"
 import { adminRouter } from "./routers/admin"
+import { notificationPreferencesRouter } from "./routers/notification-preferences"
 
 export const appRouter = router({
   deals: dealsRouter,
@@ -21,6 +22,7 @@ export const appRouter = router({
   payments: paymentsRouter,
   deliverables: deliverablesRouter,
   admin: adminRouter,
+  notificationPreferences: notificationPreferencesRouter,
 })
 
 export type AppRouter = typeof appRouter

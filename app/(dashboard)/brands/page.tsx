@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
-import { Plus, Building2, Globe, Mail, User, TrendingUp, ExternalLink, Trash2, Pencil } from "lucide-react"
+import { Plus, Building2, Globe, Mail, User, TrendingUp, ExternalLink, Trash2, Pencil, FileText } from "lucide-react"
 
 const BRAND_COLORS = [
   { bg: "#f97316", text: "bg-orange-50 text-orange-700" },
@@ -276,6 +276,12 @@ export default function BrandsPage() {
             </DialogContent>
           </Dialog>
         </div>
+      </div>
+
+      {/* Tip Banner */}
+      <div className="flex items-start gap-3 p-3 bg-teal-50 border border-teal-100 rounded-lg text-sm text-teal-800">
+        <FileText className="h-4 w-4 mt-0.5 shrink-0 text-teal-600" />
+        <p><strong>Pro tip:</strong> Upload a contract in Contracts — AI will automatically extract brand information and create this brand for you.</p>
       </div>
 
       {/* Edit Brand Dialog */}
