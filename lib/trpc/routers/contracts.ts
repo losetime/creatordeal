@@ -65,8 +65,7 @@ export const contractsRouter = router({
       const { data: allFiles } = await ctx.supabase.storage.from("contracts").list("", { limit: 500, search: contract.file_name.split(".")[0] })
       if (allFiles && allFiles.length > 0) {
         const match = allFiles[0]
-        // Reconstruct full path from metadata
-        const { data: newUrl } = await ctx.supabase.storage.from("contracts").createSignedUrl(match.fullPath || match.name, 3600)
+        const { data: newUrl } = await ctx.supabase.storage.from("contracts").createSignedUrl(match.name, 3600)
         return { url: newUrl?.signedUrl || "" }
       }
 

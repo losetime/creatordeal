@@ -39,11 +39,10 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       hasSubscription: true,
-      paypalStatus: body.status,
+      paypalData: body,
       localStatus: profile.subscription_status,
       plan: profile.plan,
       expiresAt: profile.subscription_expires_at,
-      nextBillingTime: body.next_billing_time,
     })
   } catch (error: any) {
     console.error("Get subscription status error:", error)

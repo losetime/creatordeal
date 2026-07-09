@@ -134,9 +134,10 @@ export async function extractTextFromFile(fileUrl: string): Promise<string> {
   // Handle PDF files
   if (contentType.includes("pdf") || fileUrl.endsWith(".pdf")) {
     const buffer = await response.arrayBuffer()
-    const pdfParse = (await import("pdf-parse")).default
-    const data = await pdfParse(Buffer.from(buffer))
-    return data.text
+    const { PDFParse } = await import("pdf-parse")
+    const parser = new PDFParse({ data: Buffer.from(buffer) })
+    const result = await parser.getText()
+    return result.text
   }
 
   // Handle Word documents (basic extraction)

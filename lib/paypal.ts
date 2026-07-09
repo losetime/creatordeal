@@ -1,4 +1,4 @@
-import { Client, Environment } from "@paypal/paypal-server-sdk"
+import { Client, Environment, SubscriptionsController, ExperienceContextShippingPreference, ApplicationContextUserAction } from "@paypal/paypal-server-sdk"
 
 const isLive = process.env.PAYPAL_MODE === "live"
 
@@ -10,6 +10,8 @@ const paypalClient = new Client({
   environment: isLive ? Environment.Production : Environment.Sandbox,
 })
 
+const subscriptionsController = new SubscriptionsController(paypalClient)
+
 export { paypalClient }
 
 // Plan ID from PayPal dashboard
@@ -19,37 +21,37 @@ export const PAYPAL_PLAN_ID = process.env.PAYPAL_PLAN_ID || "P-0EV63716US865732J
 export async function createPaypalSubscription(userId: string) {
   const request = {
     body: {
-      plan_id: PAYPAL_PLAN_ID,
+      planId: PAYPAL_PLAN_ID,
       subscriber: {
         name: {
-          given_name: "CreatorDeal",
+          givenName: "CreatorDeal",
           surname: "User",
         },
       },
-      application_context: {
-        brand_name: "CreatorDeal",
+      applicationContext: {
+        brandName: "CreatorDeal",
         locale: "en-US",
-        shipping_preference: "NO_SHIPPING" as const,
-        user_action: "SUBSCRIBE_NOW" as const,
-        return_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings?subscription=success`,
-        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings?subscription=cancelled`,
+        shippingPreference: ExperienceContextShippingPreference.NoShipping,
+        userAction: ApplicationContextUserAction.SubscribeNow,
+        returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/settings?subscription=success`,
+        cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/settings?subscription=cancelled`,
       },
     },
   }
 
-  const response = await paypalClient.subscriptionsController.createSubscription(request)
+  const response = await subscriptionsController.createSubscription(request)
   return { body: response.result, statusCode: response.statusCode }
 }
 
 // Get subscription details
 export async function getPaypalSubscription(subscriptionId: string) {
-  const response = await paypalClient.subscriptionsController.getSubscription({ id: subscriptionId })
+  const response = await subscriptionsController.getSubscription({ id: subscriptionId })
   return { body: response.result, statusCode: response.statusCode }
 }
 
 // Cancel a subscription
 export async function cancelPaypalSubscription(subscriptionId: string, reason: string = "User requested cancellation") {
-  const response = await paypalClient.subscriptionsController.cancelSubscription({
+  const response = await subscriptionsController.cancelSubscription({
     id: subscriptionId,
     body: { reason },
   })
