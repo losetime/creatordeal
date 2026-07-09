@@ -188,12 +188,49 @@ export default function SettingsPage() {
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [kofiOrderId, setKofiOrderId] = useState("")
+  const [subscribing, setSubscribing] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
+
+  const handleSubscribe = async () => {
+    setSubscribing(true)
+    try {
+      const res = await fetch("/api/paypal/subscribe", { method: "POST" })
+      const data = await res.json()
+      if (data.approvalUrl) {
+        window.location.href = data.approvalUrl
+      } else {
+        toast.error("Failed to create subscription", { description: data.error })
+      }
+    } catch {
+      toast.error("Failed to create subscription")
+    } finally {
+      setSubscribing(false)
+    }
+  }
+
+  const handleCancelSubscription = async () => {
+    if (!confirm("Are you sure you want to cancel your subscription? You will keep access until the end of your billing period.")) {
+      return
+    }
+    setCancelling(true)
+    try {
+      const res = await fetch("/api/paypal/cancel", { method: "POST" })
+      const data = await res.json()
+      if (data.success) {
+        toast.success("Subscription cancelled", { description: data.message })
+        utils.profiles.get.invalidate()
+      } else {
+        toast.error("Failed to cancel", { description: data.error })
+      }
+    } catch {
+      toast.error("Failed to cancel subscription")
+    } finally {
+      setCancelling(false)
+    }
+  }
 
   const handleUpgrade = () => {
-    window.open(KOFI_PRO_LINK, "_blank")
-    toast.info("Complete your payment on Ko-fi", {
-      description: "After paying, come back and click 'I've Paid' to confirm.",
-    })
+    handleSubscribe()
   }
 
   const handleShowConfirmDialog = () => {
@@ -566,16 +603,13 @@ export default function SettingsPage() {
                       </div>
                       <div className="flex gap-2">
                         {profile?.plan !== "pro" && (
-                          <>
-                            <Button onClick={handleUpgrade}>Subscribe — $9.90/mo</Button>
-                            <Button variant="outline" onClick={handleShowConfirmDialog}>
-                              I&apos;ve Paid
-                            </Button>
-                          </>
+                          <Button onClick={handleSubscribe} disabled={subscribing}>
+                            {subscribing ? "Redirecting to PayPal..." : "Subscribe — $9.90/mo"}
+                          </Button>
                         )}
                         {profile?.plan === "pro" && !profile?.payment_pending && (
-                          <Button onClick={handleUpgrade} variant="outline">
-                            Renew — $9.90/mo
+                          <Button onClick={handleCancelSubscription} variant="outline" disabled={cancelling}>
+                            {cancelling ? "Cancelling..." : "Cancel Subscription"}
                           </Button>
                         )}
                       </div>
