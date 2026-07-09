@@ -3,8 +3,10 @@ import { Client, Environment } from "@paypal/paypal-server-sdk"
 const isLive = process.env.PAYPAL_MODE === "live"
 
 const paypalClient = new Client({
-  clientId: process.env.PAYPAL_CLIENT_ID!,
-  clientSecret: process.env.PAYPAL_CLIENT_SECRET!,
+  clientCredentialsAuthCredentials: {
+    oAuthClientId: process.env.PAYPAL_CLIENT_ID!,
+    oAuthClientSecret: process.env.PAYPAL_CLIENT_SECRET!,
+  },
   environment: isLive ? Environment.Production : Environment.Sandbox,
 })
 
