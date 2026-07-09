@@ -1,11 +1,11 @@
-import { PaypalClient, PaypalEnvironment } from "@paypal/paypal-server-sdk"
+import { Client, Environment } from "@paypal/paypal-server-sdk"
 
 const isLive = process.env.PAYPAL_MODE === "live"
 
-const paypalClient = new PaypalClient({
+const paypalClient = new Client({
   clientId: process.env.PAYPAL_CLIENT_ID!,
   clientSecret: process.env.PAYPAL_CLIENT_SECRET!,
-  environment: isLive ? PaypalEnvironment.Live : PaypalEnvironment.Sandbox,
+  environment: isLive ? Environment.Production : Environment.Sandbox,
 })
 
 export { paypalClient }
@@ -16,37 +16,42 @@ export const PAYPAL_PLAN_ID = process.env.PAYPAL_PLAN_ID || "P-0EV63716US865732J
 // Create a subscription
 export async function createPaypalSubscription(userId: string) {
   const request = {
-    planId: PAYPAL_PLAN_ID,
-    subscriber: {
-      name: {
-        given_name: "CreatorDeal",
-        surname: "User",
+    body: {
+      plan_id: PAYPAL_PLAN_ID,
+      subscriber: {
+        name: {
+          given_name: "CreatorDeal",
+          surname: "User",
+        },
       },
-    },
-    application_context: {
-      brand_name: "CreatorDeal",
-      locale: "en-US",
-      shipping_preference: "NO_SHIPPING",
-      user_action: "SUBSCRIBE_NOW",
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings?subscription=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings?subscription=cancelled`,
+      application_context: {
+        brand_name: "CreatorDeal",
+        locale: "en-US",
+        shipping_preference: "NO_SHIPPING" as const,
+        user_action: "SUBSCRIBE_NOW" as const,
+        return_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings?subscription=success`,
+        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/settings?subscription=cancelled`,
+      },
     },
   }
 
-  const { body, ...httpResponse } = await paypalClient.subscriptionsController.createSubscription(request)
-  return { body: JSON.parse(body as string), statusCode: httpResponse.statusCode }
+  const response = await paypalClient.subscriptionsController.createSubscription(request)
+  return { body: response.result, statusCode: response.statusCode }
 }
 
 // Get subscription details
 export async function getPaypalSubscription(subscriptionId: string) {
-  const { body, ...httpResponse } = await paypalClient.subscriptionsController.getSubscription(subscriptionId)
-  return { body: JSON.parse(body as string), statusCode: httpResponse.statusCode }
+  const response = await paypalClient.subscriptionsController.getSubscription({ id: subscriptionId })
+  return { body: response.result, statusCode: response.statusCode }
 }
 
 // Cancel a subscription
 export async function cancelPaypalSubscription(subscriptionId: string, reason: string = "User requested cancellation") {
-  const { body, ...httpResponse } = await paypalClient.subscriptionsController.cancelSubscription(subscriptionId, { reason })
-  return { body: body ? JSON.parse(body as string) : null, statusCode: httpResponse.statusCode }
+  const response = await paypalClient.subscriptionsController.cancelSubscription({
+    id: subscriptionId,
+    body: { reason },
+  })
+  return { body: response.result, statusCode: response.statusCode }
 }
 
 // Verify webhook signature (simplified - in production use PayPal's SDK verification)
