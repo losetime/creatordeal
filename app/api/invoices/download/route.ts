@@ -111,7 +111,7 @@ export async function POST(request: Request) {
     )
 
     const pdfBuffer = await renderToBuffer(el)
-    return new Response(pdfBuffer, {
+    return new Response(new Uint8Array(pdfBuffer), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${invoice.invoice_number}.pdf"`,
