@@ -20,8 +20,9 @@ export async function GET(request: Request) {
       .single()
 
     if (error) {
-      console.error("Profile query error:", error)
+      console.error("Profile query error:", JSON.stringify(error))
     }
+    console.log("Status API - userId:", user.id, "profile:", JSON.stringify(profile))
 
     return NextResponse.json({
       hasSubscription: !!profile?.paypal_subscription_id,
