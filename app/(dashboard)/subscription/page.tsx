@@ -11,6 +11,10 @@ import { trpc } from "@/lib/trpc/client"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { useSearchParams } from "next/navigation"
 
+// Module-level state to persist across component remounts
+let isPollingActive = false
+let pollingTimeoutId: NodeJS.Timeout | null = null
+
 export default function SubscriptionPage() {
   const searchParams = useSearchParams()
   const [subscribing, setSubscribing] = useState(false)
@@ -21,13 +25,10 @@ export default function SubscriptionPage() {
   const { data: profile, isLoading: profileLoading } = trpc.profiles.get.useQuery()
   const utilsRef = useRef(utils)
   utilsRef.current = utils
-  const pollingRef = useRef(false)
   const toastShownRef = useRef(false)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Handle PayPal callback
   useEffect(() => {
-    console.log("Effect running, searchParams:", searchParams.get("subscription"))
     const subscriptionStatus = searchParams.get("subscription")
     if (subscriptionStatus !== "success") {
       if (subscriptionStatus === "cancelled") {
@@ -37,11 +38,10 @@ export default function SubscriptionPage() {
       return
     }
 
-    // Prevent duplicate polling
-    console.log("pollingRef.current:", pollingRef.current)
-    if (pollingRef.current) return
-    pollingRef.current = true
-    console.log("Starting polling")
+    // Prevent duplicate polling using module-level state
+    if (isPollingActive) return
+    isPollingActive = true
+
     setVerifying(true)
     let retryCount = 0
     const MAX_RETRIES = 10
@@ -51,56 +51,54 @@ export default function SubscriptionPage() {
       try {
         const res = await fetch("/api/paypal/status")
         const data = await res.json()
-        console.log("Polling status:", data)
 
         if (data.hasSubscription && data.status === "active" && data.plan === "pro") {
-          console.log("Subscription success, setting verifying=false")
           utilsRef.current.profiles.get.invalidate()
           if (!toastShownRef.current) {
             toastShownRef.current = true
             toast.success("Subscription activated!", { description: "Welcome to Creator Club!" })
           }
           setVerifying(false)
+          isPollingActive = false
           window.history.replaceState({}, "", "/subscription")
           return
         }
 
         retryCount++
         if (retryCount >= MAX_RETRIES) {
-          console.log("Max retries reached, setting verifying=false")
           toast.error("Verification pending", {
             description: "Your payment is being processed. Please check back in a few minutes."
           })
           setVerifying(false)
+          isPollingActive = false
           window.history.replaceState({}, "", "/subscription")
           return
         }
 
         // Schedule next poll
-        timeoutRef.current = setTimeout(checkStatus, POLL_INTERVAL)
+        pollingTimeoutId = setTimeout(checkStatus, POLL_INTERVAL)
       } catch {
         retryCount++
         if (retryCount >= MAX_RETRIES) {
-          console.log("Max retries reached (catch), setting verifying=false")
           toast.error("Verification pending", {
             description: "Your payment is being processed. Please check back in a few minutes."
           })
           setVerifying(false)
+          isPollingActive = false
           window.history.replaceState({}, "", "/subscription")
           return
         }
         // Schedule next poll
-        timeoutRef.current = setTimeout(checkStatus, POLL_INTERVAL)
+        pollingTimeoutId = setTimeout(checkStatus, POLL_INTERVAL)
       }
     }
 
     checkStatus()
 
     return () => {
-      console.log("Cleanup running, timeoutRef.current:", timeoutRef.current)
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-        timeoutRef.current = null
+      if (pollingTimeoutId) {
+        clearTimeout(pollingTimeoutId)
+        pollingTimeoutId = null
       }
     }
   }, [searchParams])
@@ -132,7 +130,8 @@ export default function SubscriptionPage() {
       const data = await res.json()
       if (data.success) {
         toast.success("Subscription cancelled", { description: data.message })
-        utilsRef.current.profiles.get.invalidate()
+        isPollingActive = false
+        utils.profiles.get.invalidate()
       } else {
         toast.error("Failed to cancel", { description: data.error })
       }
