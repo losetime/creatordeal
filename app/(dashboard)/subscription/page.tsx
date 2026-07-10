@@ -38,6 +38,7 @@ export default function SubscriptionPage() {
     if (pollingRef.current) return
     pollingRef.current = true
 
+    console.log("Starting polling, setting verifying=true")
     setVerifying(true)
     let retryCount = 0
     const MAX_RETRIES = 10
@@ -48,8 +49,10 @@ export default function SubscriptionPage() {
       try {
         const res = await fetch("/api/paypal/status")
         const data = await res.json()
+        console.log("Polling status:", data)
 
         if (data.hasSubscription && data.status === "active" && data.plan === "pro") {
+          console.log("Subscription success, setting verifying=false")
           utilsRef.current.profiles.get.invalidate()
           if (!toastShownRef.current) {
             toastShownRef.current = true
@@ -62,6 +65,7 @@ export default function SubscriptionPage() {
 
         retryCount++
         if (retryCount >= MAX_RETRIES) {
+          console.log("Max retries reached (try), setting verifying=false")
           toast.error("Verification pending", {
             description: "Your payment is being processed. Please check back in a few minutes."
           })
@@ -74,6 +78,7 @@ export default function SubscriptionPage() {
       } catch {
         retryCount++
         if (retryCount >= MAX_RETRIES) {
+          console.log("Max retries reached (catch), setting verifying=false")
           toast.error("Verification pending", {
             description: "Your payment is being processed. Please check back in a few minutes."
           })
