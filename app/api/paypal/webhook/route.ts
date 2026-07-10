@@ -106,9 +106,7 @@ export async function POST(request: Request) {
 
       case "PAYMENT.SALE.COMPLETED": {
         // Payment completed (renewal)
-        const subscriptionId = resource.billing_info?.next_billing_time
-          ? resource.id
-          : null
+        const subscriptionId = resource.billing_agreement_id
 
         if (subscriptionId) {
           const { data: profile } = await admin
@@ -118,10 +116,12 @@ export async function POST(request: Request) {
             .single()
 
           if (profile) {
+            const expiresAt = resource.billing_info?.next_billing_time
+              || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
             await admin
               .from("profiles")
               .update({
-                subscription_expires_at: resource.billing_info?.next_billing_time,
+                subscription_expires_at: expiresAt,
                 last_payment_at: new Date().toISOString(),
               })
               .eq("id", profile.id)

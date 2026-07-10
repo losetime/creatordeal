@@ -20,6 +20,7 @@ export default function SubscriptionPage() {
 
   const { data: profile, isLoading: profileLoading } = trpc.profiles.get.useQuery()
   const pollingRef = useRef(false)
+  const toastShownRef = useRef(false)
 
   // Handle PayPal callback
   useEffect(() => {
@@ -49,7 +50,10 @@ export default function SubscriptionPage() {
 
         if (data.hasSubscription && data.status === "active" && data.plan === "pro") {
           utils.profiles.get.invalidate()
-          toast.success("Subscription activated!", { description: "Welcome to Creator Club!" })
+          if (!toastShownRef.current) {
+            toastShownRef.current = true
+            toast.success("Subscription activated!", { description: "Welcome to Creator Club!" })
+          }
           setVerifying(false)
           window.history.replaceState({}, "", "/subscription")
           return
