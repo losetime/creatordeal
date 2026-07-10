@@ -38,6 +38,7 @@ import {
   DollarSign,
   TrendingUp,
   User,
+  CreditCard,
 } from "lucide-react"
 
 export function AppSidebar() {
@@ -62,6 +63,7 @@ export function AppSidebar() {
 
   const secondaryNav = [
     { name: t("nav.notifications"), href: "/notifications", icon: Bell },
+    { name: "Subscription", href: "/subscription", icon: CreditCard },
     { name: t("nav.settings"), href: "/settings", icon: Settings },
   ]
 
