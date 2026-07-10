@@ -65,9 +65,9 @@ export default function SubscriptionPage() {
             toastShownRef.current = true
             toast.success("Subscription activated!", { description: "Welcome to Creator Club!" })
           }
-          setVerifying(false)
           isPollingActive = false
           window.history.replaceState({}, "", "/subscription")
+          setVerifying(false)
           return
         }
 
@@ -76,9 +76,9 @@ export default function SubscriptionPage() {
           toast.error("Verification pending", {
             description: "Your payment is being processed. Please check back in a few minutes."
           })
-          setVerifying(false)
           isPollingActive = false
           window.history.replaceState({}, "", "/subscription")
+          setVerifying(false)
           return
         }
 
@@ -90,9 +90,9 @@ export default function SubscriptionPage() {
           toast.error("Verification pending", {
             description: "Your payment is being processed. Please check back in a few minutes."
           })
-          setVerifying(false)
           isPollingActive = false
           window.history.replaceState({}, "", "/subscription")
+          setVerifying(false)
           return
         }
         // Schedule next poll
