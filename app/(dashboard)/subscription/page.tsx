@@ -36,7 +36,7 @@ export default function SubscriptionPage() {
     }
 
     // Prevent duplicate polling
-    if (pollingRef.current || verifying) return
+    if (pollingRef.current) return
     pollingRef.current = true
 
     console.log("Starting polling, setting verifying=true")
@@ -45,8 +45,12 @@ export default function SubscriptionPage() {
     const MAX_RETRIES = 10
     const POLL_INTERVAL = 2000
     let timeoutId: NodeJS.Timeout
+    let isRequestInProgress = false
 
     const checkStatus = async () => {
+      if (isRequestInProgress) return
+      isRequestInProgress = true
+
       try {
         const res = await fetch("/api/paypal/status")
         const data = await res.json()
@@ -75,6 +79,8 @@ export default function SubscriptionPage() {
           return
         }
 
+        // Wait for request to complete, then schedule next poll
+        isRequestInProgress = false
         timeoutId = setTimeout(checkStatus, POLL_INTERVAL)
       } catch {
         retryCount++
@@ -87,6 +93,7 @@ export default function SubscriptionPage() {
           window.history.replaceState({}, "", "/subscription")
           return
         }
+        isRequestInProgress = false
         timeoutId = setTimeout(checkStatus, POLL_INTERVAL)
       }
     }
@@ -96,7 +103,7 @@ export default function SubscriptionPage() {
     return () => {
       if (timeoutId) clearTimeout(timeoutId)
     }
-  }, [searchParams, verifying])
+  }, [searchParams])
 
   const handleSubscribe = async () => {
     setSubscribing(true)
