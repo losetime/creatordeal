@@ -17,18 +17,16 @@ export async function GET(request: Request) {
       .single()
 
     if (error) {
-      console.error("Profile query error:", JSON.stringify(error))
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({
       hasSubscription: !!profile?.paypal_subscription_id,
       plan: profile?.plan || "free",
       status: profile?.subscription_status,
-      expiresAt: profile?.subscription_expires_at,
       paypalSubscriptionId: profile?.paypal_subscription_id,
     })
   } catch (error: any) {
-    console.error("Get subscription status error:", error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
