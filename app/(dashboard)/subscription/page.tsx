@@ -19,7 +19,8 @@ export default function SubscriptionPage() {
   const utils = trpc.useUtils()
 
   const { data: profile, isLoading: profileLoading } = trpc.profiles.get.useQuery()
-  const utilsRef = useRef(trpc.useUtils())
+  const utilsRef = useRef(utils)
+  utilsRef.current = utils
   const pollingRef = useRef(false)
   const toastShownRef = useRef(false)
 
