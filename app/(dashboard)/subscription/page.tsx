@@ -27,6 +27,13 @@ export default function SubscriptionPage() {
   utilsRef.current = utils
   const toastShownRef = useRef(false)
 
+  // Sync verifying state with module-level polling state on mount
+  useEffect(() => {
+    if (isPollingActive) {
+      setVerifying(true)
+    }
+  }, [])
+
   // Handle PayPal callback
   useEffect(() => {
     const subscriptionStatus = searchParams.get("subscription")
