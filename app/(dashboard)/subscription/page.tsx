@@ -35,8 +35,8 @@ export default function SubscriptionPage() {
       return
     }
 
-    // Prevent duplicate polling in Strict Mode
-    if (pollingRef.current) return
+    // Prevent duplicate polling
+    if (pollingRef.current || verifying) return
     pollingRef.current = true
 
     console.log("Starting polling, setting verifying=true")
@@ -96,7 +96,7 @@ export default function SubscriptionPage() {
     return () => {
       if (timeoutId) clearTimeout(timeoutId)
     }
-  }, [searchParams])
+  }, [searchParams, verifying])
 
   const handleSubscribe = async () => {
     setSubscribing(true)
