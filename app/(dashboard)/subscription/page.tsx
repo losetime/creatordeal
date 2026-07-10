@@ -23,9 +23,11 @@ export default function SubscriptionPage() {
   utilsRef.current = utils
   const pollingRef = useRef(false)
   const toastShownRef = useRef(false)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Handle PayPal callback
   useEffect(() => {
+    console.log("Effect running, searchParams:", searchParams.get("subscription"))
     const subscriptionStatus = searchParams.get("subscription")
     if (subscriptionStatus !== "success") {
       if (subscriptionStatus === "cancelled") {
@@ -36,15 +38,14 @@ export default function SubscriptionPage() {
     }
 
     // Prevent duplicate polling
+    console.log("pollingRef.current:", pollingRef.current)
     if (pollingRef.current) return
     pollingRef.current = true
-
-    console.log("Starting polling, setting verifying=true")
+    console.log("Starting polling")
     setVerifying(true)
     let retryCount = 0
     const MAX_RETRIES = 10
     const POLL_INTERVAL = 2000
-    let timeoutId: NodeJS.Timeout
 
     const checkStatus = async () => {
       try {
@@ -66,7 +67,7 @@ export default function SubscriptionPage() {
 
         retryCount++
         if (retryCount >= MAX_RETRIES) {
-          console.log("Max retries reached (try), setting verifying=false")
+          console.log("Max retries reached, setting verifying=false")
           toast.error("Verification pending", {
             description: "Your payment is being processed. Please check back in a few minutes."
           })
@@ -75,8 +76,8 @@ export default function SubscriptionPage() {
           return
         }
 
-        // Request completed, schedule next poll after interval
-        timeoutId = setTimeout(checkStatus, POLL_INTERVAL)
+        // Schedule next poll
+        timeoutRef.current = setTimeout(checkStatus, POLL_INTERVAL)
       } catch {
         retryCount++
         if (retryCount >= MAX_RETRIES) {
@@ -88,15 +89,19 @@ export default function SubscriptionPage() {
           window.history.replaceState({}, "", "/subscription")
           return
         }
-        // Request completed (with error), schedule next poll after interval
-        timeoutId = setTimeout(checkStatus, POLL_INTERVAL)
+        // Schedule next poll
+        timeoutRef.current = setTimeout(checkStatus, POLL_INTERVAL)
       }
     }
 
     checkStatus()
 
     return () => {
-      if (timeoutId) clearTimeout(timeoutId)
+      console.log("Cleanup running, timeoutRef.current:", timeoutRef.current)
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
+      }
     }
   }, [searchParams])
 
