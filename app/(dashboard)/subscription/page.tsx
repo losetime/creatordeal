@@ -19,6 +19,7 @@ export default function SubscriptionPage() {
   const utils = trpc.useUtils()
 
   const { data: profile, isLoading: profileLoading } = trpc.profiles.get.useQuery()
+  const utilsRef = useRef(trpc.useUtils())
   const pollingRef = useRef(false)
   const toastShownRef = useRef(false)
 
@@ -49,7 +50,7 @@ export default function SubscriptionPage() {
         const data = await res.json()
 
         if (data.hasSubscription && data.status === "active" && data.plan === "pro") {
-          utils.profiles.get.invalidate()
+          utilsRef.current.profiles.get.invalidate()
           if (!toastShownRef.current) {
             toastShownRef.current = true
             toast.success("Subscription activated!", { description: "Welcome to Creator Club!" })
@@ -89,7 +90,7 @@ export default function SubscriptionPage() {
     return () => {
       if (timeoutId) clearTimeout(timeoutId)
     }
-  }, [searchParams, utils])
+  }, [searchParams])
 
   const handleSubscribe = async () => {
     setSubscribing(true)
@@ -118,7 +119,7 @@ export default function SubscriptionPage() {
       const data = await res.json()
       if (data.success) {
         toast.success("Subscription cancelled", { description: data.message })
-        utils.profiles.get.invalidate()
+        utilsRef.current.profiles.get.invalidate()
       } else {
         toast.error("Failed to cancel", { description: data.error })
       }
@@ -237,7 +238,7 @@ export default function SubscriptionPage() {
                       {subscribing ? "Redirecting to PayPal..." : "Subscribe — $9.90/mo"}
                     </Button>
                   )}
-                  {profile?.plan === "pro" && !profile?.payment_pending && (
+                  {profile?.plan === "pro" && profile?.subscription_status !== "cancelled" && (
                     <Button onClick={handleCancelSubscription} variant="outline" disabled={cancelling}>
                       {cancelling ? "Cancelling..." : "Cancel Subscription"}
                     </Button>
