@@ -20,7 +20,7 @@ import { useLocale } from "@/hooks/use-locale"
 
 const KOFI_PRO_LINK = "https://ko-fi.com/summary/502183d7-97b2-4f16-a024-393a2d5087a6"
 
-type NavSection = "profile" | "billing" | "subscription" | "notifications" | "security"
+type NavSection = "profile" | "billing" | "notifications" | "security"
 
 const timezones = [
   { value: "America/New_York", label: "Eastern Time (ET)" },
@@ -235,7 +235,6 @@ export default function SettingsPage() {
   const navItems = [
     { icon: User, label: "Profile", id: "profile" as NavSection },
     { icon: CreditCard, label: "Billing", id: "billing" as NavSection },
-    { icon: DollarSign, label: "Subscription", id: "subscription" as NavSection },
     { icon: Bell, label: "Notifications", id: "notifications" as NavSection },
     { icon: Shield, label: "Security", id: "security" as NavSection },
   ]
