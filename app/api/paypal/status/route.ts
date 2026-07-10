@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { getPaypalSubscription } from "@/lib/paypal"
 
 export async function GET(request: Request) {
@@ -11,21 +12,18 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { data: profile, error } = await supabase
+    // Use admin client to bypass RLS
+    const admin = createAdminClient()
+    const { data: profile, error } = await admin
       .from("profiles")
       .select("paypal_subscription_id, plan, subscription_status, subscription_expires_at")
       .eq("id", user.id)
       .single()
 
-    console.log("Status API - user:", user.id)
-    console.log("Status API - profile:", JSON.stringify(profile))
-    console.log("Status API - error:", error)
-
     if (!profile?.paypal_subscription_id) {
       return NextResponse.json({
         hasSubscription: false,
         plan: profile?.plan || "free",
-        debug: { userId: user.id, profile }
       })
     }
 
