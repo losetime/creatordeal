@@ -11,16 +11,21 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { data: profile } = await supabase
+    const { data: profile, error } = await supabase
       .from("profiles")
       .select("paypal_subscription_id, plan, subscription_status, subscription_expires_at")
       .eq("id", user.id)
       .single()
 
+    console.log("Status API - user:", user.id)
+    console.log("Status API - profile:", JSON.stringify(profile))
+    console.log("Status API - error:", error)
+
     if (!profile?.paypal_subscription_id) {
       return NextResponse.json({
         hasSubscription: false,
         plan: profile?.plan || "free",
+        debug: { userId: user.id, profile }
       })
     }
 
