@@ -42,7 +42,7 @@ export default function SubscriptionPage() {
         const res = await fetch("/api/paypal/status")
         const data = await res.json()
 
-        if (data.hasSubscription && (data.status === "active" || data.plan === "pro")) {
+        if (data.hasSubscription && data.status === "active" && data.plan === "pro") {
           utils.profiles.get.invalidate()
           toast.success("Subscription activated!", { description: "Welcome to Creator Club!" })
           setVerifying(false)
