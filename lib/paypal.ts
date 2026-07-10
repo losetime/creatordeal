@@ -33,8 +33,8 @@ export async function createPaypalSubscription(userId: string) {
         locale: "en-US",
         shippingPreference: ExperienceContextShippingPreference.NoShipping,
         userAction: ApplicationContextUserAction.SubscribeNow,
-        returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/settings?subscription=success`,
-        cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/settings?subscription=cancelled`,
+        returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/subscription?subscription=success`,
+        cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/subscription?subscription=cancelled`,
       },
     },
   }
