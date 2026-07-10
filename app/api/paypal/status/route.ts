@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
     const { data: profile, error } = await supabase
       .from("profiles")
-      .select("paypal_subscription_id, plan, subscription_status, subscription_expires_at")
+      .select("paypal_subscription_id, plan, subscription_status")
       .eq("id", user.id)
       .single()
 
