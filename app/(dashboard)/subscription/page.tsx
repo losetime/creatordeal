@@ -23,7 +23,6 @@ export default function SubscriptionPage() {
   utilsRef.current = utils
   const pollingRef = useRef(false)
   const toastShownRef = useRef(false)
-  const requestInProgressRef = useRef(false)
 
   // Handle PayPal callback
   useEffect(() => {
@@ -48,12 +47,6 @@ export default function SubscriptionPage() {
     let timeoutId: NodeJS.Timeout
 
     const checkStatus = async () => {
-      // Wait for previous request to complete
-      while (requestInProgressRef.current) {
-        await new Promise(r => setTimeout(r, 100))
-      }
-      requestInProgressRef.current = true
-
       try {
         const res = await fetch("/api/paypal/status")
         const data = await res.json()
@@ -82,8 +75,7 @@ export default function SubscriptionPage() {
           return
         }
 
-        // Wait for request to complete, then schedule next poll
-        requestInProgressRef.current = false
+        // Request completed, schedule next poll after interval
         timeoutId = setTimeout(checkStatus, POLL_INTERVAL)
       } catch {
         retryCount++
@@ -96,7 +88,7 @@ export default function SubscriptionPage() {
           window.history.replaceState({}, "", "/subscription")
           return
         }
-        requestInProgressRef.current = false
+        // Request completed (with error), schedule next poll after interval
         timeoutId = setTimeout(checkStatus, POLL_INTERVAL)
       }
     }
