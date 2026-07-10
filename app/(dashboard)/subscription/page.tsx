@@ -23,32 +23,62 @@ export default function SubscriptionPage() {
   // Handle PayPal callback
   useEffect(() => {
     const subscriptionStatus = searchParams.get("subscription")
-    if (subscriptionStatus === "success") {
-      setVerifying(true)
-      // Poll for subscription status
-      const checkStatus = async () => {
-        try {
-          const res = await fetch("/api/paypal/status")
-          const data = await res.json()
-          console.log("Status check:", data)
-          if (data.hasSubscription && (data.status === "active" || data.plan === "pro")) {
-            utils.profiles.get.invalidate()
-            toast.success("Subscription activated!", { description: "Welcome to Creator Club!" })
-            setVerifying(false)
-            // Clean URL
-            window.history.replaceState({}, "", "/subscription")
-          } else {
-            // Retry after 2 seconds
-            setTimeout(checkStatus, 2000)
-          }
-        } catch {
-          setTimeout(checkStatus, 2000)
-        }
+    if (subscriptionStatus !== "success") {
+      if (subscriptionStatus === "cancelled") {
+        toast.info("Subscription cancelled", { description: "You can resubscribe anytime." })
+        window.history.replaceState({}, "", "/subscription")
       }
-      checkStatus()
-    } else if (subscriptionStatus === "cancelled") {
-      toast.info("Subscription cancelled", { description: "You can resubscribe anytime." })
-      window.history.replaceState({}, "", "/subscription")
+      return
+    }
+
+    setVerifying(true)
+    let retryCount = 0
+    const MAX_RETRIES = 10
+    const POLL_INTERVAL = 2000
+    let timeoutId: NodeJS.Timeout
+
+    const checkStatus = async () => {
+      try {
+        const res = await fetch("/api/paypal/status")
+        const data = await res.json()
+
+        if (data.hasSubscription && (data.status === "active" || data.plan === "pro")) {
+          utils.profiles.get.invalidate()
+          toast.success("Subscription activated!", { description: "Welcome to Creator Club!" })
+          setVerifying(false)
+          window.history.replaceState({}, "", "/subscription")
+          return
+        }
+
+        retryCount++
+        if (retryCount >= MAX_RETRIES) {
+          toast.error("Verification pending", {
+            description: "Your payment is being processed. Please check back in a few minutes."
+          })
+          setVerifying(false)
+          window.history.replaceState({}, "", "/subscription")
+          return
+        }
+
+        timeoutId = setTimeout(checkStatus, POLL_INTERVAL)
+      } catch {
+        retryCount++
+        if (retryCount >= MAX_RETRIES) {
+          toast.error("Verification pending", {
+            description: "Your payment is being processed. Please check back in a few minutes."
+          })
+          setVerifying(false)
+          window.history.replaceState({}, "", "/subscription")
+          return
+        }
+        timeoutId = setTimeout(checkStatus, POLL_INTERVAL)
+      }
+    }
+
+    checkStatus()
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
     }
   }, [searchParams, utils])
 
@@ -137,6 +167,18 @@ export default function SubscriptionPage() {
             <Loader2 className="h-12 w-12 text-teal-500 animate-spin mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Confirming your subscription...</h3>
             <p className="text-sm text-muted-foreground">Please wait while we verify your payment with PayPal.</p>
+            <p className="text-xs text-muted-foreground mt-2">This usually takes less than 30 seconds.</p>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-4"
+              onClick={() => {
+                setVerifying(false)
+                window.history.replaceState({}, "", "/subscription")
+              }}
+            >
+              Cancel and check later
+            </Button>
           </CardContent>
         </Card>
       )}
