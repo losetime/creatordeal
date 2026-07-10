@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import {
-  User, CreditCard, Bell, Shield, Mail, Settings, Check,
+  User, Bell, Shield, Mail, Settings, Check,
   Globe, Clock, DollarSign, Download, Key, CheckCircle
 } from "lucide-react"
 import { trpc } from "@/lib/trpc/client"
@@ -20,7 +20,7 @@ import { useLocale } from "@/hooks/use-locale"
 
 const KOFI_PRO_LINK = "https://ko-fi.com/summary/502183d7-97b2-4f16-a024-393a2d5087a6"
 
-type NavSection = "profile" | "billing" | "notifications" | "security"
+type NavSection = "profile" | "notifications" | "security"
 
 const timezones = [
   { value: "America/New_York", label: "Eastern Time (ET)" },
@@ -75,29 +75,6 @@ function ProfileSkeleton() {
   )
 }
 
-function BillingSkeleton() {
-  return (
-    <div className="space-y-4">
-      <Skeleton className="h-24 w-full rounded-lg" />
-      {[...Array(3)].map((_, i) => (
-        <div key={i} className="flex items-center justify-between p-4 rounded-lg">
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-9 w-9 rounded-full" />
-            <div className="space-y-1.5">
-              <Skeleton className="h-3.5 w-36" />
-              <Skeleton className="h-3 w-24" />
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-5 w-14 rounded-full" />
-            <Skeleton className="h-4 w-16" />
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
 export default function SettingsPage() {
   const { user, signOut } = useAuth()
   const { t, locale, setLocale } = useLocale()
@@ -118,7 +95,6 @@ export default function SettingsPage() {
   const [currency, setCurrency] = useState("USD")
 
   const { data: profile, isLoading: profileLoading } = trpc.profiles.get.useQuery()
-  const { data: invoices, isLoading: invoicesLoading } = trpc.invoices.list.useQuery()
   const { data: notifPrefs } = trpc.notificationPreferences.get.useQuery()
 
   // Load notification preferences from database
@@ -234,7 +210,6 @@ export default function SettingsPage() {
 
   const navItems = [
     { icon: User, label: "Profile", id: "profile" as NavSection },
-    { icon: CreditCard, label: "Billing", id: "billing" as NavSection },
     { icon: Bell, label: "Notifications", id: "notifications" as NavSection },
     { icon: Shield, label: "Security", id: "security" as NavSection },
   ]
@@ -447,69 +422,6 @@ export default function SettingsPage() {
                       {updateProfile.isPending ? `${t("common.loading")}` : t("settings.saveSettings")}
                     </Button>
                   </>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Billing */}
-          {activeNav === "billing" && (
-            <Card className="shadow-card overflow-hidden border-0">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <DollarSign className="h-4 w-4 text-emerald-500" />
-                  Billing History
-                </CardTitle>
-                <CardDescription>
-                  View and download your past invoices
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                {invoicesLoading ? (
-                  <BillingSkeleton />
-                ) : (invoices ?? []).length === 0 ? (
-                  <div className="p-8 text-center text-muted-foreground text-sm">
-                    No invoices yet. They&apos;ll appear here once you&apos;re billed.
-                  </div>
-                ) : (
-                  <div className="divide-y">
-                    {(invoices ?? []).map((invoice) => (
-                      <div key={invoice.id} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 rounded-full bg-emerald-100 flex items-center justify-center">
-                            <DollarSign className="h-4 w-4 text-emerald-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">
-                              {invoice.deals?.brands?.name ? `${invoice.deals.brands.name} - ` : ""}
-                              {invoice.deals?.title ?? "Invoice"}
-                            </p>
-                            <p className="text-xs text-muted-foreground">{formatDate(invoice.due_date)}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Badge
-                            variant="secondary"
-                            className={`text-xs ${
-                              invoice.status === "paid"
-                                ? "bg-emerald-100 text-emerald-700"
-                                : invoice.status === "overdue"
-                                ? "bg-rose-100 text-rose-700"
-                                : invoice.status === "sent"
-                                ? "bg-blue-100 text-blue-700"
-                                : "bg-slate-100 text-slate-600"
-                            }`}
-                          >
-                            {invoice.status}
-                          </Badge>
-                          <span className="text-sm font-medium">{formatCurrency(invoice.amount)}</span>
-                          <Button variant="ghost" size="sm" onClick={() => toast.success("Invoice downloaded", { description: `${invoice.invoice_number}.pdf` })}>
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                 )}
               </CardContent>
             </Card>
