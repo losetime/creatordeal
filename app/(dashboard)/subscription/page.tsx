@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -19,6 +19,7 @@ export default function SubscriptionPage() {
   const utils = trpc.useUtils()
 
   const { data: profile, isLoading: profileLoading } = trpc.profiles.get.useQuery()
+  const pollingRef = useRef(false)
 
   // Handle PayPal callback
   useEffect(() => {
@@ -30,6 +31,10 @@ export default function SubscriptionPage() {
       }
       return
     }
+
+    // Prevent duplicate polling in Strict Mode
+    if (pollingRef.current) return
+    pollingRef.current = true
 
     setVerifying(true)
     let retryCount = 0

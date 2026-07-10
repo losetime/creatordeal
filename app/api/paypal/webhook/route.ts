@@ -17,6 +17,7 @@ export async function POST(request: Request) {
     const resource = body.resource
 
     console.log("PayPal webhook received:", eventType, resource?.id)
+    console.log("Webhook resource payload:", JSON.stringify(resource, null, 2))
 
     const admin = createAdminClient()
     const resend = new Resend(process.env.RESEND_API_KEY)
@@ -27,6 +28,10 @@ export async function POST(request: Request) {
         const subscriptionId = resource.id
         const subscriberEmail = resource.subscriber?.email_address
         const nextBillingTime = resource.next_billing_time
+          || resource.billing_info?.next_billing_time
+          || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days fallback
+
+        console.log("next_billing_time resolved:", nextBillingTime)
 
         // Find user by paypal_subscription_id or subscriber email
         const { data: profile } = await admin
