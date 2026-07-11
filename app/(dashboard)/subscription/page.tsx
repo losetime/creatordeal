@@ -31,6 +31,7 @@ export default function SubscriptionPage() {
   // 处理 PayPal 回调，发起（或跳过重复发起）轮询
   useEffect(() => {
     const subscriptionStatus = searchParams.get("subscription")
+    console.log("subscriptionStatus:", subscriptionStatus)
 
     if (subscriptionStatus === "cancelled") {
       toast.info("Subscription cancelled", { description: "You can resubscribe anytime." })
@@ -40,6 +41,7 @@ export default function SubscriptionPage() {
 
     if (subscriptionStatus !== "success") return
 
+    console.log("Starting polling from store")
     paypalVerificationStore.start(
       // onSuccess
       () => {
