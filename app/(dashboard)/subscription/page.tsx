@@ -9,12 +9,13 @@ import { toast } from "sonner"
 import { CreditCard, CheckCircle, Clock, DollarSign, Check, Loader2 } from "lucide-react"
 import { trpc } from "@/lib/trpc/client"
 import { formatDate } from "@/lib/utils"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { paypalVerificationStore } from "@/lib/paypal-verification-store"
 import { usePaypalVerification } from "@/hooks/use-paypal-verification"
 
 export default function SubscriptionPage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const [subscribing, setSubscribing] = useState(false)
   const [cancelling, setCancelling] = useState(false)
   const utils = trpc.useUtils()
@@ -33,7 +34,7 @@ export default function SubscriptionPage() {
 
     if (subscriptionStatus === "cancelled") {
       toast.info("Subscription cancelled", { description: "You can resubscribe anytime." })
-      window.history.replaceState({}, "", "/subscription")
+      router.replace("/subscription")
       return
     }
 
@@ -44,14 +45,14 @@ export default function SubscriptionPage() {
       () => {
         utilsRef.current.profiles.get.invalidate()
         toast.success("Subscription activated!", { description: "Welcome to Creator Club!" })
-        window.history.replaceState({}, "", "/subscription")
+        router.replace("/subscription")
       },
       // onGiveUp
       () => {
         toast.error("Verification pending", {
           description: "Your payment is being processed. Please check back in a few minutes."
         })
-        window.history.replaceState({}, "", "/subscription")
+        router.replace("/subscription")
       }
     )
     // 注意：这里没有清理函数去 clearTimeout —— 轮询交给 store 自己管理生命周期，
@@ -150,7 +151,7 @@ export default function SubscriptionPage() {
               className="mt-4"
               onClick={() => {
                 paypalVerificationStore.stop()
-                window.history.replaceState({}, "", "/subscription")
+                router.replace("/subscription")
               }}
             >
               Check later
