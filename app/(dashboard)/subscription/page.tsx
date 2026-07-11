@@ -1,113 +1,61 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
-import { CreditCard, CheckCircle, Clock, DollarSign, Check, Loader2, ExternalLink } from "lucide-react"
+import { CreditCard, CheckCircle, Clock, DollarSign, Check, Loader2 } from "lucide-react"
 import { trpc } from "@/lib/trpc/client"
-import { formatCurrency, formatDate } from "@/lib/utils"
+import { formatDate } from "@/lib/utils"
 import { useSearchParams } from "next/navigation"
-
-// Module-level state to persist across component remounts
-let isPollingActive = false
-let pollingTimeoutId: NodeJS.Timeout | null = null
+import { paypalVerificationStore } from "@/lib/paypal-verification-store"
+import { usePaypalVerification } from "@/hooks/use-paypal-verification"
 
 export default function SubscriptionPage() {
   const searchParams = useSearchParams()
   const [subscribing, setSubscribing] = useState(false)
   const [cancelling, setCancelling] = useState(false)
-  const [verifying, setVerifying] = useState(false)
   const utils = trpc.useUtils()
-
-  const { data: profile, isLoading: profileLoading } = trpc.profiles.get.useQuery()
   const utilsRef = useRef(utils)
   utilsRef.current = utils
-  const toastShownRef = useRef(false)
 
-  // Sync verifying state with module-level polling state on mount
-  useEffect(() => {
-    if (isPollingActive) {
-      setVerifying(true)
-    }
-  }, [])
+  const { data: profile, isLoading: profileLoading } = trpc.profiles.get.useQuery()
 
-  // Handle PayPal callback
+  // 唯一的状态来源：verifying / success / idle / failed 都来自这个 store
+  const verification = usePaypalVerification()
+  const verifying = verification.status === "verifying"
+
+  // 处理 PayPal 回调，发起（或跳过重复发起）轮询
   useEffect(() => {
     const subscriptionStatus = searchParams.get("subscription")
-    if (subscriptionStatus !== "success") {
-      if (subscriptionStatus === "cancelled") {
-        toast.info("Subscription cancelled", { description: "You can resubscribe anytime." })
-        window.history.replaceState({}, "", "/subscription")
-      }
+
+    if (subscriptionStatus === "cancelled") {
+      toast.info("Subscription cancelled", { description: "You can resubscribe anytime." })
+      window.history.replaceState({}, "", "/subscription")
       return
     }
 
-    // Prevent duplicate polling using module-level state
-    if (isPollingActive) return
-    isPollingActive = true
+    if (subscriptionStatus !== "success") return
 
-    setVerifying(true)
-    let retryCount = 0
-    const MAX_RETRIES = 10
-    const POLL_INTERVAL = 2000
-
-    const checkStatus = async () => {
-      try {
-        const res = await fetch("/api/paypal/status")
-        const data = await res.json()
-
-        if (data.hasSubscription && data.status === "active" && data.plan === "pro") {
-          utilsRef.current.profiles.get.invalidate()
-          if (!toastShownRef.current) {
-            toastShownRef.current = true
-            toast.success("Subscription activated!", { description: "Welcome to Creator Club!" })
-          }
-          isPollingActive = false
-          window.history.replaceState({}, "", "/subscription")
-          setVerifying(false)
-          return
-        }
-
-        retryCount++
-        if (retryCount >= MAX_RETRIES) {
-          toast.error("Verification pending", {
-            description: "Your payment is being processed. Please check back in a few minutes."
-          })
-          isPollingActive = false
-          window.history.replaceState({}, "", "/subscription")
-          setVerifying(false)
-          return
-        }
-
-        // Schedule next poll
-        pollingTimeoutId = setTimeout(checkStatus, POLL_INTERVAL)
-      } catch {
-        retryCount++
-        if (retryCount >= MAX_RETRIES) {
-          toast.error("Verification pending", {
-            description: "Your payment is being processed. Please check back in a few minutes."
-          })
-          isPollingActive = false
-          window.history.replaceState({}, "", "/subscription")
-          setVerifying(false)
-          return
-        }
-        // Schedule next poll
-        pollingTimeoutId = setTimeout(checkStatus, POLL_INTERVAL)
+    paypalVerificationStore.start(
+      // onSuccess
+      () => {
+        utilsRef.current.profiles.get.invalidate()
+        toast.success("Subscription activated!", { description: "Welcome to Creator Club!" })
+        window.history.replaceState({}, "", "/subscription")
+      },
+      // onGiveUp
+      () => {
+        toast.error("Verification pending", {
+          description: "Your payment is being processed. Please check back in a few minutes."
+        })
+        window.history.replaceState({}, "", "/subscription")
       }
-    }
-
-    checkStatus()
-
-    return () => {
-      if (pollingTimeoutId) {
-        clearTimeout(pollingTimeoutId)
-        pollingTimeoutId = null
-      }
-    }
+    )
+    // 注意：这里没有清理函数去 clearTimeout —— 轮询交给 store 自己管理生命周期，
+    // 组件卸载/重挂载都不会打断它，也不会产生"假的进行中"状态。
   }, [searchParams])
 
   const handleSubscribe = async () => {
@@ -137,7 +85,6 @@ export default function SubscriptionPage() {
       const data = await res.json()
       if (data.success) {
         toast.success("Subscription cancelled", { description: data.message })
-        isPollingActive = false
         utils.profiles.get.invalidate()
       } else {
         toast.error("Failed to cancel", { description: data.error })
@@ -202,11 +149,11 @@ export default function SubscriptionPage() {
               size="sm"
               className="mt-4"
               onClick={() => {
-                setVerifying(false)
+                paypalVerificationStore.stop()
                 window.history.replaceState({}, "", "/subscription")
               }}
             >
-              Cancel and check later
+              Check later
             </Button>
           </CardContent>
         </Card>
