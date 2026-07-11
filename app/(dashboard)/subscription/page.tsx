@@ -35,7 +35,7 @@ export default function SubscriptionPage() {
 
     if (subscriptionStatus === "cancelled") {
       toast.info("Subscription cancelled", { description: "You can resubscribe anytime." })
-      router.replace("/subscription")
+      router.replace(`/subscription?t=${Date.now()}`)
       return
     }
 
@@ -54,7 +54,7 @@ export default function SubscriptionPage() {
         toast.error("Verification pending", {
           description: "Your payment is being processed. Please check back in a few minutes."
         })
-        router.replace("/subscription")
+        router.replace(`/subscription?t=${Date.now()}`)
       }
     )
     // 注意：这里没有清理函数去 clearTimeout —— 轮询交给 store 自己管理生命周期，
@@ -153,7 +153,7 @@ export default function SubscriptionPage() {
               className="mt-4"
               onClick={() => {
                 paypalVerificationStore.stop()
-                router.replace("/subscription")
+                router.replace(`/subscription?t=${Date.now()}`)
               }}
             >
               Check later
