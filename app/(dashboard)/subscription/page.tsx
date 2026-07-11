@@ -21,8 +21,6 @@ export default function SubscriptionPage() {
   const utils = trpc.useUtils()
   const utilsRef = useRef(utils)
   utilsRef.current = utils
-  const routerRef = useRef(router)
-  routerRef.current = router
 
   const { data: profile, isLoading: profileLoading } = trpc.profiles.get.useQuery()
 
@@ -37,7 +35,7 @@ export default function SubscriptionPage() {
 
     if (subscriptionStatus === "cancelled") {
       toast.info("Subscription cancelled", { description: "You can resubscribe anytime." })
-      routerRef.current.replace("/subscription")
+      router.replace("/subscription")
       return
     }
 
@@ -49,14 +47,14 @@ export default function SubscriptionPage() {
       () => {
         utilsRef.current.profiles.get.invalidate()
         toast.success("Subscription activated!", { description: "Welcome to Creator Club!" })
-        routerRef.current.replace("/subscription")
+        router.replace(`/subscription?verified=${Date.now()}`)
       },
       // onGiveUp
       () => {
         toast.error("Verification pending", {
           description: "Your payment is being processed. Please check back in a few minutes."
         })
-        routerRef.current.replace("/subscription")
+        router.replace("/subscription")
       }
     )
     // 注意：这里没有清理函数去 clearTimeout —— 轮询交给 store 自己管理生命周期，
@@ -155,7 +153,7 @@ export default function SubscriptionPage() {
               className="mt-4"
               onClick={() => {
                 paypalVerificationStore.stop()
-                routerRef.current.replace("/subscription")
+                router.replace("/subscription")
               }}
             >
               Check later
