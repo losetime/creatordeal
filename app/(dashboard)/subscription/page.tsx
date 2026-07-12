@@ -9,13 +9,12 @@ import { toast } from "sonner"
 import { CreditCard, CheckCircle, Clock, DollarSign, Check, Loader2 } from "lucide-react"
 import { trpc } from "@/lib/trpc/client"
 import { formatDate } from "@/lib/utils"
-import { useSearchParams, useRouter } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { paypalVerificationStore } from "@/lib/paypal-verification-store"
 import { usePaypalVerification } from "@/hooks/use-paypal-verification"
 
 export default function SubscriptionPage() {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const [subscribing, setSubscribing] = useState(false)
   const [cancelling, setCancelling] = useState(false)
   const utils = trpc.useUtils()
@@ -31,34 +30,30 @@ export default function SubscriptionPage() {
   // 处理 PayPal 回调，发起（或跳过重复发起）轮询
   useEffect(() => {
     const subscriptionStatus = searchParams.get("subscription")
-    console.log("subscriptionStatus:", subscriptionStatus)
 
     if (subscriptionStatus === "cancelled") {
       toast.info("Subscription cancelled", { description: "You can resubscribe anytime." })
-      router.replace(`/subscription?t=${Date.now()}`)
+      window.location.href = "/subscription"
       return
     }
 
     if (subscriptionStatus !== "success") return
 
-    console.log("Starting polling from store")
     paypalVerificationStore.start(
       // onSuccess
       () => {
         utilsRef.current.profiles.get.invalidate()
         toast.success("Subscription activated!", { description: "Welcome to Creator Club!" })
-        router.replace(`/subscription?verified=${Date.now()}`)
+        window.location.href = "/subscription"
       },
       // onGiveUp
       () => {
         toast.error("Verification pending", {
           description: "Your payment is being processed. Please check back in a few minutes."
         })
-        router.replace(`/subscription?t=${Date.now()}`)
+        window.location.href = "/subscription"
       }
     )
-    // 注意：这里没有清理函数去 clearTimeout —— 轮询交给 store 自己管理生命周期，
-    // 组件卸载/重挂载都不会打断它，也不会产生"假的进行中"状态。
   }, [searchParams])
 
   const handleSubscribe = async () => {
@@ -153,7 +148,7 @@ export default function SubscriptionPage() {
               className="mt-4"
               onClick={() => {
                 paypalVerificationStore.stop()
-                router.replace(`/subscription?t=${Date.now()}`)
+                window.location.href = "/subscription"
               }}
             >
               Check later
