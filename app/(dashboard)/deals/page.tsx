@@ -77,6 +77,7 @@ export default function DealsPage() {
   const { t } = useLocale()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [brandFilter, setBrandFilter] = useState("")
   const [editingDeal, setEditingDeal] = useState<DealType | null>(null)
@@ -96,6 +97,22 @@ export default function DealsPage() {
   const utils = trpc.useUtils()
   const { data: deals = [], isLoading: dealsLoading } = trpc.deals.list.useQuery()
   const { data: brands = [] } = trpc.brands.list.useQuery()
+  const { data: profile } = trpc.profiles.get.useQuery()
+
+  // Check if user can create more deals
+  const canCreateDeal = () => {
+    if (profile?.plan === "pro" || profile?.plan === "team") return true
+    const activeDeals = deals.filter((d: DealType) => d.stage !== "closed")
+    return activeDeals.length < 3
+  }
+
+  const handleCreateClick = () => {
+    if (!canCreateDeal()) {
+      setIsUpgradeDialogOpen(true)
+      return
+    }
+    setIsDialogOpen(true)
+  }
 
   const createMutation = trpc.deals.create.useMutation({
     onSuccess: () => { utils.deals.list.invalidate(); toast.success("Deal created successfully") },
@@ -235,7 +252,7 @@ export default function DealsPage() {
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-black hover:bg-black/80 text-white h-8" size="sm">
+              <Button className="bg-black hover:bg-black/80 text-white h-8" size="sm" onClick={(e) => { e.preventDefault(); handleCreateClick() }}>
                 <Plus className="mr-1.5 h-3.5 w-3.5" />
                 {t("deals.createDeal")}
               </Button>
@@ -292,6 +309,32 @@ export default function DealsPage() {
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
                 <Button className="bg-black hover:bg-black/80 text-white" onClick={handleCreateDeal} disabled={createMutation.isPending}>
                   {createMutation.isPending ? "Creating..." : "Create Deal"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Upgrade Dialog */}
+          <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Upgrade to Creator Club</DialogTitle>
+                <DialogDescription>
+                  You&apos;ve reached the free plan limit of 3 active deals.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="rounded-lg bg-teal-50 p-4">
+                  <p className="text-sm text-teal-800">
+                    Upgrade to <strong>Creator Club</strong> for unlimited deals, smart invoicing, AI contract scanner, rate benchmarking, and priority support.
+                  </p>
+                </div>
+                <p className="text-sm text-muted-foreground">$9.90/month • Cancel anytime</p>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsUpgradeDialogOpen(false)}>Maybe Later</Button>
+                <Button className="bg-teal-600 hover:bg-teal-700 text-white" onClick={() => window.location.href = "/subscription"}>
+                  Upgrade Now
                 </Button>
               </DialogFooter>
             </DialogContent>
