@@ -7,6 +7,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -61,6 +69,7 @@ export function SmartDealCreator({ onComplete }: { onComplete?: () => void }) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null)
   const [editedData, setEditedData] = useState<ParsedData | null>(null)
+  const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false)
 
   const utils = trpc.useUtils()
 
@@ -164,6 +173,10 @@ export function SmartDealCreator({ onComplete }: { onComplete?: () => void }) {
       const data = await res.json()
 
       if (!res.ok) {
+        if (data.error === "DEAL_LIMIT_REACHED") {
+          setIsUpgradeDialogOpen(true)
+          return
+        }
         throw new Error(data.error || "Failed to create deal")
       }
 
@@ -435,6 +448,7 @@ export function SmartDealCreator({ onComplete }: { onComplete?: () => void }) {
 
   // Show upload form
   return (
+    <>
     <Card className="shadow-card">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -494,5 +508,32 @@ export function SmartDealCreator({ onComplete }: { onComplete?: () => void }) {
         )}
       </CardContent>
     </Card>
+
+    {/* Upgrade Dialog */}
+    <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Upgrade to Creator Club</DialogTitle>
+          <DialogDescription>
+            You&apos;ve reached the free plan limit of 3 active deals.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="rounded-lg bg-teal-50 p-4">
+            <p className="text-sm text-teal-800">
+              Upgrade to <strong>Creator Club</strong> for unlimited deals, smart invoicing, AI contract scanner, rate benchmarking, and priority support.
+            </p>
+          </div>
+          <p className="text-sm text-muted-foreground">$9.90/month • Cancel anytime</p>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setIsUpgradeDialogOpen(false)}>Maybe Later</Button>
+          <Button className="bg-teal-600 hover:bg-teal-700 text-white" onClick={() => window.location.href = "/subscription"}>
+            Upgrade Now
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   )
 }

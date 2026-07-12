@@ -50,6 +50,31 @@ export async function POST(request: Request) {
     const body = await request.json()
     const validatedData = createDealSchema.parse(body)
 
+    // Check plan limits for free users
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("plan")
+      .eq("id", user.id)
+      .single()
+
+    if (profile?.plan === "free") {
+      // Count active deals (not closed)
+      const { count } = await supabase
+        .from("deals")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .neq("stage", "closed")
+
+      if (count && count >= 3) {
+        return NextResponse.json({
+          error: "DEAL_LIMIT_REACHED",
+          message: "You've reached the free plan limit of 3 active deals.",
+          upgradeMessage: "Upgrade to Creator Club for unlimited deals, smart invoicing, AI contract scanner, and more.",
+          upgradeUrl: "/subscription"
+        }, { status: 403 })
+      }
+    }
+
     // 1. Create or find brand
     let brandId: string | null = null
 
