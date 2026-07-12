@@ -30,8 +30,8 @@ export async function POST(request: Request) {
       subscriptionId: body.id,
       approvalUrl: body.links?.find((l: any) => l.rel === "approve")?.href,
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error("Create subscription error:", error)
-    return NextResponse.json({ error: error.message || "Unknown error" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to create subscription" }, { status: 500 })
   }
 }

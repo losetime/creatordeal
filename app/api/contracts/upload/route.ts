@@ -21,6 +21,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "file and deal_id required" }, { status: 400 })
     }
 
+    // Check file size (max 10MB)
+    const MAX_FILE_SIZE = 10 * 1024 * 1024
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json({ error: "File size exceeds 10MB limit" }, { status: 400 })
+    }
+
     // Verify deal ownership
     const { data: deal, error: dealError } = await supabase
       .from("deals")

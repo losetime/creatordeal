@@ -155,7 +155,19 @@ export const ratesRouter = router({
 
   // Refresh crowdsourced aggregates from rate_history
   // Can be called periodically (e.g., via cron) or on-demand
+  // Admin only
   refreshAggregates: protectedProcedure.mutation(async ({ ctx }) => {
+    // Check admin role
+    const { data: profile } = await ctx.supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", ctx.user.id)
+      .single()
+
+    if (profile?.role !== "admin") {
+      throw new Error("Admin access required")
+    }
+
     const admin = createAdminClient()
 
     // Compute aggregates using raw SQL for efficiency

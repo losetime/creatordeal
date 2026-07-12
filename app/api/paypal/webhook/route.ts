@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { verifyWebhookSignature } from "@/lib/paypal"
 import { Resend } from "resend"
 
 function formatDate(dateStr: string): string {
@@ -12,12 +13,25 @@ function formatDate(dateStr: string): string {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
+    // Get raw body for signature verification
+    const rawBody = await request.text()
+    const headers: Record<string, string> = {}
+    request.headers.forEach((value, key) => {
+      headers[key] = value
+    })
+
+    // Verify webhook signature
+    const isValid = await verifyWebhookSignature(headers, rawBody)
+    if (!isValid) {
+      console.error("PayPal webhook signature verification failed")
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
+    }
+
+    const body = JSON.parse(rawBody)
     const eventType = body.event_type
     const resource = body.resource
 
     console.log("PayPal webhook received:", eventType, resource?.id)
-    console.log("Webhook resource payload:", JSON.stringify(resource, null, 2))
 
     const admin = createAdminClient()
     const resend = new Resend(process.env.RESEND_API_KEY)

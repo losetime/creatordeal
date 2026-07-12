@@ -37,8 +37,8 @@ export async function POST(request: Request) {
       .eq("id", user.id)
 
     return NextResponse.json({ success: true, message: "Subscription cancelled. Benefits remain until end of billing period." })
-  } catch (error: any) {
+  } catch (error) {
     console.error("Cancel subscription error:", error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: "Failed to cancel subscription" }, { status: 500 })
   }
 }

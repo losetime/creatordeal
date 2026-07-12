@@ -15,13 +15,16 @@ const subscriptionsController = new SubscriptionsController(paypalClient)
 export { paypalClient }
 
 // Plan ID from PayPal dashboard
-export const PAYPAL_PLAN_ID = process.env.PAYPAL_PLAN_ID || "P-0EV63716US865732JNJHSVKQ"
+export const PAYPAL_PLAN_ID = process.env.PAYPAL_PLAN_ID
+if (!PAYPAL_PLAN_ID) {
+  console.warn("PAYPAL_PLAN_ID not set - subscription features may not work")
+}
 
 // Create a subscription
 export async function createPaypalSubscription(userId: string) {
   const request = {
     body: {
-      planId: PAYPAL_PLAN_ID,
+      planId: PAYPAL_PLAN_ID!,
       subscriber: {
         name: {
           givenName: "CreatorDeal",
@@ -58,9 +61,30 @@ export async function cancelPaypalSubscription(subscriptionId: string, reason: s
   return { body: response.result, statusCode: response.statusCode }
 }
 
-// Verify webhook signature (simplified - in production use PayPal's SDK verification)
-export function verifyWebhookSignature(headers: Record<string, string>, body: string): boolean {
-  // In production, use paypalClient.webhookHooks.verifyWebhookSignature()
-  // For now, we'll trust webhooks from PayPal (they come from known IPs)
-  return true
+// Verify PayPal webhook signature
+export async function verifyWebhookSignature(
+  headers: Record<string, string>,
+  body: string
+): Promise<boolean> {
+  const webhookId = process.env.PAYPAL_WEBHOOK_ID
+  if (!webhookId) {
+    console.error("PAYPAL_WEBHOOK_ID not configured")
+    return false
+  }
+
+  try {
+    const signatureVerification = await paypalClient.webhookHooks.verifyWebhookSignature({
+      body: body as any,
+      webhookId,
+      authAlgo: headers["paypal-auth-algo"] || "",
+      certUrl: headers["paypal-cert-url"] || "",
+      signature: headers["paypal-transmission-sig"] || "",
+      timestamp: headers["paypal-transmission-time"] || "",
+    })
+
+    return signatureVerification.result?.verification_status === "SUCCESS"
+  } catch (error) {
+    console.error("Webhook signature verification failed:", error)
+    return false
+  }
 }

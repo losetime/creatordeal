@@ -17,7 +17,8 @@ export async function GET(request: Request) {
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error("Profile fetch error:", error)
+      return NextResponse.json({ error: "Failed to fetch subscription status" }, { status: 500 })
     }
 
     return NextResponse.json({
@@ -27,7 +28,8 @@ export async function GET(request: Request) {
       expiresAt: profile?.subscription_expires_at,
       paypalSubscriptionId: profile?.paypal_subscription_id,
     })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  } catch (error) {
+    console.error("PayPal status error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

@@ -24,6 +24,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "File is required" }, { status: 400 })
     }
 
+    // Check file size (max 10MB)
+    const MAX_FILE_SIZE = 10 * 1024 * 1024
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json({ error: "File size exceeds 10MB limit" }, { status: 400 })
+    }
+
     // Validate file type
     const allowedTypes = [
       "application/pdf",
@@ -101,11 +107,7 @@ export async function POST(request: Request) {
     }
 
     // Check if we got meaningful text
-    console.log("Extracted contract text length:", contractText?.length)
-    console.log("Contract text preview:", contractText?.substring(0, 200))
-
     if (!contractText || contractText.trim().length < 50) {
-      console.log("Text too short, skipping AI parsing")
       return NextResponse.json({
         success: true,
         fileUrl,
@@ -120,11 +122,9 @@ export async function POST(request: Request) {
     let parsedData: ContractData
 
     try {
-      console.log("Starting AI parsing...")
       parsedData = await parseContract(contractText)
-      console.log("AI parsing successful")
-    } catch (aiError: any) {
-      console.error("AI parsing failed:", aiError?.message || aiError)
+    } catch (aiError) {
+      console.error("AI parsing failed")
       return NextResponse.json({
         success: true,
         fileUrl,
