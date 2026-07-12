@@ -32,10 +32,28 @@ export default function ContractsPage() {
   const [selectedContractId, setSelectedContractId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [uploading, setUploading] = useState(false)
+  const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false)
 
   const { data: contracts, isLoading: contractsLoading } = trpc.contracts.list.useQuery()
   const { data: deals, isLoading: dealsLoading } = trpc.deals.list.useQuery()
+  const { data: profile } = trpc.profiles.get.useQuery()
   const utils = trpc.useUtils()
+
+  // Check if user can create more deals
+  const canCreateDeal = () => {
+    if (profile?.plan === "pro" || profile?.plan === "team") return true
+    const activeDeals = deals?.filter((d: any) => d.stage !== "closed") || []
+    return activeDeals.length < 3
+  }
+
+  const handleSmartCreateClick = () => {
+    if (!canCreateDeal()) {
+      setIsUpgradeDialogOpen(true)
+      return
+    }
+    setShowSmartCreate(true)
+    setShowUpload(false)
+  }
 
   const deleteContract = trpc.contracts.delete.useMutation({
     onSuccess: () => {
@@ -122,10 +140,7 @@ export default function ContractsPage() {
           </div>
           <div className="flex gap-2">
             <Button
-              onClick={() => {
-                setShowSmartCreate(true)
-                setShowUpload(false)
-              }}
+              onClick={handleSmartCreateClick}
               className="bg-black hover:bg-black/80 text-white"
             >
               <Wand2 className="mr-2 h-4 w-4" />
@@ -393,6 +408,32 @@ export default function ContractsPage() {
             )}
 
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upgrade Dialog */}
+      <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upgrade to Creator Club</DialogTitle>
+            <DialogDescription>
+              You&apos;ve reached the free plan limit of 3 active deals.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="rounded-lg bg-teal-50 p-4">
+              <p className="text-sm text-teal-800">
+                Upgrade to <strong>Creator Club</strong> for unlimited deals, smart invoicing, AI contract scanner, rate benchmarking, and priority support.
+              </p>
+            </div>
+            <p className="text-sm text-muted-foreground">$9.90/month • Cancel anytime</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsUpgradeDialogOpen(false)}>Maybe Later</Button>
+            <Button className="bg-teal-600 hover:bg-teal-700 text-white" onClick={() => window.location.href = "/subscription"}>
+              Upgrade Now
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
