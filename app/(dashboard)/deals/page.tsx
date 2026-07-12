@@ -99,7 +99,25 @@ export default function DealsPage() {
 
   const createMutation = trpc.deals.create.useMutation({
     onSuccess: () => { utils.deals.list.invalidate(); toast.success("Deal created successfully") },
-    onError: (error) => toast.error("Failed to create deal", { description: error.message }),
+    onError: (error) => {
+      try {
+        const parsed = JSON.parse(error.message)
+        if (parsed.code === "DEAL_LIMIT_REACHED") {
+          toast.error(parsed.message, {
+            description: parsed.upgradeMessage,
+            action: {
+              label: "Upgrade",
+              onClick: () => window.location.href = parsed.upgradeUrl,
+            },
+            duration: 10000,
+          })
+        } else {
+          toast.error("Failed to create deal", { description: error.message })
+        }
+      } catch {
+        toast.error("Failed to create deal", { description: error.message })
+      }
+    },
   })
 
   const updateMutation = trpc.deals.update.useMutation({

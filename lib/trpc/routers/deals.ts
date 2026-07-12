@@ -69,7 +69,12 @@ export const dealsRouter = router({
           .neq("stage", "closed")
 
         if (count && count >= 3) {
-          throw new Error("Free plan is limited to 3 active deals. Please upgrade to Creator Club for unlimited deals.")
+          throw new Error(JSON.stringify({
+            code: "DEAL_LIMIT_REACHED",
+            message: "You've reached the free plan limit of 3 active deals.",
+            upgradeMessage: "Upgrade to Creator Club for unlimited deals, smart invoicing, AI contract scanner, and more.",
+            upgradeUrl: "/subscription"
+          }))
         }
       }
 
