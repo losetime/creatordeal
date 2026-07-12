@@ -199,12 +199,26 @@ export default function SubscriptionPage() {
                 <div className="flex gap-2">
                   {profile?.plan !== "pro" && (
                     <Button onClick={handleSubscribe} disabled={subscribing}>
-                      {subscribing ? "Redirecting to PayPal..." : "Subscribe — $9.90/mo"}
+                      {subscribing ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Redirecting to PayPal...
+                        </>
+                      ) : (
+                        "Subscribe — $9.90/mo"
+                      )}
                     </Button>
                   )}
                   {profile?.plan === "pro" && profile?.subscription_status !== "cancelled" && (
                     <Button onClick={handleCancelSubscription} variant="outline" disabled={cancelling}>
-                      {cancelling ? "Cancelling..." : "Cancel Subscription"}
+                      {cancelling ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Cancelling...
+                        </>
+                      ) : (
+                        "Cancel Subscription"
+                      )}
                     </Button>
                   )}
                 </div>
