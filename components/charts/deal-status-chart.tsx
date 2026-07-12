@@ -9,14 +9,14 @@ interface DealStatusChartProps {
 }
 
 const STAGE_COLORS: Record<string, string> = {
-  inquiry: "var(--color-chart-1)",
-  negotiate: "var(--color-chart-2)",
-  signed: "var(--color-chart-3)",
-  creating: "var(--color-chart-4)",
-  review: "var(--color-chart-5)",
-  published: "var(--color-chart-1)",
-  paid: "var(--color-chart-3)",
-  closed: "var(--color-chart-2)",
+  inquiry: "#3b82f6",      // blue-500
+  negotiate: "#f59e0b",    // amber-500
+  signed: "#10b981",       // emerald-500
+  creating: "#8b5cf6",     // violet-500
+  review: "#f97316",       // orange-500
+  published: "#06b6d4",    // cyan-500
+  paid: "#14b8a6",         // teal-500
+  closed: "#9ca3af",       // slate-400
 }
 
 const chartConfig = {
