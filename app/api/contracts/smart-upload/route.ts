@@ -101,7 +101,11 @@ export async function POST(request: Request) {
     }
 
     // Check if we got meaningful text
+    console.log("Extracted contract text length:", contractText?.length)
+    console.log("Contract text preview:", contractText?.substring(0, 200))
+
     if (!contractText || contractText.trim().length < 50) {
+      console.log("Text too short, skipping AI parsing")
       return NextResponse.json({
         success: true,
         fileUrl,
@@ -116,7 +120,9 @@ export async function POST(request: Request) {
     let parsedData: ContractData
 
     try {
+      console.log("Starting AI parsing...")
       parsedData = await parseContract(contractText)
+      console.log("AI parsing successful")
     } catch (aiError: any) {
       console.error("AI parsing failed:", aiError?.message || aiError)
       return NextResponse.json({
