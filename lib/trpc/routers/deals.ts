@@ -53,6 +53,26 @@ export const dealsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // Check plan limits for free users
+      const { data: profile } = await ctx.supabase
+        .from("profiles")
+        .select("plan")
+        .eq("id", ctx.user.id)
+        .single()
+
+      if (profile?.plan === "free") {
+        // Count active deals (not closed)
+        const { count } = await ctx.supabase
+          .from("deals")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", ctx.user.id)
+          .neq("stage", "closed")
+
+        if (count && count >= 3) {
+          throw new Error("Free plan is limited to 3 active deals. Please upgrade to Creator Club for unlimited deals.")
+        }
+      }
+
       const { data, error } = await ctx.supabase
         .from("deals")
         .insert({
