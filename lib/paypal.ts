@@ -61,7 +61,7 @@ export async function cancelPaypalSubscription(subscriptionId: string, reason: s
   return { body: response.result, statusCode: response.statusCode }
 }
 
-// Verify PayPal webhook signature
+// Verify PayPal webhook signature using PayPal API
 export async function verifyWebhookSignature(
   headers: Record<string, string>,
   body: string
@@ -73,18 +73,50 @@ export async function verifyWebhookSignature(
   }
 
   try {
-    const signatureVerification = await paypalClient.webhookHooks.verifyWebhookSignature({
-      body: body as any,
-      webhookId,
-      authAlgo: headers["paypal-auth-algo"] || "",
-      certUrl: headers["paypal-cert-url"] || "",
-      signature: headers["paypal-transmission-sig"] || "",
-      timestamp: headers["paypal-transmission-time"] || "",
+    // Get access token
+    const tokenResponse = await fetch(`${paypalClient.environment === "production" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com"}/v1/oauth2/token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Basic ${Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString("base64")}`,
+      },
+      body: "grant_type=client_credentials",
     })
 
-    return signatureVerification.result?.verification_status === "SUCCESS"
+    if (!tokenResponse.ok) {
+      console.error("Failed to get PayPal access token")
+      return false
+    }
+
+    const { access_token } = await tokenResponse.json()
+
+    // Verify webhook signature
+    const baseUrl = paypalClient.environment === "production" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com"
+    const verifyResponse = await fetch(`${baseUrl}/v1/notifications/verify-webhook-signature`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${access_token}`,
+      },
+      body: JSON.stringify({
+        auth_algo: headers["paypal-auth-algo"],
+        cert_url: headers["paypal-cert-url"],
+        signature: headers["paypal-transmission-sig"],
+        timestamp: headers["paypal-transmission-time"],
+        webhook_id: webhookId,
+        webhook_event: body,
+      }),
+    })
+
+    if (!verifyResponse.ok) {
+      console.error("Webhook verification API failed")
+      return false
+    }
+
+    const result = await verifyResponse.json()
+    return result.verification_status === "SUCCESS"
   } catch (error) {
-    console.error("Webhook signature verification failed:", error)
+    console.error("Webhook signature verification error")
     return false
   }
 }
