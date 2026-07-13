@@ -174,7 +174,11 @@ export default function SubscriptionPage() {
             <div className="rounded-lg p-4 bg-slate-50">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-semibold">{planLabel} Plan — $9.90/mo</p>
+                  {profile?.plan === "pro" || profile?.plan === "team" ? (
+                    <p className="font-semibold">{planLabel} Plan — $9.90/mo</p>
+                  ) : (
+                    <p className="font-semibold">Free Plan — Upgrade to unlock all features</p>
+                  )}
                   <p className="text-sm text-muted-foreground mt-1">
                     {profile?.plan === "pro" || profile?.plan === "team"
                       ? "Unlimited deals, invoicing, AI contract scanner, rate benchmarks, priority support"
