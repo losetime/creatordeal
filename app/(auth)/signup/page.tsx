@@ -139,6 +139,8 @@ export default function SignupPage() {
                 {t("auth.signup.createAccount")}
               </Button>
             </form>
+            {/* Google Sign-Up - Hidden until configured */}
+            {/*
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <Separator className="w-full" />
@@ -167,6 +169,7 @@ export default function SignupPage() {
               </svg>
               {t("auth.signup.signUpWithGoogle")}
             </Button>
+            */}
             <p className="text-center text-sm text-muted-foreground mt-4">
               {t("auth.signup.hasAccount")}{" "}
               <Link href="/login" className="text-primary hover:underline">

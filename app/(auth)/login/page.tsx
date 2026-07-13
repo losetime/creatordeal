@@ -145,6 +145,8 @@ export default function LoginPage() {
                 </Button>
               </form>
             )}
+            {/* Google Sign-In - Hidden until configured */}
+            {/*
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <Separator className="w-full" />
@@ -173,6 +175,7 @@ export default function LoginPage() {
               </svg>
               {t("auth.login.signInWithGoogle")}
             </Button>
+            */}
             <p className="text-center text-sm text-muted-foreground mt-4">
               {t("auth.login.noAccount")}{" "}
               <Link href="/signup" className="text-primary hover:underline">
