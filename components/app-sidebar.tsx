@@ -2,8 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Zap, Moon, Sun, LogOut } from "lucide-react"
-import { useTheme } from "next-themes"
+import { Zap, LogOut } from "lucide-react"
 import { useAuth } from "@/lib/auth/context"
 import { trpc } from "@/lib/trpc/client"
 import { useLocale } from "@/hooks/use-locale"
@@ -44,7 +43,6 @@ import {
 export function AppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const { theme, setTheme } = useTheme()
   const { user, signOut } = useAuth()
   const { t, locale, setLocale } = useLocale()
 
@@ -175,14 +173,6 @@ export function AppSidebar() {
                 <DropdownMenuItem onClick={() => router.push("/settings")}>
                   <User className="mr-2 h-4 w-4" />
                   {t("nav.settings")}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-                  {theme === "dark" ? (
-                    <Sun className="mr-2 h-4 w-4" />
-                  ) : (
-                    <Moon className="mr-2 h-4 w-4" />
-                  )}
-                  {theme === "dark" ? "Light Mode" : "Dark Mode"}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>

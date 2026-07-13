@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { ThemeProvider } from "next-themes"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
 import { TRPCProvider } from "@/lib/trpc/provider"
@@ -20,23 +19,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <TRPCProvider>
-            <AuthProvider>
-              <I18nProvider>
-                <TooltipProvider>
-                  {children}
-                  <Toaster />
-                </TooltipProvider>
-              </I18nProvider>
-            </AuthProvider>
-          </TRPCProvider>
-        </ThemeProvider>
+        <TRPCProvider>
+          <AuthProvider>
+            <I18nProvider>
+              <TooltipProvider>
+                {children}
+                <Toaster />
+              </TooltipProvider>
+            </I18nProvider>
+          </AuthProvider>
+        </TRPCProvider>
       </body>
     </html>
   )
