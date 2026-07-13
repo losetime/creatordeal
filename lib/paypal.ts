@@ -73,8 +73,10 @@ export async function verifyWebhookSignature(
   }
 
   try {
+    const baseUrl = isLive ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com"
+
     // Get access token
-    const tokenResponse = await fetch(`${paypalClient.environment === "production" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com"}/v1/oauth2/token`, {
+    const tokenResponse = await fetch(`${baseUrl}/v1/oauth2/token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -91,7 +93,6 @@ export async function verifyWebhookSignature(
     const { access_token } = await tokenResponse.json()
 
     // Verify webhook signature
-    const baseUrl = paypalClient.environment === "production" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com"
     const verifyResponse = await fetch(`${baseUrl}/v1/notifications/verify-webhook-signature`, {
       method: "POST",
       headers: {
