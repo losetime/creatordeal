@@ -35,26 +35,6 @@ export const profilesRouter = router({
       return data
     }),
 
-  // Submit Ko-fi payment for manual verification
-  submitKofiPayment: protectedProcedure
-    .input(z.object({ orderId: z.string().min(1) }))
-    .mutation(async ({ ctx, input }) => {
-      const { data, error } = await ctx.supabase
-        .from("profiles")
-        .update({
-          payment_pending: true,
-          payment_order_id: input.orderId,
-          payment_submitted_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", ctx.user.id)
-        .select()
-        .single()
-
-      if (error) throw error
-      return data
-    }),
-
   updatePassword: protectedProcedure
     .input(z.object({ newPassword: z.string().min(8) }))
     .mutation(async ({ ctx, input }) => {

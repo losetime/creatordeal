@@ -119,12 +119,6 @@ export default function SettingsPage() {
     },
   })
 
-  const submitKofiPayment = trpc.profiles.submitKofiPayment.useMutation({
-    onSuccess: () => {
-      utils.profiles.get.invalidate()
-    },
-  })
-
   const updateNotifPrefs = trpc.notificationPreferences.update.useMutation({
     onSuccess: () => {
       utils.notificationPreferences.get.invalidate()
@@ -166,29 +160,6 @@ export default function SettingsPage() {
       email_deadline_today: notifications.emailDeadlineToday,
       email_payment_overdue: notifications.emailPaymentOverdue,
     })
-  }
-
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-  const [kofiOrderId, setKofiOrderId] = useState("")
-
-  const handleShowConfirmDialog = () => {
-    setShowConfirmDialog(true)
-  }
-
-  const handleConfirmPayment = async () => {
-    if (!kofiOrderId.trim()) {
-      toast.error("Please enter your Ko-fi order ID")
-      return
-    }
-    const isRenewal = profile?.plan === "pro"
-    submitKofiPayment.mutate({ orderId: kofiOrderId.trim() })
-    toast.success(isRenewal ? "Renewal submitted for review" : "Payment submitted for review", {
-      description: isRenewal
-        ? "Your renewal has been submitted. An admin will verify your payment shortly."
-        : "Your account has been upgraded. An admin will verify your payment shortly.",
-    })
-    setShowConfirmDialog(false)
-    setKofiOrderId("")
   }
 
   const handleChangePassword = async () => {
@@ -530,45 +501,6 @@ export default function SettingsPage() {
           )}
         </div>
       </div>
-
-      {/* Payment Confirmation Dialog */}
-      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Your Payment</DialogTitle>
-            <DialogDescription>
-              Please enter the order ID from your Ko-fi payment confirmation email.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="rounded-lg bg-slate-50 p-4 text-sm text-slate-600">
-              <p className="font-medium mb-2">How to find your order ID:</p>
-              <ol className="list-decimal list-inside space-y-1">
-                <li>Check your email inbox for a message from Ko-fi</li>
-                <li>Look for the order/transaction ID (a long string of letters and numbers)</li>
-                <li>Copy and paste it below</li>
-              </ol>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="orderId">Ko-fi Order ID</Label>
-              <Input
-                id="orderId"
-                placeholder="e.g. 502183d7-97b2-4f16-a024-393a2d5087a6"
-                value={kofiOrderId}
-                onChange={(e) => setKofiOrderId(e.target.value)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmPayment} disabled={!kofiOrderId.trim()}>
-              Confirm & Upgrade
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
