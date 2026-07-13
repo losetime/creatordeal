@@ -159,62 +159,92 @@ export default function SubscriptionPage() {
 
       {/* Subscription Status */}
       {!verifying && (
-        <Card className="shadow-card overflow-hidden border-0">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <CreditCard className="h-4 w-4 text-violet-500" />
-              Current Plan
-            </CardTitle>
-            <CardDescription>
-              You&apos;re currently on the{" "}
-              <Badge variant="secondary" className="bg-teal-100 text-teal-700">{planLabel}</Badge>
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-lg p-4 bg-slate-50">
-              <div className="flex items-center justify-between">
-                <div>
-                  {profile?.plan === "pro" || profile?.plan === "team" ? (
-                    <p className="font-semibold">{planLabel} Plan — $9.90/mo</p>
-                  ) : (
-                    <p className="font-semibold">Free Plan — Upgrade to unlock all features</p>
-                  )}
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {profile?.plan === "pro" || profile?.plan === "team"
-                      ? "Unlimited deals, invoicing, AI contract scanner, rate benchmarks, priority support"
-                      : "3 active deals, basic features"}
-                  </p>
+        <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
+          {/* Free Plan Card */}
+          <div className={`relative rounded-xl border bg-card p-8 ${
+            profile?.plan !== "pro" ? "border-primary shadow-lg shadow-primary/10" : "border-border"
+          }`}>
+            {profile?.plan !== "pro" && (
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <Badge className="bg-primary text-primary-foreground">Current Plan</Badge>
+              </div>
+            )}
+            <h3 className="text-xl font-semibold text-foreground">Free</h3>
+            <p className="text-sm text-muted-foreground">Perfect for getting started</p>
+            <div className="mt-4">
+              <span className="text-4xl font-bold text-foreground">$0</span>
+              <span className="text-muted-foreground"> forever</span>
+            </div>
+            <ul className="mt-6 space-y-3">
+              {[
+                "Up to 3 active deals",
+                "Basic invoicing",
+                "Payment tracking",
+                "Email support"
+              ].map((feature) => (
+                <li key={feature} className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-primary shrink-0" />
+                  <span className="text-sm text-foreground">{feature}</span>
+                </li>
+              ))}
+            </ul>
+            {profile?.plan !== "pro" && (
+              <div className="mt-8">
+                <p className="text-xs text-center text-muted-foreground">Your current plan</p>
+              </div>
+            )}
+          </div>
+
+          {/* Creator Club Plan Card */}
+          <div className={`relative rounded-xl border bg-card p-8 ${
+            profile?.plan === "pro" ? "border-primary shadow-lg shadow-primary/10" : "border-border"
+          }`}>
+            {profile?.plan === "pro" && (
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <Badge className="bg-primary text-primary-foreground">Current Plan</Badge>
+              </div>
+            )}
+            {profile?.plan !== "pro" && (
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <Badge className="bg-primary text-primary-foreground">Most Popular</Badge>
+              </div>
+            )}
+            <h3 className="text-xl font-semibold text-foreground">Creator Club</h3>
+            <p className="text-sm text-muted-foreground">For serious creators</p>
+            <div className="mt-4">
+              <span className="text-4xl font-bold text-foreground">$9.90</span>
+              <span className="text-muted-foreground"> /month</span>
+            </div>
+            <ul className="mt-6 space-y-3">
+              {[
+                "Unlimited deals",
+                "Smart invoicing",
+                "AI contract scanner",
+                "Rate benchmarking",
+                "Priority support",
+                "Custom branding"
+              ].map((feature) => (
+                <li key={feature} className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-primary shrink-0" />
+                  <span className="text-sm text-foreground">{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-8">
+              {profile?.plan === "pro" ? (
+                <div className="space-y-2">
                   {profile?.payment_pending && (
-                    <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                    <p className="text-xs text-center text-amber-600 flex items-center justify-center gap-1">
                       <Clock className="h-3 w-3" /> Payment pending verification
                     </p>
                   )}
-                  {profile?.plan === "pro" && !profile?.payment_pending && (
-                    <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
-                      <CheckCircle className="h-3 w-3" /> Active
+                  {profile?.subscription_expires_at && (
+                    <p className="text-xs text-center text-muted-foreground">
+                      Expires {formatDate(profile.subscription_expires_at)}
                     </p>
                   )}
-                  {profile?.plan === "pro" && profile?.subscription_expires_at && (
-                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                      <Clock className="h-3 w-3" /> Expires {formatDate(profile.subscription_expires_at)}
-                    </p>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  {profile?.plan !== "pro" && (
-                    <Button onClick={handleSubscribe} disabled={subscribing}>
-                      {subscribing ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Redirecting to PayPal...
-                        </>
-                      ) : (
-                        "Subscribe — $9.90/mo"
-                      )}
-                    </Button>
-                  )}
-                  {profile?.plan === "pro" && profile?.subscription_status !== "cancelled" && (
-                    <Button onClick={handleCancelSubscription} variant="outline" disabled={cancelling}>
+                  {profile?.subscription_status !== "cancelled" && (
+                    <Button onClick={handleCancelSubscription} variant="outline" className="w-full" disabled={cancelling}>
                       {cancelling ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -226,33 +256,21 @@ export default function SubscriptionPage() {
                     </Button>
                   )}
                 </div>
-              </div>
+              ) : (
+                <Button onClick={handleSubscribe} className="w-full" disabled={subscribing}>
+                  {subscribing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Redirecting to PayPal...
+                    </>
+                  ) : (
+                    "Subscribe — $9.90/mo"
+                  )}
+                </Button>
+              )}
             </div>
-
-            {/* Features for non-pro users */}
-            {profile?.plan !== "pro" && (
-              <div className="rounded-lg p-4 bg-teal-50">
-                <p className="font-medium text-sm text-slate-700 mb-3">Creator Club includes:</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    "Unlimited deals",
-                    "Smart invoicing",
-                    "AI contract scanner",
-                    "Rate benchmarking",
-                    "Priority support"
-                  ].map((feature) => (
-                    <div key={feature} className="flex items-center gap-2 text-sm">
-                      <div className="h-5 w-5 rounded-full bg-teal-100 flex items-center justify-center">
-                        <Check className="h-3 w-3 text-teal-600" />
-                      </div>
-                      <span className="text-slate-600">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Subscription History */}
