@@ -9,6 +9,9 @@ import "./globals.css"
 export const metadata: Metadata = {
   title: "CreatorDeal - Sponsorship Management for Creators",
   description: "Manage your brand deals, track revenue, and generate invoices all in one place.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 }
 
 export default function RootLayout({
