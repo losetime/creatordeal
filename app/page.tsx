@@ -99,32 +99,9 @@ const pricingPlans = [
     cta: "Join Club",
     popular: true,
   },
-  {
-    name: "Team",
-    price: "$49",
-    period: "/month",
-    description: "For agencies and teams",
-    features: [
-      "Everything in Pro",
-      "Team collaboration",
-      "Client portal",
-      "API access",
-      "Dedicated support",
-      "Custom integrations",
-    ],
-    cta: "Contact Sales",
-    popular: false,
-  },
 ]
 
-const testimonials = [
-  {
-    name: "CreatorDeal User",
-    role: "Early Adopter",
-    content: "Finally a tool built specifically for sponsorship management. The deal pipeline alone saves hours every week.",
-    avatar: "CD",
-  },
-]
+const testimonials = []
 
 const faqs = [
   {
@@ -149,9 +126,7 @@ const faqs = [
   },
 ]
 
-const logos = [
-  "YouTube", "Instagram", "TikTok", "Twitch", "Twitter"
-]
+const logos: string[] = []
 
 export default function HomePage() {
   return (
@@ -171,9 +146,6 @@ export default function HomePage() {
             </a>
             <a href="#pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Pricing
-            </a>
-            <a href="#testimonials" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Testimonials
             </a>
           </nav>
           <div className="flex items-center gap-3">
@@ -237,22 +209,6 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Logo Cloud */}
-        <section className="border-b border-border/50 py-12">
-          <div className="container mx-auto px-4">
-            <p className="text-center text-sm font-medium text-muted-foreground mb-8">
-              Trusted by creators working with world-class brands
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16">
-              {logos.map((logo) => (
-                <div key={logo} className="text-2xl font-bold text-muted-foreground/30 select-none">
-                  {logo}
-                </div>
-              ))}
             </div>
           </div>
         </section>
@@ -375,47 +331,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Testimonials */}
-        <section id="testimonials" className="border-y border-border/50 bg-muted/30 py-24">
-          <div className="container mx-auto px-4">
-            <div className="mx-auto max-w-2xl text-center mb-16">
-              <Badge variant="secondary" className="mb-4">
-                Testimonials
-              </Badge>
-              <h2 className="text-3xl font-bold sm:text-4xl text-foreground">
-                Loved by Creators Worldwide
-              </h2>
-              <p className="mt-4 text-lg text-muted-foreground">
-                See what other creators are saying about CreatorDeal.
-              </p>
-            </div>
-            <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
-              {testimonials.map((testimonial) => (
-                <div
-                  key={testimonial.name}
-                  className="rounded-xl border border-border bg-card p-6"
-                >
-                  <div className="flex gap-1 mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                    ))}
-                  </div>
-                  <p className="text-sm text-foreground leading-relaxed">&ldquo;{testimonial.content}&rdquo;</p>
-                  <div className="mt-6 flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm">
-                      {testimonial.avatar}
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground text-sm">{testimonial.name}</p>
-                      <p className="text-xs text-muted-foreground">{testimonial.role}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* FAQ */}
         <section className="py-24">
           <div className="container mx-auto px-4">
@@ -469,7 +384,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t border-border/50 bg-background py-12">
         <div className="container mx-auto px-4">
-          <div className="grid gap-8 md:grid-cols-4">
+          <div className="grid gap-8 md:grid-cols-3">
             <div>
               <Link href="/" className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
@@ -490,14 +405,6 @@ export default function HomePage() {
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-foreground mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Careers</a></li>
-              </ul>
-            </div>
-            <div>
               <h4 className="font-semibold text-foreground mb-4">Legal</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link></li>
@@ -509,11 +416,6 @@ export default function HomePage() {
           <Separator className="my-8" />
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
             <p>&copy; 2026 CreatorDeal. All rights reserved.</p>
-            <div className="flex items-center gap-4">
-              <a href="#" className="hover:text-foreground transition-colors">Twitter</a>
-              <a href="#" className="hover:text-foreground transition-colors">LinkedIn</a>
-              <a href="#" className="hover:text-foreground transition-colors">Instagram</a>
-            </div>
           </div>
         </div>
       </footer>
