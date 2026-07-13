@@ -119,6 +119,12 @@ export default function SettingsPage() {
     },
   })
 
+  const submitKofiPayment = trpc.profiles.submitKofiPayment.useMutation({
+    onSuccess: () => {
+      utils.profiles.get.invalidate()
+    },
+  })
+
   const updateNotifPrefs = trpc.notificationPreferences.update.useMutation({
     onSuccess: () => {
       utils.notificationPreferences.get.invalidate()
@@ -175,13 +181,7 @@ export default function SettingsPage() {
       return
     }
     const isRenewal = profile?.plan === "pro"
-    updateProfile.mutate({
-      plan: "pro",
-      subscription_status: "active",
-      payment_pending: true,
-      payment_order_id: kofiOrderId.trim(),
-      payment_submitted_at: new Date().toISOString(),
-    })
+    submitKofiPayment.mutate({ orderId: kofiOrderId.trim() })
     toast.success(isRenewal ? "Renewal submitted for review" : "Payment submitted for review", {
       description: isRenewal
         ? "Your renewal has been submitted. An admin will verify your payment shortly."
