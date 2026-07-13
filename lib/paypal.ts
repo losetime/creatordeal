@@ -94,23 +94,19 @@ export async function verifyWebhookSignature(
     const { access_token } = await tokenResponse.json()
 
     // Verify webhook signature
+    const webhookEvent = JSON.parse(body)
     const verifyPayload = {
       auth_algo: headers["paypal-auth-algo"],
       cert_url: headers["paypal-cert-url"],
       signature: headers["paypal-transmission-sig"],
       timestamp: headers["paypal-transmission-time"],
       webhook_id: webhookId,
-      webhook_event: JSON.parse(body),
+      webhook_event: webhookEvent,
     }
 
-    console.log("Webhook verify payload:", JSON.stringify({
-      auth_algo: verifyPayload.auth_algo,
-      cert_url: verifyPayload.cert_url,
-      signature: verifyPayload.signature,
-      timestamp: verifyPayload.timestamp,
-      webhook_id: webhookId,
-      webhook_event_type: verifyPayload.webhook_event?.event_type,
-    }))
+    const requestBody = JSON.stringify(verifyPayload)
+    console.log("Verify request body length:", requestBody.length)
+    console.log("Verify request webhook_event keys:", Object.keys(webhookEvent))
 
     const verifyResponse = await fetch(`${baseUrl}/v1/notifications/verify-webhook-signature`, {
       method: "POST",
@@ -118,7 +114,7 @@ export async function verifyWebhookSignature(
         "Content-Type": "application/json",
         Authorization: `Bearer ${access_token}`,
       },
-      body: JSON.stringify(verifyPayload),
+      body: requestBody,
     })
 
     if (!verifyResponse.ok) {
