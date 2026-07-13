@@ -106,9 +106,10 @@ export async function verifyWebhookSignature(
     console.log("Webhook verify payload:", JSON.stringify({
       auth_algo: verifyPayload.auth_algo,
       cert_url: verifyPayload.cert_url,
-      signature: verifyPayload.signature ? "present" : "missing",
+      signature: verifyPayload.signature,
       timestamp: verifyPayload.timestamp,
       webhook_id: webhookId,
+      webhook_event_type: verifyPayload.webhook_event?.event_type,
     }))
 
     const verifyResponse = await fetch(`${baseUrl}/v1/notifications/verify-webhook-signature`, {
