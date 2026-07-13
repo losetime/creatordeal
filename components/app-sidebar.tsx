@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Zap, LogOut } from "lucide-react"
+import { Rocket, LogOut } from "lucide-react"
 import { useAuth } from "@/lib/auth/context"
 import { trpc } from "@/lib/trpc/client"
 import { useLocale } from "@/hooks/use-locale"
@@ -89,7 +89,7 @@ export function AppSidebar() {
             <SidebarMenuButton asChild size="lg">
               <Link href="/home" className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary">
-                  <Zap className="h-5 w-5 text-white" />
+                  <Rocket className="h-5 w-5 text-white" />
                 </div>
                 <span className="text-lg font-bold group-data-[collapsible=icon]:hidden">
                   CreatorDeal

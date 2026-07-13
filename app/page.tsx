@@ -15,6 +15,7 @@ import {
   Star,
   ChevronDown,
   Zap,
+  Rocket,
 } from "lucide-react"
 
 const features = [
@@ -136,7 +137,7 @@ export default function HomePage() {
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Zap className="h-5 w-5 text-primary-foreground" />
+              <Rocket className="h-5 w-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-bold text-foreground">CreatorDeal</span>
           </Link>
@@ -286,7 +287,7 @@ export default function HomePage() {
                 Start free, upgrade when you&apos;re ready. No hidden fees.
               </p>
             </div>
-            <div className="grid gap-8 md:grid-cols-3 max-w-5xl mx-auto">
+            <div className="grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
               {pricingPlans.map((plan) => (
                 <div
                   key={plan.name}
@@ -388,7 +389,7 @@ export default function HomePage() {
             <div>
               <Link href="/" className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                  <Zap className="h-5 w-5 text-primary-foreground" />
+                  <Rocket className="h-5 w-5 text-primary-foreground" />
                 </div>
                 <span className="text-lg font-bold text-foreground">CreatorDeal</span>
               </Link>
