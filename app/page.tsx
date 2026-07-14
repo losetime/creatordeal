@@ -125,6 +125,10 @@ const faqs = [
     question: "Is my data secure?",
     answer: "We use industry-standard encryption and Supabase's security infrastructure. Your data is always private and protected.",
   },
+  {
+    question: "How can I contact support?",
+    answer: "Email us at support@creatordealmail.cyberloom.work and we'll get back to you within 24 hours.",
+  },
 ]
 
 const logos: string[] = []
@@ -395,6 +399,9 @@ export default function HomePage() {
               </Link>
               <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
                 The all-in-one platform for content creators to manage their sponsorship business.
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                <a href="mailto:support@creatordealmail.cyberloom.work" className="hover:text-foreground transition-colors">support@creatordealmail.cyberloom.work</a>
               </p>
             </div>
             <div>
