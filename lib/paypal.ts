@@ -100,7 +100,7 @@ export async function verifyWebhookSignature(
       signature: headers["paypal-transmission-sig"],
       timestamp: headers["paypal-transmission-time"],
       webhook_id: webhookId,
-      webhook_event: body, // Send as raw JSON string, not parsed object
+      webhook_event: webhookEvent,
     }
 
     const requestBody = JSON.stringify(verifyPayload)
