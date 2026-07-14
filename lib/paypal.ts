@@ -94,6 +94,7 @@ export async function verifyWebhookSignature(
     const { access_token } = await tokenResponse.json()
 
     // Verify webhook signature
+    const webhookEvent = JSON.parse(body)
     const verifyPayload = {
       auth_algo: headers["paypal-auth-algo"],
       cert_url: headers["paypal-cert-url"],
