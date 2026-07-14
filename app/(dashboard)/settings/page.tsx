@@ -364,6 +364,9 @@ export default function SettingsPage() {
                             <option key={lang.value} value={lang.value}>{lang.label}</option>
                           ))}
                         </select>
+                        {profile?.role !== "admin" && (
+                          <p className="text-xs text-muted-foreground">Only administrators can change language</p>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="currency" className="text-sm font-medium flex items-center gap-1">

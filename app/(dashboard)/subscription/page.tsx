@@ -162,11 +162,11 @@ export default function SubscriptionPage() {
         <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
           {/* Free Plan Card */}
           <div className={`relative rounded-xl border bg-card p-8 ${
-            profile?.plan !== "pro" ? "border-primary shadow-lg shadow-primary/10" : "border-border"
+            profile?.plan !== "pro" ? "border-teal-500 shadow-lg shadow-teal-500/10" : "border-border"
           }`}>
             {profile?.plan !== "pro" && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge className="bg-primary text-primary-foreground">Current Plan</Badge>
+                <Badge className="bg-teal-500 text-white">Current Plan</Badge>
               </div>
             )}
             <h3 className="text-xl font-semibold text-foreground">Free</h3>
@@ -183,7 +183,7 @@ export default function SubscriptionPage() {
                 "Email support"
               ].map((feature) => (
                 <li key={feature} className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-primary shrink-0" />
+                  <CheckCircle className="h-4 w-4 text-teal-500 shrink-0" />
                   <span className="text-sm text-foreground">{feature}</span>
                 </li>
               ))}
@@ -197,16 +197,16 @@ export default function SubscriptionPage() {
 
           {/* Creator Club Plan Card */}
           <div className={`relative rounded-xl border bg-card p-8 ${
-            profile?.plan === "pro" ? "border-primary shadow-lg shadow-primary/10" : "border-border"
+            profile?.plan === "pro" ? "border-teal-500 shadow-lg shadow-teal-500/10" : "border-border"
           }`}>
             {profile?.plan === "pro" && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge className="bg-primary text-primary-foreground">Current Plan</Badge>
+                <Badge className="bg-teal-500 text-white">Current Plan</Badge>
               </div>
             )}
             {profile?.plan !== "pro" && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge className="bg-primary text-primary-foreground">Most Popular</Badge>
+                <Badge className="bg-teal-500 text-white">Most Popular</Badge>
               </div>
             )}
             <h3 className="text-xl font-semibold text-foreground">Creator Club</h3>
@@ -225,7 +225,7 @@ export default function SubscriptionPage() {
                 "Custom branding"
               ].map((feature) => (
                 <li key={feature} className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-primary shrink-0" />
+                  <CheckCircle className="h-4 w-4 text-teal-500 shrink-0" />
                   <span className="text-sm text-foreground">{feature}</span>
                 </li>
               ))}

@@ -57,6 +57,22 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Admin route protection
+  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin")
+  if (isAdminRoute && user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single()
+
+    if (profile?.role !== "admin") {
+      const url = request.nextUrl.clone()
+      url.pathname = "/home"
+      return NextResponse.redirect(url)
+    }
+  }
+
   // Auto-downgrade expired subscriptions
   if (user && !isAuthPage && !isLandingPage && !isLegalPage && !isApiRoute && !isStatic) {
     const { data: profile } = await supabase
