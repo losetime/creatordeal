@@ -347,27 +347,26 @@ export default function SettingsPage() {
                           ))}
                         </select>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="language" className="text-sm font-medium flex items-center gap-1">
-                          <Globe className="h-3 w-3" /> {t("settings.language")}
-                        </Label>
-                        <select
-                          id="language"
-                          value={language}
-                          onChange={(e) => {
-                            setLanguage(e.target.value)
-                            setLocale(e.target.value as "en" | "zh")
-                          }}
-                          className="flex h-9 w-full rounded-md border border-input bg-slate-50 px-3 py-1 text-sm shadow-sm transition-colors focus:bg-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        >
-                          {languages.map((lang) => (
-                            <option key={lang.value} value={lang.value}>{lang.label}</option>
-                          ))}
-                        </select>
-                        {profile?.role !== "admin" && (
-                          <p className="text-xs text-muted-foreground">Only administrators can change language</p>
-                        )}
-                      </div>
+                      {profile?.role === "admin" && (
+                        <div className="space-y-2">
+                          <Label htmlFor="language" className="text-sm font-medium flex items-center gap-1">
+                            <Globe className="h-3 w-3" /> {t("settings.language")}
+                          </Label>
+                          <select
+                            id="language"
+                            value={language}
+                            onChange={(e) => {
+                              setLanguage(e.target.value)
+                              setLocale(e.target.value as "en" | "zh")
+                            }}
+                            className="flex h-9 w-full rounded-md border border-input bg-slate-50 px-3 py-1 text-sm shadow-sm transition-colors focus:bg-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                          >
+                            {languages.map((lang) => (
+                              <option key={lang.value} value={lang.value}>{lang.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
                       <div className="space-y-2">
                         <Label htmlFor="currency" className="text-sm font-medium flex items-center gap-1">
                           <DollarSign className="h-3 w-3" /> {t("settings.currency")}
