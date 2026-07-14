@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { toast } from "sonner"
 import {
   User, Bell, Shield, Mail, Settings, Check,
-  Globe, Clock, DollarSign, Download, Key, CheckCircle
+  Globe, Clock, DollarSign, Download, Key, CheckCircle, MessageSquare
 } from "lucide-react"
 import { trpc } from "@/lib/trpc/client"
 import { useAuth } from "@/lib/auth/context"
@@ -20,7 +20,7 @@ import { useLocale } from "@/hooks/use-locale"
 
 const KOFI_PRO_LINK = "https://ko-fi.com/summary/502183d7-97b2-4f16-a024-393a2d5087a6"
 
-type NavSection = "profile" | "notifications" | "security"
+type NavSection = "profile" | "notifications" | "security" | "contact"
 
 const timezones = [
   { value: "America/New_York", label: "Eastern Time (ET)" },
@@ -183,6 +183,7 @@ export default function SettingsPage() {
     { icon: User, label: "Profile", id: "profile" as NavSection },
     { icon: Bell, label: "Notifications", id: "notifications" as NavSection },
     { icon: Shield, label: "Security", id: "security" as NavSection },
+    { icon: MessageSquare, label: "Contact", id: "contact" as NavSection },
   ]
 
   const userInitials = profile?.full_name
@@ -500,6 +501,52 @@ export default function SettingsPage() {
                 </CardContent>
               </Card>
             </>
+          )}
+
+          {/* Contact */}
+          {activeNav === "contact" && (
+            <Card className="shadow-card overflow-hidden border-0">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <MessageSquare className="h-4 w-4 text-teal-500" />
+                  Contact Us
+                </CardTitle>
+                <CardDescription>
+                  Get in touch with our support team
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-lg p-4 bg-slate-50">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Mail className="h-4 w-4 text-teal-500" />
+                      <div>
+                        <p className="font-medium">Email Support</p>
+                        <a href="mailto:support@creatordealmail.cyberloom.work" className="text-sm text-teal-600 hover:underline">
+                          support@creatordealmail.cyberloom.work
+                        </a>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Clock className="h-4 w-4 text-teal-500" />
+                      <div>
+                        <p className="font-medium">Response Time</p>
+                        <p className="text-sm text-muted-foreground">Within 24 hours</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Globe className="h-4 w-4 text-teal-500" />
+                      <div>
+                        <p className="font-medium">Website</p>
+                        <a href="https://creatordeal.cyberloom.work" target="_blank" rel="noopener noreferrer" className="text-sm text-teal-600 hover:underline">
+                          creatordeal.cyberloom.work
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>

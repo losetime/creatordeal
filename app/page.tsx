@@ -119,7 +119,7 @@ const faqs = [
   },
   {
     question: "What payment methods do you support?",
-    answer: "You can track payments from any source — bank transfers, PayPal, Venmo, or any other method. Manual payment recording is built in.",
+    answer: "We accept payments via PayPal. You can track payments from any source — bank transfers, Venmo, or any other method. Manual payment recording is built in.",
   },
   {
     question: "Is my data secure?",
