@@ -25,8 +25,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import {
-  Plus, DollarSign, Calendar, X, Trash2, Pencil,
-  Handshake, Filter, Sparkles, ChevronRight, FileText,
+  Plus, DollarSign, Calendar, Trash2, Pencil,
+  Handshake, Sparkles, ChevronRight, FileText,
 } from "lucide-react"
 import { trpc } from "@/lib/trpc/client"
 import { formatCurrency, formatDate } from "@/lib/utils"
@@ -78,7 +78,6 @@ export default function DealsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false)
-  const [brandFilter, setBrandFilter] = useState("")
   const [editingDeal, setEditingDeal] = useState<DealType | null>(null)
   const [deletingDealId, setDeletingDealId] = useState<string | null>(null)
   const [activeStage, setActiveStage] = useState("inquiry")
@@ -152,16 +151,8 @@ export default function DealsPage() {
   })
 
   const filteredDeals = useMemo(() => {
-    return deals.filter((deal: DealType) => {
-      const brand = getDealBrand(deal)
-      if (brandFilter && brand?.name !== brandFilter) return false
-      return true
-    })
-  }, [deals, brandFilter])
-
-  const hasFilters = !!brandFilter
-
-  const clearFilters = () => { setBrandFilter("") }
+    return deals
+  }, [deals])
 
   const activeStageDeals = useMemo(() => {
     return filteredDeals.filter((d: DealType) => d.stage === activeStage)
@@ -349,37 +340,21 @@ export default function DealsPage() {
         <p><strong>Pro tip:</strong> Go to Contracts to upload a contract — AI will automatically extract key information and create a deal and brand for you.</p>
       </div>
 
-      {/* Filters - Brand only */}
-      {brands.length > 0 && (
-        <div className="flex items-center gap-2">
-          <Filter className="h-3 w-3 text-muted-foreground" />
-          <select value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)} className="rounded border border-slate-200 bg-white px-2 py-1.5 text-xs h-8">
-            <option value="">All Brands</option>
-            {brands.map((b: any) => <option key={b.id} value={b.name}>{b.name}</option>)}
-          </select>
-          {brandFilter && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-rose-600 hover:bg-rose-50 h-8 px-2 text-xs">
-              <X className="mr-1 h-3 w-3" /> Clear
-            </Button>
-          )}
-        </div>
-      )}
-
-      {/* Stage Flow Tabs */}
-      <div className="flex items-center gap-0 overflow-x-auto pb-2">
+      {/* Stage Flow Tabs - Arrow Style */}
+      <div className="flex items-center overflow-x-auto pb-2">
         {stages.map((stage, idx) => {
           const stageDeals = filteredDeals.filter((d: DealType) => d.stage === stage.id)
           const isActive = activeStage === stage.id
           const isLast = idx === stages.length - 1
           return (
-            <div key={stage.id} className="flex items-center">
+            <div key={stage.id} className="flex items-center flex-shrink-0">
               <button
                 onClick={() => setActiveStage(stage.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-all ${
+                className={`relative flex items-center gap-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-all ${
                   isActive
                     ? `${stage.color} text-white shadow-md`
                     : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
-                } ${idx === 0 ? 'rounded-l-lg' : ''} ${isLast ? 'rounded-r-lg' : ''}`}
+                } ${idx === 0 ? 'rounded-l-lg' : 'rounded-l-none'}`}
               >
                 <span>{stage.name}</span>
                 <span className={`text-xs px-1.5 py-0.5 rounded ${
@@ -389,11 +364,7 @@ export default function DealsPage() {
                 </span>
               </button>
               {!isLast && (
-                <div className={`h-8 w-6 flex items-center justify-center ${
-                  isActive ? 'text-slate-400' : 'text-slate-300'
-                }`}>
-                  <ChevronRight className="h-4 w-4" />
-                </div>
+                <div className="flex-shrink-0 w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px] border-l-slate-300" />
               )}
             </div>
           )
@@ -433,8 +404,8 @@ export default function DealsPage() {
               const stageIdx = stages.findIndex((s) => s.id === deal.stage)
               return (
                 <Card key={deal.id} className="group shadow-card hover:shadow-card-hover transition-all border-0 relative">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2.5 mb-3">
+                  <CardContent className="p-3">
+                    <div className="flex items-center gap-2.5 mb-2">
                       <div className={`h-8 w-8 rounded-full ${brand ? getBrandColor(brand.name) : "bg-slate-400"} flex items-center justify-center text-white text-xs font-semibold shadow-sm flex-shrink-0`}>
                         {brand?.name?.charAt(0) || "B"}
                       </div>
