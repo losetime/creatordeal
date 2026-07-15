@@ -11,7 +11,7 @@ interface RevenueChartProps {
 const chartConfig = {
   amount: {
     label: "Revenue",
-    color: "var(--color-chart-1)",
+    color: "#0d9488",
   },
 } satisfies ChartConfig
 
@@ -42,7 +42,7 @@ export function RevenueChart({ data = [] }: RevenueChartProps) {
                 tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
               />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="amount" fill="var(--color-chart-1)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="amount" fill="#0d9488" radius={[4, 4, 0, 0]} maxBarSize={60} />
             </BarChart>
           </ChartContainer>
         )}
