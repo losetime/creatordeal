@@ -346,34 +346,34 @@ export default function DealsPage() {
           const stageDeals = filteredDeals.filter((d: DealType) => d.stage === stage.id)
           const isActive = activeStage === stage.id
           return (
-            <div key={stage.id} className="relative">
-              <button
-                onClick={() => setActiveStage(stage.id)}
-                className={`relative flex items-center gap-2 pl-5 pr-7 py-3 text-sm font-medium whitespace-nowrap transition-all z-10 ${
-                  isActive
-                    ? `${stage.color} text-white shadow-md`
-                    : "bg-white text-slate-600 hover:bg-slate-50"
+            <button
+              key={stage.id}
+              onClick={() => setActiveStage(stage.id)}
+              className="relative flex items-center gap-2 pl-5 pr-7 py-3 text-sm font-medium whitespace-nowrap transition-all"
+              style={{ zIndex: isActive ? 10 : 1 }}
+            >
+              {/* Border layer */}
+              <div
+                className={`absolute inset-0 ${
+                  isActive ? stage.color : 'bg-white border border-slate-200'
                 }`}
-                style={{
-                  clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)',
-                  border: isActive ? 'none' : '1px solid #e5e7eb',
-                }}
-              >
-                <span>{stage.name}</span>
-                <span className={`text-xs px-1.5 py-0.5 rounded ${
-                  isActive ? 'bg-white/20' : 'bg-slate-100 text-slate-600'
-                }`}>
-                  {stageDeals.length}
-                </span>
-              </button>
-              {/* Border overlay for inactive tabs */}
-              {!isActive && (
-                <div
-                  className="absolute inset-0 pointer-events-none border border-slate-200"
-                  style={{ clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)' }}
-                />
-              )}
-            </div>
+                style={{ clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)' }}
+              />
+              {/* Content layer */}
+              <div
+                className={`absolute inset-0.5 ${
+                  isActive ? stage.color : 'bg-white'
+                }`}
+                style={{ clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)' }}
+              />
+              {/* Text */}
+              <span className={`relative z-10 ${isActive ? 'text-white' : 'text-slate-600'}`}>{stage.name}</span>
+              <span className={`relative z-10 text-xs px-1.5 py-0.5 rounded ${
+                isActive ? 'bg-white/20' : 'bg-slate-100 text-slate-600'
+              }`}>
+                {stageDeals.length}
+              </span>
+            </button>
           )
         })}
       </div>
