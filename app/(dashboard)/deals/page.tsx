@@ -26,7 +26,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import {
   Plus, DollarSign, Calendar, Search, X, Trash2, Pencil,
-  Handshake, Filter, Sparkles, ChevronRight, ChevronDown, FileText,
+  Handshake, Filter, Sparkles, ChevronRight, FileText,
 } from "lucide-react"
 import { trpc } from "@/lib/trpc/client"
 import { formatCurrency, formatDate } from "@/lib/utils"
@@ -82,7 +82,7 @@ export default function DealsPage() {
   const [brandFilter, setBrandFilter] = useState("")
   const [editingDeal, setEditingDeal] = useState<DealType | null>(null)
   const [deletingDealId, setDeletingDealId] = useState<string | null>(null)
-  const [expandedStages, setExpandedStages] = useState<Set<string>>(new Set(["signed", "creating", "review"]))
+  const [activeStage, setActiveStage] = useState("inquiry")
 
   const [newDeal, setNewDeal] = useState({
     title: "", brand_id: "", amount: "", content_type: "",
@@ -165,12 +165,13 @@ export default function DealsPage() {
 
   const clearFilters = () => { setSearchQuery(""); setBrandFilter("") }
 
-  const toggleStage = (stageId: string) => {
-    const next = new Set(expandedStages)
-    if (next.has(stageId)) next.delete(stageId)
-    else next.add(stageId)
-    setExpandedStages(next)
-  }
+  const activeStageDeals = useMemo(() => {
+    return filteredDeals.filter((d: DealType) => d.stage === activeStage)
+  }, [filteredDeals, activeStage])
+
+  const activeStageTotal = useMemo(() => {
+    return activeStageDeals.reduce((sum: number, d: DealType) => sum + (d.amount ?? 0), 0)
+  }, [activeStageDeals])
 
   const handleCreateDeal = () => {
     if (!newDeal.title) return
@@ -222,6 +223,8 @@ export default function DealsPage() {
       updateStageMutation.mutate({ id: deal.id, stage: stages[currentIdx + 1].id as any })
     }
   }
+
+  const activeStageData = stages.find((s) => s.id === activeStage)
 
   if (dealsLoading) {
     return (
@@ -372,102 +375,118 @@ export default function DealsPage() {
         </CardContent>
       </Card>
 
-      {/* Vertical Pipeline */}
-      <div className="space-y-3">
-        {stages.map((stage, stageIdx) => {
+      {/* Stage Tabs */}
+      <div className="flex gap-1 overflow-x-auto pb-2 -mx-1 px-1">
+        {stages.map((stage) => {
           const stageDeals = filteredDeals.filter((d: DealType) => d.stage === stage.id)
-          const isExpanded = expandedStages.has(stage.id)
-          const stageTotal = stageDeals.reduce((sum: number, d: DealType) => sum + (d.amount ?? 0), 0)
-
+          const isActive = activeStage === stage.id
           return (
-            <div key={stage.id}>
-              {/* Stage Header */}
-              <button
-                onClick={() => toggleStage(stage.id)}
-                className="w-full flex items-center gap-3 p-3 rounded-xl bg-white shadow-card hover:shadow-card-hover transition-all"
+            <button
+              key={stage.id}
+              onClick={() => setActiveStage(stage.id)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                isActive
+                  ? `${stage.color} text-white shadow-md`
+                  : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
+              }`}
+            >
+              <span>{stage.name}</span>
+              <Badge
+                variant="secondary"
+                className={`text-xs ${
+                  isActive
+                    ? "bg-white/20 text-white"
+                    : `${stage.lightBg} ${stage.textColor}`
+                }`}
               >
-                <div className={`h-3 w-3 rounded-full bg-gradient-to-r ${stage.gradient} flex-shrink-0`} />
-                <span className="font-semibold text-sm text-slate-700">{stage.name}</span>
-                <Badge variant="secondary" className={`${stage.lightBg} ${stage.textColor} text-xs`}>
-                  {stageDeals.length}
-                </Badge>
-                {stageTotal > 0 && (
-                  <span className="text-xs text-slate-500 ml-auto">{formatCurrency(stageTotal)}</span>
-                )}
-                {isExpanded ? (
-                  <ChevronDown className="h-4 w-4 text-slate-400" />
-                ) : (
-                  <ChevronRight className="h-4 w-4 text-slate-400" />
-                )}
-              </button>
-
-              {/* Stage Deals */}
-              {isExpanded && (
-                <div className="ml-6 mt-2 space-y-2 border-l-2 border-slate-100 pl-4">
-                  {stageDeals.length === 0 ? (
-                    <p className="text-xs text-muted-foreground py-3">No deals in this stage</p>
-                  ) : (
-                    stageDeals.map((deal: DealType) => {
-                      const brand = getDealBrand(deal)
-                      return (
-                        <div key={deal.id} className="group bg-white rounded-lg p-3 shadow-sm border border-slate-100 hover:shadow-card hover:border-teal-100 transition-all">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-2.5">
-                              <div className={`h-8 w-8 rounded-full ${brand ? getBrandColor(brand.name) : "bg-slate-400"} flex items-center justify-center text-white text-xs font-semibold shadow-sm flex-shrink-0`}>
-                                {brand?.name?.charAt(0) || "B"}
-                              </div>
-                              <div className="min-w-0">
-                                <p className="font-medium text-sm text-slate-800">{deal.title}</p>
-                                <p className="text-xs text-muted-foreground">{brand?.name || "Unknown brand"}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              {stageIdx < stages.length - 1 && deal.stage !== "closed" && (
-                                <Button size="sm" onClick={() => moveToNextStage(deal)} className="h-7 px-2 text-xs bg-black hover:bg-black/80 text-white">
-                                  <ChevronRight className="h-3 w-3 mr-0.5" /> Next
-                                </Button>
-                              )}
-                              <button onClick={() => handleEditDeal(deal)} className="p-1.5 hover:bg-slate-100 rounded transition-colors">
-                                <Pencil className="h-3.5 w-3.5 text-slate-500" />
-                              </button>
-                              <button onClick={() => setDeletingDealId(deal.id)} className="p-1.5 hover:bg-rose-50 rounded transition-colors">
-                                <Trash2 className="h-3.5 w-3.5 text-rose-500" />
-                              </button>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 mt-2 ml-10">
-                            {deal.amount != null && (
-                              <div className="flex items-center text-xs text-slate-500 bg-slate-50 px-2 py-0.5 rounded">
-                                <DollarSign className="h-3 w-3 mr-0.5" />
-                                {formatCurrency(deal.amount)}
-                              </div>
-                            )}
-                            {deal.content_deadline && (
-                              <div className="flex items-center text-xs text-slate-500 bg-slate-50 px-2 py-0.5 rounded">
-                                <Calendar className="h-3 w-3 mr-0.5" />
-                                {new Date(deal.content_deadline).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                              </div>
-                            )}
-                            {deal.content_type && (
-                              <span className="text-xs text-slate-400">{deal.content_type}</span>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })
-                  )}
-                </div>
-              )}
-
-              {/* Connector line between stages */}
-              {stageIdx < stages.length - 1 && isExpanded && (
-                <div className="flex justify-center py-1">
-                  <div className="w-0.5 h-3 bg-slate-200 rounded-full" />
-                </div>
-              )}
-            </div>
+                {stageDeals.length}
+              </Badge>
+            </button>
           )
         })}
+      </div>
+
+      {/* Active Stage Content */}
+      <div className="space-y-3">
+        {/* Stage Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className={`h-3 w-3 rounded-full bg-gradient-to-r ${activeStageData?.gradient}`} />
+            <h3 className="font-semibold text-slate-700">{activeStageData?.name}</h3>
+            {activeStageTotal > 0 && (
+              <span className="text-sm text-slate-500">{formatCurrency(activeStageTotal)}</span>
+            )}
+          </div>
+        </div>
+
+        {/* Deals Grid */}
+        {activeStageDeals.length === 0 ? (
+          <Card className="py-12 shadow-card">
+            <CardContent className="flex flex-col items-center justify-center text-center">
+              <div className="rounded-full bg-slate-100 p-4 mb-3">
+                <Handshake className="h-8 w-8 text-slate-400" />
+              </div>
+              <p className="text-sm text-muted-foreground">No deals in this stage</p>
+              <Button size="sm" onClick={handleCreateClick} className="mt-3 bg-black hover:bg-black/80 text-white">
+                <Plus className="mr-1 h-3 w-3" /> Add Deal
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {activeStageDeals.map((deal: DealType) => {
+              const brand = getDealBrand(deal)
+              const stageIdx = stages.findIndex((s) => s.id === deal.stage)
+              return (
+                <Card key={deal.id} className="group shadow-card hover:shadow-card-hover transition-all border-0">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className={`h-8 w-8 rounded-full ${brand ? getBrandColor(brand.name) : "bg-slate-400"} flex items-center justify-center text-white text-xs font-semibold shadow-sm flex-shrink-0`}>
+                          {brand?.name?.charAt(0) || "B"}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-medium text-sm text-slate-800 truncate">{deal.title}</p>
+                          <p className="text-xs text-muted-foreground truncate">{brand?.name || "Unknown brand"}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {stageIdx < stages.length - 1 && deal.stage !== "closed" && (
+                          <Button size="sm" onClick={() => moveToNextStage(deal)} className="h-6 px-2 text-xs bg-black hover:bg-black/80 text-white">
+                            <ChevronRight className="h-3 w-3" />
+                          </Button>
+                        )}
+                        <button onClick={() => handleEditDeal(deal)} className="p-1 hover:bg-slate-100 rounded transition-colors">
+                          <Pencil className="h-3.5 w-3.5 text-slate-500" />
+                        </button>
+                        <button onClick={() => setDeletingDealId(deal.id)} className="p-1 hover:bg-rose-50 rounded transition-colors">
+                          <Trash2 className="h-3.5 w-3.5 text-rose-500" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {deal.amount != null && (
+                        <div className="flex items-center text-xs text-slate-500 bg-slate-50 px-2 py-0.5 rounded">
+                          <DollarSign className="h-3 w-3 mr-0.5" />
+                          {formatCurrency(deal.amount)}
+                        </div>
+                      )}
+                      {deal.content_deadline && (
+                        <div className="flex items-center text-xs text-slate-500 bg-slate-50 px-2 py-0.5 rounded">
+                          <Calendar className="h-3 w-3 mr-0.5" />
+                          {new Date(deal.content_deadline).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        </div>
+                      )}
+                      {deal.content_type && (
+                        <span className="text-xs text-slate-400">{deal.content_type}</span>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* Empty State */}
