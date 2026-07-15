@@ -340,31 +340,38 @@ export default function DealsPage() {
         <p><strong>Pro tip:</strong> Go to Contracts to upload a contract — AI will automatically extract key information and create a deal and brand for you.</p>
       </div>
 
-      {/* Stage Flow Tabs - Arrow Style */}
+      {/* Stage Flow Tabs - Chevron Style */}
       <div className="flex items-center overflow-x-auto pb-2">
         {stages.map((stage, idx) => {
           const stageDeals = filteredDeals.filter((d: DealType) => d.stage === stage.id)
           const isActive = activeStage === stage.id
-          const isLast = idx === stages.length - 1
           return (
-            <div key={stage.id} className="flex items-center flex-shrink-0">
+            <div key={stage.id} className="relative">
               <button
                 onClick={() => setActiveStage(stage.id)}
-                className={`relative flex items-center gap-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-all ${
+                className={`relative flex items-center gap-2 pl-5 pr-7 py-3 text-sm font-medium whitespace-nowrap transition-all z-10 ${
                   isActive
                     ? `${stage.color} text-white shadow-md`
-                    : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
-                } ${idx === 0 ? 'rounded-l-lg' : 'rounded-l-none'}`}
+                    : "bg-white text-slate-600 hover:bg-slate-50"
+                }`}
+                style={{
+                  clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)',
+                  border: isActive ? 'none' : '1px solid #e5e7eb',
+                }}
               >
                 <span>{stage.name}</span>
                 <span className={`text-xs px-1.5 py-0.5 rounded ${
-                  isActive ? 'bg-white/20' : stage.lightBg
+                  isActive ? 'bg-white/20' : 'bg-slate-100 text-slate-600'
                 }`}>
                   {stageDeals.length}
                 </span>
               </button>
-              {!isLast && (
-                <div className="flex-shrink-0 w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-l-[10px] border-l-slate-300" />
+              {/* Border overlay for inactive tabs */}
+              {!isActive && (
+                <div
+                  className="absolute inset-0 pointer-events-none border border-slate-200"
+                  style={{ clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)' }}
+                />
               )}
             </div>
           )
