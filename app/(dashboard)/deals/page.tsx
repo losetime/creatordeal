@@ -340,35 +340,23 @@ export default function DealsPage() {
         <p><strong>Pro tip:</strong> Go to Contracts to upload a contract — AI will automatically extract key information and create a deal and brand for you.</p>
       </div>
 
-      {/* Stage Flow Tabs - Chevron Style */}
-      <div className="flex items-center overflow-x-auto pb-2">
-        {stages.map((stage, idx) => {
+      {/* Stage Flow Tabs - Pill Style */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2">
+        {stages.map((stage) => {
           const stageDeals = filteredDeals.filter((d: DealType) => d.stage === stage.id)
           const isActive = activeStage === stage.id
           return (
             <button
               key={stage.id}
               onClick={() => setActiveStage(stage.id)}
-              className="relative flex items-center gap-2 pl-5 pr-7 py-3 text-sm font-medium whitespace-nowrap transition-all"
-              style={{ zIndex: isActive ? 10 : 1 }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                isActive
+                  ? `${stage.color} text-white shadow-md`
+                  : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+              }`}
             >
-              {/* Border layer */}
-              <div
-                className={`absolute inset-0 ${
-                  isActive ? stage.color : 'bg-white border border-slate-200'
-                }`}
-                style={{ clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)' }}
-              />
-              {/* Content layer */}
-              <div
-                className={`absolute inset-0.5 ${
-                  isActive ? stage.color : 'bg-white'
-                }`}
-                style={{ clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%)' }}
-              />
-              {/* Text */}
-              <span className={`relative z-10 ${isActive ? 'text-white' : 'text-slate-600'}`}>{stage.name}</span>
-              <span className={`relative z-10 text-xs px-1.5 py-0.5 rounded ${
+              <span>{stage.name}</span>
+              <span className={`text-xs px-1.5 py-0.5 rounded-full ${
                 isActive ? 'bg-white/20' : 'bg-slate-100 text-slate-600'
               }`}>
                 {stageDeals.length}
@@ -405,51 +393,58 @@ export default function DealsPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {activeStageDeals.map((deal: DealType) => {
               const brand = getDealBrand(deal)
               const stageIdx = stages.findIndex((s) => s.id === deal.stage)
               return (
-                <Card key={deal.id} className="group shadow-card hover:shadow-card-hover transition-all border-0 relative">
+                <Card key={deal.id} className="group shadow-sm hover:shadow-md transition-all border border-slate-100 relative overflow-hidden">
+                  {/* Top accent bar */}
+                  <div className={`h-1 w-full bg-gradient-to-r ${activeStageData?.gradient}`} />
+                  
                   <CardContent className="p-3">
+                    {/* Header: Brand + Title */}
                     <div className="flex items-center gap-2.5 mb-2">
-                      <div className={`h-8 w-8 rounded-full ${brand ? getBrandColor(brand.name) : "bg-slate-400"} flex items-center justify-center text-white text-xs font-semibold shadow-sm flex-shrink-0`}>
+                      <div className={`h-9 w-9 rounded-lg ${brand ? getBrandColor(brand.name) : "bg-slate-400"} flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0`}>
                         {brand?.name?.charAt(0) || "B"}
                       </div>
-                      <div className="min-w-0">
-                        <p className="font-medium text-sm text-slate-800 truncate">{deal.title}</p>
-                        <p className="text-xs text-muted-foreground truncate">{brand?.name || "Unknown brand"}</p>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-medium text-sm text-slate-800 truncate">{deal.title}</h4>
+                        <p className="text-xs text-slate-500">{brand?.name || "Unknown brand"}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap">
+
+                    {/* Info tags */}
+                    <div className="flex items-center gap-1.5 flex-wrap mb-2">
                       {deal.amount != null && (
-                        <div className="flex items-center text-xs text-slate-500 bg-slate-50 px-2 py-0.5 rounded">
-                          <DollarSign className="h-3 w-3 mr-0.5" />
+                        <div className="flex items-center text-xs font-medium text-slate-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                          <DollarSign className="h-3 w-3 mr-0.5 text-emerald-600" />
                           {formatCurrency(deal.amount)}
                         </div>
                       )}
                       {deal.content_deadline && (
-                        <div className="flex items-center text-xs text-slate-500 bg-slate-50 px-2 py-0.5 rounded">
-                          <Calendar className="h-3 w-3 mr-0.5" />
+                        <div className="flex items-center text-xs text-slate-600 bg-slate-50 px-1.5 py-0.5 rounded">
+                          <Calendar className="h-3 w-3 mr-0.5 text-slate-400" />
                           {new Date(deal.content_deadline).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                         </div>
                       )}
                       {deal.content_type && (
-                        <span className="text-xs text-slate-400">{deal.content_type}</span>
+                        <span className="text-xs text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded">{deal.content_type}</span>
                       )}
                     </div>
-                    {/* Action buttons - bottom right */}
-                    <div className="absolute bottom-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+
+                    {/* Action buttons */}
+                    <div className="flex items-center justify-end gap-1 pt-1.5 border-t border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity">
                       {stageIdx < stages.length - 1 && deal.stage !== "closed" && (
-                        <Button size="sm" onClick={() => moveToNextStage(deal)} className="h-6 px-2 text-xs bg-black hover:bg-black/80 text-white">
-                          <ChevronRight className="h-3 w-3" />
+                        <Button size="sm" onClick={() => moveToNextStage(deal)} className="h-7 px-2.5 text-xs bg-slate-900 hover:bg-slate-800 text-white">
+                          Next
                         </Button>
                       )}
-                      <button onClick={() => handleEditDeal(deal)} className="p-1 hover:bg-slate-100 rounded transition-colors">
-                        <Pencil className="h-3.5 w-3.5 text-slate-500" />
+                      <button onClick={() => handleEditDeal(deal)} className="p-1.5 hover:bg-slate-100 rounded-md transition-colors">
+                        <Pencil className="h-3.5 w-3.5 text-slate-400" />
                       </button>
-                      <button onClick={() => setDeletingDealId(deal.id)} className="p-1 hover:bg-rose-50 rounded transition-colors">
-                        <Trash2 className="h-3.5 w-3.5 text-rose-500" />
+                      <button onClick={() => setDeletingDealId(deal.id)} className="p-1.5 hover:bg-rose-50 rounded-md transition-colors">
+                        <Trash2 className="h-3.5 w-3.5 text-rose-400" />
                       </button>
                     </div>
                   </CardContent>
