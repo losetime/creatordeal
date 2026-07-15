@@ -25,7 +25,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import {
-  Plus, DollarSign, Calendar, Search, X, Trash2, Pencil,
+  Plus, DollarSign, Calendar, X, Trash2, Pencil,
   Handshake, Filter, Sparkles, ChevronRight, FileText,
 } from "lucide-react"
 import { trpc } from "@/lib/trpc/client"
@@ -78,7 +78,6 @@ export default function DealsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
   const [brandFilter, setBrandFilter] = useState("")
   const [editingDeal, setEditingDeal] = useState<DealType | null>(null)
   const [deletingDealId, setDeletingDealId] = useState<string | null>(null)
@@ -154,16 +153,15 @@ export default function DealsPage() {
 
   const filteredDeals = useMemo(() => {
     return deals.filter((deal: DealType) => {
-      if (searchQuery && !deal.title.toLowerCase().includes(searchQuery.toLowerCase())) return false
       const brand = getDealBrand(deal)
       if (brandFilter && brand?.name !== brandFilter) return false
       return true
     })
-  }, [deals, searchQuery, brandFilter])
+  }, [deals, brandFilter])
 
-  const hasFilters = searchQuery || brandFilter
+  const hasFilters = !!brandFilter
 
-  const clearFilters = () => { setSearchQuery(""); setBrandFilter("") }
+  const clearFilters = () => { setBrandFilter("") }
 
   const activeStageDeals = useMemo(() => {
     return filteredDeals.filter((d: DealType) => d.stage === activeStage)
@@ -351,57 +349,53 @@ export default function DealsPage() {
         <p><strong>Pro tip:</strong> Go to Contracts to upload a contract — AI will automatically extract key information and create a deal and brand for you.</p>
       </div>
 
-      {/* Filters */}
-      <Card className="shadow-card border-0 bg-white">
-        <CardContent className="p-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Search deals..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-8 h-8 bg-slate-50" />
-            </div>
-            <div className="flex items-center gap-2">
-              <Filter className="h-3 w-3 text-muted-foreground" />
-              <select value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)} className="rounded border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs h-8">
-                <option value="">All Brands</option>
-                {brands.map((b: any) => <option key={b.id} value={b.name}>{b.name}</option>)}
-              </select>
-            </div>
-            {hasFilters && (
-              <Button variant="ghost" size="sm" onClick={clearFilters} className="text-rose-600 hover:bg-rose-50 h-8 px-2 text-xs">
-                <X className="mr-1 h-3 w-3" /> Clear
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Filters - Brand only */}
+      {brands.length > 0 && (
+        <div className="flex items-center gap-2">
+          <Filter className="h-3 w-3 text-muted-foreground" />
+          <select value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)} className="rounded border border-slate-200 bg-white px-2 py-1.5 text-xs h-8">
+            <option value="">All Brands</option>
+            {brands.map((b: any) => <option key={b.id} value={b.name}>{b.name}</option>)}
+          </select>
+          {brandFilter && (
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-rose-600 hover:bg-rose-50 h-8 px-2 text-xs">
+              <X className="mr-1 h-3 w-3" /> Clear
+            </Button>
+          )}
+        </div>
+      )}
 
-      {/* Stage Tabs */}
-      <div className="flex gap-1 overflow-x-auto pb-2 -mx-1 px-1">
-        {stages.map((stage) => {
+      {/* Stage Flow Tabs */}
+      <div className="flex items-center gap-0 overflow-x-auto pb-2">
+        {stages.map((stage, idx) => {
           const stageDeals = filteredDeals.filter((d: DealType) => d.stage === stage.id)
           const isActive = activeStage === stage.id
+          const isLast = idx === stages.length - 1
           return (
-            <button
-              key={stage.id}
-              onClick={() => setActiveStage(stage.id)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
-                isActive
-                  ? `${stage.color} text-white shadow-md`
-                  : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
-              }`}
-            >
-              <span>{stage.name}</span>
-              <Badge
-                variant="secondary"
-                className={`text-xs ${
+            <div key={stage.id} className="flex items-center">
+              <button
+                onClick={() => setActiveStage(stage.id)}
+                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-all ${
                   isActive
-                    ? "bg-white/20 text-white"
-                    : `${stage.lightBg} ${stage.textColor}`
-                }`}
+                    ? `${stage.color} text-white shadow-md`
+                    : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
+                } ${idx === 0 ? 'rounded-l-lg' : ''} ${isLast ? 'rounded-r-lg' : ''}`}
               >
-                {stageDeals.length}
-              </Badge>
-            </button>
+                <span>{stage.name}</span>
+                <span className={`text-xs px-1.5 py-0.5 rounded ${
+                  isActive ? 'bg-white/20' : stage.lightBg
+                }`}>
+                  {stageDeals.length}
+                </span>
+              </button>
+              {!isLast && (
+                <div className={`h-8 w-6 flex items-center justify-center ${
+                  isActive ? 'text-slate-400' : 'text-slate-300'
+                }`}>
+                  <ChevronRight className="h-4 w-4" />
+                </div>
+              )}
+            </div>
           )
         })}
       </div>
@@ -438,30 +432,15 @@ export default function DealsPage() {
               const brand = getDealBrand(deal)
               const stageIdx = stages.findIndex((s) => s.id === deal.stage)
               return (
-                <Card key={deal.id} className="group shadow-card hover:shadow-card-hover transition-all border-0">
+                <Card key={deal.id} className="group shadow-card hover:shadow-card-hover transition-all border-0 relative">
                   <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className={`h-8 w-8 rounded-full ${brand ? getBrandColor(brand.name) : "bg-slate-400"} flex items-center justify-center text-white text-xs font-semibold shadow-sm flex-shrink-0`}>
-                          {brand?.name?.charAt(0) || "B"}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-medium text-sm text-slate-800 truncate">{deal.title}</p>
-                          <p className="text-xs text-muted-foreground truncate">{brand?.name || "Unknown brand"}</p>
-                        </div>
+                    <div className="flex items-center gap-2.5 mb-3">
+                      <div className={`h-8 w-8 rounded-full ${brand ? getBrandColor(brand.name) : "bg-slate-400"} flex items-center justify-center text-white text-xs font-semibold shadow-sm flex-shrink-0`}>
+                        {brand?.name?.charAt(0) || "B"}
                       </div>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {stageIdx < stages.length - 1 && deal.stage !== "closed" && (
-                          <Button size="sm" onClick={() => moveToNextStage(deal)} className="h-6 px-2 text-xs bg-black hover:bg-black/80 text-white">
-                            <ChevronRight className="h-3 w-3" />
-                          </Button>
-                        )}
-                        <button onClick={() => handleEditDeal(deal)} className="p-1 hover:bg-slate-100 rounded transition-colors">
-                          <Pencil className="h-3.5 w-3.5 text-slate-500" />
-                        </button>
-                        <button onClick={() => setDeletingDealId(deal.id)} className="p-1 hover:bg-rose-50 rounded transition-colors">
-                          <Trash2 className="h-3.5 w-3.5 text-rose-500" />
-                        </button>
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm text-slate-800 truncate">{deal.title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{brand?.name || "Unknown brand"}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -480,6 +459,20 @@ export default function DealsPage() {
                       {deal.content_type && (
                         <span className="text-xs text-slate-400">{deal.content_type}</span>
                       )}
+                    </div>
+                    {/* Action buttons - bottom right */}
+                    <div className="absolute bottom-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {stageIdx < stages.length - 1 && deal.stage !== "closed" && (
+                        <Button size="sm" onClick={() => moveToNextStage(deal)} className="h-6 px-2 text-xs bg-black hover:bg-black/80 text-white">
+                          <ChevronRight className="h-3 w-3" />
+                        </Button>
+                      )}
+                      <button onClick={() => handleEditDeal(deal)} className="p-1 hover:bg-slate-100 rounded transition-colors">
+                        <Pencil className="h-3.5 w-3.5 text-slate-500" />
+                      </button>
+                      <button onClick={() => setDeletingDealId(deal.id)} className="p-1 hover:bg-rose-50 rounded transition-colors">
+                        <Trash2 className="h-3.5 w-3.5 text-rose-500" />
+                      </button>
                     </div>
                   </CardContent>
                 </Card>
