@@ -10,7 +10,14 @@ export const metadata: Metadata = {
   title: "CreatorDeal - Sponsorship Management for Creators",
   description: "Manage your brand deals, track revenue, and generate invoices all in one place.",
   icons: {
-    icon: "/favicon.svg",
+    icon: [
+      { url: "/logo.png", sizes: "32x32", type: "image/png" },
+      { url: "/logo.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: "/logo.png",
+    other: [
+      { rel: "icon", url: "/logo.png", type: "image/png" },
+    ],
   },
 }
 

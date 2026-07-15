@@ -1,6 +1,5 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Rocket } from "lucide-react"
 
 export default function PrivacyPolicyPage() {
   return (
@@ -8,9 +7,7 @@ export default function PrivacyPolicyPage() {
       <header className="border-b border-border/50 bg-background/80 backdrop-blur-lg">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Rocket className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img src="/logo.png" alt="CreatorDeal" className="h-8 w-8" />
             <span className="text-xl font-bold">CreatorDeal</span>
           </Link>
           <Link href="/">

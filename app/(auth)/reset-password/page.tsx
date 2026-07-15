@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { Rocket, Loader2, CheckCircle } from "lucide-react"
+import { Loader2, CheckCircle } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 
@@ -57,9 +57,7 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <Link href="/" className="inline-flex items-center gap-2 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-primary">
-              <Rocket className="h-6 w-6 text-white" />
-            </div>
+            <img src="/logo.png" alt="CreatorDeal" className="h-10 w-10" />
             <span className="text-2xl font-bold text-white">CreatorDeal</span>
           </Link>
         </div>

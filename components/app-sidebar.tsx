@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Rocket, LogOut } from "lucide-react"
+import { LogOut } from "lucide-react"
 import { useAuth } from "@/lib/auth/context"
 import { trpc } from "@/lib/trpc/client"
 import { useLocale } from "@/hooks/use-locale"
@@ -88,9 +88,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg">
               <Link href="/home" className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary">
-                  <Rocket className="h-5 w-5 text-white" />
-                </div>
+                <img src="/logo.png" alt="CreatorDeal" className="h-8 w-8" />
                 <span className="text-lg font-bold group-data-[collapsible=icon]:hidden">
                   CreatorDeal
                 </span>

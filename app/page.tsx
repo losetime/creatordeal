@@ -15,7 +15,6 @@ import {
   Star,
   ChevronDown,
   Zap,
-  Rocket,
 } from "lucide-react"
 
 const features = [
@@ -140,9 +139,7 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Rocket className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img src="/logo.png" alt="CreatorDeal" className="h-8 w-8" />
             <span className="text-xl font-bold text-foreground">CreatorDeal</span>
           </Link>
           <nav className="hidden md:flex items-center gap-8">
@@ -392,9 +389,7 @@ export default function HomePage() {
           <div className="grid gap-8 md:grid-cols-3">
             <div>
               <Link href="/" className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                  <Rocket className="h-5 w-5 text-primary-foreground" />
-                </div>
+                <img src="/logo.png" alt="CreatorDeal" className="h-8 w-8" />
                 <span className="text-lg font-bold text-foreground">CreatorDeal</span>
               </Link>
               <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
