@@ -469,13 +469,11 @@ export default function DealsPage() {
             </div>
             <h3 className="text-xl font-semibold">No deals found</h3>
             <p className="text-muted-foreground mt-2 mb-6 max-w-md">
-              {hasFilters ? "Try adjusting your filters." : "Upload a contract or create a deal to get started."}
+              Upload a contract or create a deal to get started.
             </p>
-            {!hasFilters && (
-              <Button onClick={() => setIsDialogOpen(true)} className="bg-black hover:bg-black/80 text-white shadow-md">
-                <Plus className="mr-2 h-4 w-4" /> Create Deal
-              </Button>
-            )}
+            <Button onClick={() => setIsDialogOpen(true)} className="bg-black hover:bg-black/80 text-white shadow-md">
+              <Plus className="mr-2 h-4 w-4" /> Create Deal
+            </Button>
           </CardContent>
         </Card>
       )}
