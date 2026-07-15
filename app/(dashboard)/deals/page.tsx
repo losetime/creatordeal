@@ -26,7 +26,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import {
   Plus, DollarSign, Calendar, Trash2, Pencil,
-  Handshake, Sparkles, ChevronRight, FileText,
+  Handshake, Sparkles, ChevronRight, FileText, Loader2,
 } from "lucide-react"
 import { trpc } from "@/lib/trpc/client"
 import { formatCurrency, formatDate } from "@/lib/utils"
@@ -80,6 +80,7 @@ export default function DealsPage() {
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false)
   const [editingDeal, setEditingDeal] = useState<DealType | null>(null)
   const [deletingDealId, setDeletingDealId] = useState<string | null>(null)
+  const [nextDeal, setNextDeal] = useState<DealType | null>(null)
   const [activeStage, setActiveStage] = useState("inquiry")
 
   const [newDeal, setNewDeal] = useState({
@@ -206,10 +207,14 @@ export default function DealsPage() {
     setEditingDeal(null)
   }
 
-  const moveToNextStage = (deal: DealType) => {
-    const currentIdx = stages.findIndex((s) => s.id === deal.stage)
+  const handleConfirmNext = () => {
+    if (!nextDeal) return
+    const currentIdx = stages.findIndex((s) => s.id === nextDeal.stage)
     if (currentIdx < stages.length - 1) {
-      updateStageMutation.mutate({ id: deal.id, stage: stages[currentIdx + 1].id as any })
+      updateStageMutation.mutate(
+        { id: nextDeal.id, stage: stages[currentIdx + 1].id as any },
+        { onSuccess: () => setNextDeal(null) }
+      )
     }
   }
 
@@ -434,9 +439,9 @@ export default function DealsPage() {
                     </div>
 
                     {/* Action buttons */}
-                    <div className="flex items-center justify-end gap-1 pt-1.5 border-t border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-end gap-1 pt-1.5 border-t border-slate-100">
                       {stageIdx < stages.length - 1 && deal.stage !== "closed" && (
-                        <Button size="sm" onClick={() => moveToNextStage(deal)} className="h-7 px-2.5 text-xs bg-slate-900 hover:bg-slate-800 text-white">
+                        <Button size="sm" onClick={() => setNextDeal(deal)} className="h-7 px-2.5 text-xs bg-slate-900 hover:bg-slate-800 text-white">
                           Next
                         </Button>
                       )}
@@ -526,6 +531,28 @@ export default function DealsPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Next Stage Dialog */}
+      <Dialog open={!!nextDeal} onOpenChange={(open) => !open && setNextDeal(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Move to Next Stage</DialogTitle>
+            <DialogDescription>
+              Move "{nextDeal?.title}" to the next stage in the pipeline?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNextDeal(null)}>Cancel</Button>
+            <Button onClick={handleConfirmNext} disabled={updateStageMutation.isPending}>
+              {updateStageMutation.isPending ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Moving...</>
+              ) : (
+                "Confirm"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Delete Dialog */}
       <Dialog open={!!deletingDealId} onOpenChange={(open) => !open && setDeletingDealId(null)}>
         <DialogContent>
@@ -535,8 +562,12 @@ export default function DealsPage() {
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeletingDealId(null)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => { if (deletingDealId) { deleteMutation.mutate({ id: deletingDealId }); setDeletingDealId(null) } }} disabled={deleteMutation.isPending}>
-              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            <Button variant="destructive" onClick={() => { if (deletingDealId) { deleteMutation.mutate({ id: deletingDealId }, { onSuccess: () => setDeletingDealId(null) }) } }} disabled={deleteMutation.isPending}>
+              {deleteMutation.isPending ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...</>
+              ) : (
+                "Delete"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
