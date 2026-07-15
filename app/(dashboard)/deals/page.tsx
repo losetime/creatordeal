@@ -398,7 +398,7 @@ export default function DealsPage() {
               const brand = getDealBrand(deal)
               const stageIdx = stages.findIndex((s) => s.id === deal.stage)
               return (
-                <Card key={deal.id} className="group shadow-sm hover:shadow-md transition-all border border-slate-100 relative overflow-hidden">
+                <Card key={deal.id} className="group shadow-sm hover:shadow-md transition-all border border-slate-100 relative overflow-hidden py-0 gap-0">
                   {/* Top accent bar */}
                   <div className={`h-1 w-full bg-gradient-to-r ${activeStageData?.gradient}`} />
                   
