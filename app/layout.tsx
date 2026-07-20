@@ -6,7 +6,7 @@ import { AuthProvider } from "@/lib/auth/context"
 import { I18nProvider } from "@/components/i18n-provider"
 import "./globals.css"
 
-const SITE_URL = "https://creatordeal.app"
+const SITE_URL = "https://creatordeal.cyberloom.work"
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

@@ -134,7 +134,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-xl font-semibold mb-3">10. Contact Us</h2>
             <p className="text-muted-foreground leading-relaxed">
-              If you have any questions about this Privacy Notice, please contact us at privacy@creatordeal.app.
+              If you have any questions about this Privacy Notice, please contact us at support@creatordealmail.cyberloom.work.
             </p>
           </section>
         </div>

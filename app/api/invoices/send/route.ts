@@ -222,7 +222,7 @@ export async function POST(request: Request) {
           
           <p style="margin-top: 16px;">
             ${pdfUrl ? `<a href="${pdfUrl}" class="btn">Download PDF</a>` : ""}
-            <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://creatordeal.app"}/invoices" class="btn btn-secondary">View in App</a>
+            <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://creatordeal.cyberloom.work"}/invoices" class="btn btn-secondary">View in App</a>
           </p>
 
           <div class="footer">

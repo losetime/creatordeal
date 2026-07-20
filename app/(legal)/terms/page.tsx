@@ -119,7 +119,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-xl font-semibold mb-3">11. Contact</h2>
             <p className="text-muted-foreground leading-relaxed">
-              If you have any questions about these Terms, please contact us at support@creatordeal.app.
+              If you have any questions about these Terms, please contact us at support@creatordealmail.cyberloom.work.
             </p>
           </section>
         </div>

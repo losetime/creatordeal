@@ -12,4 +12,4 @@ Disallow: /admin
 Disallow: /api/
 Disallow: /_next/
 
-Sitemap: https://creatordeal.app/sitemap.xml
+Sitemap: https://creatordeal.cyberloom.work/sitemap.xml

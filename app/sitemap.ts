@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next"
 
-const BASE_URL = "https://creatordeal.app"
+const BASE_URL = "https://creatordeal.cyberloom.work"
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date()

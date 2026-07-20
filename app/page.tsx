@@ -18,7 +18,7 @@ import {
   Zap,
 } from "lucide-react"
 
-const SITE_URL = "https://creatordeal.app"
+const SITE_URL = "https://creatordeal.cyberloom.work"
 
 export const metadata: Metadata = {
   title: "CreatorDeal - Sponsorship Management for Creators & Invoice Template for Influencers",

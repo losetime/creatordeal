@@ -54,7 +54,7 @@ export default function RefundPolicyPage() {
           <section>
             <h2 className="text-xl font-semibold mb-3">3. How to Request a Refund</h2>
             <p className="text-muted-foreground leading-relaxed">
-              To request a refund, please contact us at support@creatordeal.app with:
+              To request a refund, please contact us at support@creatordealmail.cyberloom.work with:
             </p>
             <ul className="list-disc list-inside text-muted-foreground mt-2 space-y-1">
               <li>Your account email address</li>
@@ -99,7 +99,7 @@ export default function RefundPolicyPage() {
           <section>
             <h2 className="text-xl font-semibold mb-3">7. Contact</h2>
             <p className="text-muted-foreground leading-relaxed">
-              For any refund-related questions, please contact us at support@creatordeal.app.
+              For any refund-related questions, please contact us at support@creatordealmail.cyberloom.work.
             </p>
           </section>
         </div>
