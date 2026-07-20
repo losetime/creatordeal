@@ -34,8 +34,9 @@ export async function middleware(request: NextRequest) {
   const isLegalPage = request.nextUrl.pathname.startsWith("/terms") || request.nextUrl.pathname.startsWith("/privacy") || request.nextUrl.pathname.startsWith("/refund") || request.nextUrl.pathname.startsWith("/reset-password")
   const isApiRoute = request.nextUrl.pathname.startsWith("/api/")
   const isStatic = request.nextUrl.pathname.startsWith("/_next") || request.nextUrl.pathname.includes(".")
+  const isSeoRoute = request.nextUrl.pathname === "/opengraph-image" || request.nextUrl.pathname === "/sitemap.xml" || request.nextUrl.pathname === "/robots.txt"
 
-  if (isStatic || isApiRoute) {
+  if (isStatic || isApiRoute || isSeoRoute) {
     return supabaseResponse
   }
 
