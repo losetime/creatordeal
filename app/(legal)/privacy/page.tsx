@@ -1,5 +1,17 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description:
+    "CreatorDeal privacy policy. Learn how we collect, use, and protect your personal information on our sponsorship management platform for creators.",
+  alternates: { canonical: "/privacy" },
+  openGraph: {
+    title: "Privacy Policy | CreatorDeal",
+    description: "Learn how CreatorDeal collects, uses, and protects your personal information.",
+  },
+}
 
 export default function PrivacyPolicyPage() {
   return (

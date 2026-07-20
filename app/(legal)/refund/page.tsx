@@ -1,5 +1,17 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+
+export const metadata: Metadata = {
+  title: "Refund Policy",
+  description:
+    "CreatorDeal refund policy. Learn about our 14-day full refund guarantee and subscription cancellation terms.",
+  alternates: { canonical: "/refund" },
+  openGraph: {
+    title: "Refund Policy | CreatorDeal",
+    description: "Learn about CreatorDeal's refund and cancellation terms.",
+  },
+}
 
 export default function RefundPolicyPage() {
   return (

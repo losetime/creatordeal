@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -16,6 +17,22 @@ import {
   ChevronDown,
   Zap,
 } from "lucide-react"
+
+const SITE_URL = "https://creatordeal.app"
+
+export const metadata: Metadata = {
+  title: "CreatorDeal - Sponsorship Management for Creators & Invoice Template for Influencers",
+  description:
+    "The all-in-one sponsorship management platform for content creators. Track brand deals, generate professional invoices, scan contracts with AI, and get paid 2x faster. Free plan available.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "CreatorDeal - Sponsorship Management for Creators",
+    description:
+      "Track brand deals, generate influencer invoices, scan contracts with AI, and get paid faster. Free plan available.",
+    url: SITE_URL,
+    images: ["/og-image.png"],
+  },
+}
 
 const features = [
   {
@@ -133,9 +150,79 @@ const faqs = [
 const logos: string[] = []
 
 export default function HomePage() {
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "CreatorDeal",
+    url: SITE_URL,
+    logo: `${SITE_URL}/logo.png`,
+    description:
+      "All-in-one sponsorship management platform for content creators to track brand deals, generate invoices, and manage their creator business.",
+    sameAs: [],
+    contactPoint: {
+      "@type": "ContactPoint",
+      email: "support@creatordealmail.cyberloom.work",
+      contactType: "customer support",
+    },
+  }
+
+  const webAppJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "CreatorDeal",
+    url: SITE_URL,
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    description:
+      "Sponsorship management platform for content creators. Track brand deals, generate invoices, scan contracts with AI, and manage payments.",
+    offers: [
+      {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+        name: "Free Plan",
+        description: "Up to 3 active deals, basic invoicing, payment tracking",
+      },
+      {
+        "@type": "Offer",
+        price: "9.90",
+        priceCurrency: "USD",
+        name: "Creator Club",
+        description: "Unlimited deals, smart invoicing, AI contract scanner, rate benchmarking",
+        pricePeriod: "P1M",
+      },
+    ],
+  }
+
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  }
+
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      {/* Header */}
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <div className="flex min-h-screen flex-col bg-background">
+        {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
@@ -423,5 +510,6 @@ export default function HomePage() {
         </div>
       </footer>
     </div>
+    </>
   )
 }

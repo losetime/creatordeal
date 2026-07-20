@@ -1,5 +1,17 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description:
+    "CreatorDeal terms of service. Read the terms and conditions for using our sponsorship management and invoicing platform for content creators.",
+  alternates: { canonical: "/terms" },
+  openGraph: {
+    title: "Terms of Service | CreatorDeal",
+    description: "Read the terms and conditions for using CreatorDeal.",
+  },
+}
 
 export default function TermsOfServicePage() {
   return (

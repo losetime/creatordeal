@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Disallow: /home
+Disallow: /deals
+Disallow: /payments
+Disallow: /invoices
+Disallow: /contracts
+Disallow: /settings
+Disallow: /notifications
+Disallow: /subscription
+Disallow: /admin
+Disallow: /api/
+Disallow: /_next/
+
+Sitemap: https://creatordeal.app/sitemap.xml
